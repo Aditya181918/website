@@ -140,17 +140,18 @@ export default function App() {
 
       {/* ENTRY SCREEN */}
       {!entered ? (
-        <section className="h-screen flex flex-col items-center justify-center text-center px-6 relative">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 2 }}
-          >
+        <section className="h-screen flex items-center justify-center px-6 relative">
+<motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 2 }}
+  className="w-full max-w-5xl mx-auto text-center flex flex-col items-center"
+>
             <motion.h1
               initial={{ y: 40 }}
               animate={{ y: 0 }}
               transition={{ duration: 1.5 }}
-              className="heading-font text-6xl md:text-8xl font-light leading-tight"
+className="heading-font text-[5rem] md:text-[8rem] font-light leading-none text-center"
             >
               Before you enter...
             </motion.h1>
@@ -172,7 +173,7 @@ export default function App() {
               }}
               className="mt-14 px-10 py-4 rounded-full glass text-lg tracking-wide"
             >
-              enter
+              Enter
             </motion.button>
           </motion.div>
         </section>
