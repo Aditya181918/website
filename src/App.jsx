@@ -1,41 +1,45 @@
 // App.jsx
-// Premium Romantic Website — "The One Made Just For You"
-// React + Tailwind + Framer Motion
+// PREMIUM CINEMATIC ROMANTIC WEBSITE
+// Blue aesthetic + smooth balloons + confetti + premium typography
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Music2, X, Star } from "lucide-react";
+import { Heart, Music2, X, Sparkles } from "lucide-react";
 
 const notes = [
   "You make ordinary moments feel important.",
-  "Being loved by you feels warm.",
-  "You somehow make life quieter and brighter at the same time.",
-  "You are my favourite part of every day.",
-  "Could you BE any more amazing?",
-  "You matter to me in ways I still struggle to explain.",
+  "You somehow make life softer.",
+  "You are deeply loved, more than you know.",
   "You feel like peace after chaos.",
-  "You’re probably my favourite plot twist.",
-  "I think part of me was waiting for you.",
-  "You make life softer.",
-  "You are deeply loved.",
+  "Could you BE any more amazing?",
+  "You are my favourite part of every day.",
+  "Somehow the world feels lighter with you in it.",
+  "You matter to me in ways I still struggle to explain.",
+  "You are my favourite plot twist.",
+  "You make silence feel comforting.",
   "I hope life gives us slow mornings together.",
-  "You’re my favourite notification.",
-  "You have the kindest soul.",
-  "You make the world feel less heavy.",
+  "You are the kind of person people write about.",
+];
+
+const littleThings = [
+  "You are my favourite notification.",
+  "You make even difficult days feel lighter.",
+  "You have the prettiest mind.",
+  "I still smile at our conversations.",
 ];
 
 const episodeCards = [
   {
     title: "The One Where I Realized",
-    text: "Somewhere between our conversations, your smile, and the way you exist so effortlessly... I realized you had quietly become very important to me.",
-  },
-  {
-    title: "The One Where You Stayed In My Head",
-    text: "You became the person I randomly think about during the day. The person small things remind me of.",
+    text: "Somewhere between our conversations and your smile, I realized you had quietly become very important to me.",
   },
   {
     title: "The One Where Life Felt Softer",
-    text: "You brought a kind of warmth into my life that I didn’t know I needed.",
+    text: "You brought a warmth into my life that I didn’t even know I needed.",
+  },
+  {
+    title: "The One Where You Stayed In My Head",
+    text: "You became the person random things remind me of throughout the day.",
   },
   {
     title: "The One I Never Want To End",
@@ -47,15 +51,53 @@ export default function App() {
   const [entered, setEntered] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [musicPlaying, setMusicPlaying] = useState(false);
+  const [confetti, setConfetti] = useState([]);
 
-  // REPLACE THIS WITH YOUR YOUTUBE VIDEO ID
   const youtubeLink =
     "https://www.youtube.com/embed/oafxkMv4xnc?autoplay=1&loop=1&playlist=oafxkMv4xnc&controls=0&showinfo=0&modestbranding=1";
 
+  const popBalloon = (note, event) => {
+    const burst = Array.from({ length: 18 }).map((_, i) => ({
+      id: i,
+      x: event.clientX,
+      y: event.clientY,
+    }));
+
+    setConfetti(burst);
+    setSelectedNote(note);
+
+    setTimeout(() => {
+      setConfetti([]);
+    }, 1200);
+  };
+
   return (
-    <div className="bg-[#0d0d16] text-white min-h-screen overflow-x-hidden font-sans relative">
-      
-      {/* Hidden YouTube Music */}
+    <div
+      className="min-h-screen overflow-x-hidden text-white relative"
+      style={{
+        background:
+          "radial-gradient(circle at top, #13203d 0%, #070b1a 45%, #050816 100%)",
+        fontFamily: "Inter, sans-serif",
+      }}
+    >
+      {/* GOOGLE FONT */}
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
+
+          .heading-font {
+            font-family: 'Cormorant Garamond', serif;
+          }
+
+          .glass {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+          }
+        `}
+      </style>
+
+      {/* MUSIC */}
       {musicPlaying && (
         <iframe
           width="0"
@@ -67,20 +109,40 @@ export default function App() {
         />
       )}
 
-      {/* Background Glow */}
+      {/* BACKGROUND PARTICLES */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-pink-400/20 blur-3xl rounded-full" />
-        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-purple-400/20 blur-3xl rounded-full" />
+        {[...Array(50)].map((_, i) => (
+          <motion.div
+            key={i}
+            animate={{
+              y: [0, -40, 0],
+              opacity: [0.2, 0.8, 0.2],
+            }}
+            transition={{
+              duration: 4 + Math.random() * 5,
+              repeat: Infinity,
+            }}
+            className="absolute rounded-full bg-blue-200/20"
+            style={{
+              width: `${2 + Math.random() * 5}px`,
+              height: `${2 + Math.random() * 5}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              filter: "blur(1px)",
+            }}
+          />
+        ))}
       </div>
 
-      {/* Music Button */}
+      {/* MUSIC BUTTON */}
       <button
         onClick={() => setMusicPlaying(!musicPlaying)}
-        className="fixed top-6 right-6 z-50 backdrop-blur-xl bg-white/10 border border-white/20 p-3 rounded-full hover:scale-110 transition"
+        className="fixed top-6 right-6 z-50 glass p-4 rounded-full hover:scale-110 transition duration-300"
       >
-        <Music2 size={20} />
+        <Music2 size={22} />
       </button>
 
+      {/* ENTRY SCREEN */}
       {!entered ? (
         <section className="h-screen flex flex-col items-center justify-center text-center px-6 relative">
           <motion.div
@@ -88,60 +150,92 @@ export default function App() {
             animate={{ opacity: 1 }}
             transition={{ duration: 2 }}
           >
-            <h1 className="text-5xl md:text-7xl font-light leading-tight">
+            <motion.h1
+              initial={{ y: 40 }}
+              animate={{ y: 0 }}
+              transition={{ duration: 1.5 }}
+              className="heading-font text-6xl md:text-8xl font-light leading-tight"
+            >
               Before you enter...
-            </h1>
+            </motion.h1>
 
-            <p className="mt-8 text-xl text-white/70 max-w-xl leading-relaxed">
+            <p className="mt-8 text-xl text-blue-100/70 max-w-xl leading-relaxed">
               I couldn’t fit everything I feel for you into messages.
             </p>
 
-            <p className="mt-3 text-2xl italic text-pink-200">
+            <p className="mt-4 text-3xl italic text-blue-200 heading-font">
               So I made this instead.
             </p>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => {
                 setEntered(true);
                 setMusicPlaying(true);
               }}
-              className="mt-12 px-8 py-4 rounded-full bg-white text-black hover:scale-105 transition text-lg"
+              className="mt-14 px-10 py-4 rounded-full glass text-lg tracking-wide"
             >
               enter
-            </button>
+            </motion.button>
           </motion.div>
         </section>
       ) : (
         <>
-          {/* Balloon Section */}
-          <section className="min-h-screen relative flex flex-col items-center justify-center px-6 py-32">
+          {/* BALLOONS */}
+          <section className="min-h-screen relative flex flex-col items-center justify-center px-6 pt-20 pb-10">
             <motion.h1
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-5xl md:text-7xl text-center font-light leading-tight"
+              className="heading-font text-5xl md:text-7xl text-center leading-tight"
             >
               Some feelings are too big for texts.
             </motion.h1>
 
-            <p className="mt-6 text-white/70 text-xl text-center">
+            <p className="mt-5 text-blue-100/70 text-xl text-center">
               Pop the balloons.
             </p>
 
-            <div className="relative mt-24 w-full max-w-6xl h-[700px]">
+            <div className="relative mt-12 w-full max-w-6xl h-[700px]">
               {notes.map((note, index) => (
                 <FloatingBalloon
                   key={index}
                   note={note}
-                  setSelectedNote={setSelectedNote}
                   index={index}
+                  popBalloon={popBalloon}
                 />
               ))}
             </div>
           </section>
 
-          {/* Episode Section */}
-          <section className="py-32 px-6">
-            <h2 className="text-5xl text-center mb-20">
+          {/* LITTLE THINGS */}
+          <section className="py-10 px-6">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="heading-font text-5xl text-center mb-12">
+                Little Things I Never Say Enough
+              </h2>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {littleThings.map((item, i) => (
+                  <motion.div
+                    key={i}
+                    whileHover={{ y: -6 }}
+                    className="glass rounded-[28px] p-8"
+                  >
+                    <Sparkles className="text-blue-200 mb-5" />
+
+                    <p className="text-lg text-blue-50/80 leading-relaxed">
+                      {item}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* FRIENDS SECTION */}
+          <section className="py-16 px-6">
+            <h2 className="heading-font text-6xl text-center mb-14">
               The One Where...
             </h2>
 
@@ -149,14 +243,14 @@ export default function App() {
               {episodeCards.map((card, index) => (
                 <motion.div
                   key={index}
-                  whileHover={{ y: -10 }}
-                  className="backdrop-blur-xl bg-white/10 border border-white/10 p-8 rounded-[30px]"
+                  whileHover={{ y: -8 }}
+                  className="glass rounded-[32px] p-10"
                 >
-                  <h3 className="text-3xl mb-6 text-pink-200">
+                  <h3 className="heading-font text-4xl mb-6 text-blue-200">
                     {card.title}
                   </h3>
 
-                  <p className="text-white/75 leading-relaxed text-lg">
+                  <p className="text-blue-50/75 leading-relaxed text-lg">
                     {card.text}
                   </p>
                 </motion.div>
@@ -164,65 +258,17 @@ export default function App() {
             </div>
           </section>
 
-          {/* Hidden Lily Section */}
-          <section className="py-40 text-center relative">
-            <h2 className="text-5xl mb-6">Find The Hidden Lilies</h2>
-
-            <p className="text-white/60 mb-16">
-              Some secrets are hidden across this page.
-            </p>
-
-            <div className="flex justify-center gap-10 flex-wrap">
-              {[
-                "You are my favourite notification.",
-                "You feel like home.",
-                "I still smile at our conversations.",
-              ].map((text, i) => (
-                <Lily key={i} text={text} />
-              ))}
-            </div>
-          </section>
-
-          {/* Constellation Section */}
-          <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
-            <div className="absolute inset-0">
-              {[...Array(70)].map((_, i) => (
-                <Star
-                  key={i}
-                  className="absolute text-white/40"
-                  size={10}
-                  style={{
-                    top: `${Math.random() * 100}%`,
-                    left: `${Math.random() * 100}%`,
-                  }}
-                />
-              ))}
-            </div>
-
-            <motion.h2
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              className="text-6xl relative z-10"
-            >
-              In every universe,
-            </motion.h2>
-
-            <p className="mt-6 text-2xl text-white/70 relative z-10">
-              I think I’d still find you.
-            </p>
-          </section>
-
-          {/* Final Letter */}
-          <section className="py-40 px-6 flex justify-center">
+          {/* FINAL LETTER */}
+          <section className="py-20 px-6 flex justify-center">
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="max-w-3xl backdrop-blur-2xl bg-white/10 border border-white/10 rounded-[40px] p-12"
+              whileHover={{ scale: 1.01 }}
+              className="glass max-w-3xl rounded-[40px] p-12"
             >
-              <h2 className="text-5xl mb-10 text-center">
+              <h2 className="heading-font text-6xl mb-10 text-center">
                 To You
               </h2>
 
-              <div className="space-y-6 text-lg leading-relaxed text-white/80">
+              <div className="space-y-6 text-lg leading-relaxed text-blue-50/80">
                 <p>
                   Loving you has changed the way I experience life.
                 </p>
@@ -243,7 +289,7 @@ export default function App() {
                   Thank you for existing in my life.
                 </p>
 
-                <p className="text-pink-200 text-2xl mt-10">
+                <p className="text-blue-200 text-3xl mt-10 heading-font">
                   Always you.
                 </p>
               </div>
@@ -252,31 +298,54 @@ export default function App() {
         </>
       )}
 
-      {/* Note Modal */}
+      {/* CONFETTI */}
+      {confetti.map((piece, i) => (
+        <motion.div
+          key={i}
+          initial={{
+            opacity: 1,
+            x: piece.x,
+            y: piece.y,
+            scale: 1,
+          }}
+          animate={{
+            x: piece.x + (Math.random() - 0.5) * 300,
+            y: piece.y - Math.random() * 250,
+            opacity: 0,
+            scale: 0,
+            rotate: Math.random() * 360,
+          }}
+          transition={{ duration: 1.2 }}
+          className="fixed w-3 h-3 rounded-full bg-blue-200 z-[9999]"
+        />
+      ))}
+
+      {/* NOTE POPUP */}
       <AnimatePresence>
         {selectedNote && (
           <motion.div
-            className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-6"
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-center justify-center px-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              className="bg-[#1b1b2c] border border-white/10 max-w-lg p-10 rounded-[30px] relative"
+              initial={{ scale: 0.7, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.7, opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="glass max-w-lg p-12 rounded-[35px] relative"
             >
               <button
                 onClick={() => setSelectedNote(null)}
-                className="absolute top-5 right-5"
+                className="absolute top-5 right-5 text-white/70 hover:text-white"
               >
                 <X />
               </button>
 
-              <Heart className="text-pink-300 mb-6" />
+              <Heart className="text-blue-200 mb-6" />
 
-              <p className="text-2xl leading-relaxed text-white/85">
+              <p className="heading-font text-4xl leading-relaxed text-blue-50">
                 {selectedNote}
               </p>
             </motion.div>
@@ -287,74 +356,51 @@ export default function App() {
   );
 }
 
-function FloatingBalloon({ note, setSelectedNote, index }) {
+function FloatingBalloon({ note, index, popBalloon }) {
   const colors = [
-    "bg-pink-300",
-    "bg-yellow-300",
-    "bg-purple-300",
-    "bg-blue-300",
-    "bg-red-300",
+    "#9ec5ff",
+    "#74a7ff",
+    "#b7d4ff",
+    "#6f9cff",
+    "#89b6ff",
   ];
 
   return (
     <motion.div
       animate={{
-        y: [0, -25, 0],
+        y: [0, -30, 0],
+        rotate: [-2, 2, -2],
       }}
       transition={{
-        duration: 4 + Math.random() * 2,
+        duration: 5 + Math.random() * 2,
         repeat: Infinity,
       }}
-      onClick={() => setSelectedNote(note)}
-      className={`absolute cursor-pointer rounded-full shadow-2xl ${colors[index % colors.length]}`}
+      whileHover={{
+        scale: 1.08,
+      }}
+      onClick={(e) => popBalloon(note, e)}
+      className="absolute cursor-pointer"
       style={{
-        width: `${90 + Math.random() * 40}px`,
-        height: `${120 + Math.random() * 40}px`,
-        left: `${Math.random() * 90}%`,
-        top: `${Math.random() * 90}%`,
+        left: `${Math.random() * 85}%`,
+        top: `${Math.random() * 80}%`,
       }}
     >
-      <div className="absolute left-1/2 top-full w-[2px] h-24 bg-white/40" />
-    </motion.div>
-  );
-}
+      {/* STRING */}
+      <div className="absolute left-1/2 top-[120px] w-[2px] h-24 bg-white/30" />
 
-function Lily({ text }) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <>
-      <motion.div
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setOpen(true)}
-        className="cursor-pointer text-7xl"
+      {/* BALLOON */}
+      <div
+        className="relative rounded-full shadow-2xl"
+        style={{
+          width: "110px",
+          height: "140px",
+          background: colors[index % colors.length],
+          boxShadow: "0 20px 40px rgba(130,170,255,0.35)",
+        }}
       >
-        🤍
-      </motion.div>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center px-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setOpen(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              className="bg-[#1c1c2c] p-10 rounded-[30px] max-w-md text-center"
-            >
-              <p className="text-2xl leading-relaxed text-white/85">
-                {text}
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+        {/* GLOSS */}
+        <div className="absolute top-5 left-5 w-6 h-10 rounded-full bg-white/40 blur-sm" />
+      </div>
+    </motion.div>
   );
 }
