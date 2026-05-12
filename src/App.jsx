@@ -1,7 +1,7 @@
 // App.jsx
-// MOBILE OPTIMIZED FINAL PREMIUM VERSION
+// FINAL PREMIUM MOBILE + SONG SELECTOR VERSION
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Music2, X, Star } from "lucide-react";
 
@@ -67,26 +67,44 @@ const moods = [
   },
 ];
 
+const songs = [
+  {
+    name: "Khat",
+    code: "LUgpPmj6nR8",
+  },
+  {
+    name: "I Like Me Better",
+    code: "a7fzkqLozwA",
+  },
+  {
+    name: "Future Looks Good",
+    code: "KkGhYIPcAHg",
+  },
+  {
+    name: "High On You",
+    code: "gI1Z4UHg9o0",
+  },
+  {
+    name: "Yellow",
+    code: "yKNxeF4KMsY",
+  },
+  {
+    name: "Tum Ho Toh",
+    code: "rOUuGvJkBrQ",
+  },
+];
+
 export default function App() {
   const [entered, setEntered] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [selectedMood, setSelectedMood] = useState(null);
-  const [musicPlaying, setMusicPlaying] = useState(false);
+  const [musicOpen, setMusicOpen] = useState(false);
+  const [currentSong, setCurrentSong] = useState(null);
   const [confetti, setConfetti] = useState([]);
 
   const [background, setBackground] = useState(
     "radial-gradient(circle at top, #13203d 0%, #070b1a 45%, #050816 100%)"
   );
-
-  const audioRef = useRef(null);
-
-  useEffect(() => {
-    if (musicPlaying && audioRef.current) {
-      audioRef.current.play().catch(() => {});
-    } else if (audioRef.current) {
-      audioRef.current.pause();
-    }
-  }, [musicPlaying]);
 
   const popBalloon = (note, event) => {
     const burst = Array.from({ length: 24 }).map((_, i) => ({
@@ -119,6 +137,17 @@ export default function App() {
         fontFamily: "Inter, sans-serif",
       }}
     >
+      {/* YOUTUBE PLAYER */}
+      {currentSong && (
+        <iframe
+          width="0"
+          height="0"
+          allow="autoplay"
+          src={`https://www.youtube.com/embed/${currentSong}?autoplay=1&loop=1&playlist=${currentSong}&controls=0`}
+          title="music-player"
+        />
+      )}
+
       {/* FONTS */}
       <style>
         {`
@@ -135,19 +164,6 @@ export default function App() {
           }
         `}
       </style>
-
-      {/* AUDIO */}
-      <audio
-        ref={audioRef}
-        loop
-        playsInline
-        preload="auto"
-      >
-        <source
-          src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=dreamy-background-ambient-110997.mp3"
-          type="audio/mp3"
-        />
-      </audio>
 
       {/* STARS */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -175,7 +191,7 @@ export default function App() {
 
       {/* MUSIC BUTTON */}
       <button
-        onClick={() => setMusicPlaying(!musicPlaying)}
+        onClick={() => setMusicOpen(true)}
         className="fixed top-5 right-5 z-50 glass p-3 sm:p-4 rounded-full hover:scale-110 transition"
       >
         <Music2 size={20} />
@@ -212,7 +228,6 @@ export default function App() {
               whileTap={{ scale: 0.96 }}
               onClick={() => {
                 setEntered(true);
-                setMusicPlaying(true);
               }}
               className="mt-14 px-10 py-4 rounded-full glass text-lg sm:text-xl"
             >
@@ -382,6 +397,59 @@ export default function App() {
           </section>
         </>
       )}
+
+      {/* MUSIC POPUP */}
+      <AnimatePresence>
+        {musicOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-center justify-center px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="glass w-full max-w-md p-8 rounded-[35px] relative"
+            >
+              <button
+                onClick={() => setMusicOpen(false)}
+                className="absolute top-5 right-5 text-white/70 hover:text-white"
+              >
+                <X />
+              </button>
+
+              <h2 className="heading-font text-4xl text-center mb-8 text-blue-200">
+                Choose A Song
+              </h2>
+
+              <div className="space-y-4">
+                {songs.map((song, index) => (
+                  <motion.button
+                    key={index}
+                    whileHover={{
+                      scale: 1.03,
+                    }}
+                    whileTap={{
+                      scale: 0.98,
+                    }}
+                    onClick={() => {
+                      setCurrentSong(song.code);
+                      setMusicOpen(false);
+                    }}
+                    className="w-full glass rounded-2xl p-5 text-left"
+                  >
+                    <p className="text-xl text-blue-50">
+                      {song.name}
+                    </p>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* CONFETTI */}
       {confetti.map((piece, i) => (
