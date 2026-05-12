@@ -1,8 +1,7 @@
 // App.jsx
-// ULTRA PREMIUM ROMANTIC WEBSITE
-// Smooth balloons + mood section + dynamic backgrounds + cinematic experience
+// MOBILE OPTIMIZED FINAL PREMIUM VERSION
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Music2, X, Star } from "lucide-react";
 
@@ -79,8 +78,15 @@ export default function App() {
     "radial-gradient(circle at top, #13203d 0%, #070b1a 45%, #050816 100%)"
   );
 
-  const youtubeLink =
-    "https://www.youtube.com/embed/oafxkMv4xnc?autoplay=1&loop=1&playlist=oafxkMv4xnc&controls=0&showinfo=0&modestbranding=1";
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    if (musicPlaying && audioRef.current) {
+      audioRef.current.play().catch(() => {});
+    } else if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  }, [musicPlaying]);
 
   const popBalloon = (note, event) => {
     const burst = Array.from({ length: 24 }).map((_, i) => ({
@@ -130,19 +136,20 @@ export default function App() {
         `}
       </style>
 
-      {/* MUSIC */}
-      {musicPlaying && (
-        <iframe
-          width="0"
-          height="0"
-          src={youtubeLink}
-          title="background-music"
-          frameBorder="0"
-          allow="autoplay"
+      {/* AUDIO */}
+      <audio
+        ref={audioRef}
+        loop
+        playsInline
+        preload="auto"
+      >
+        <source
+          src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=dreamy-background-ambient-110997.mp3"
+          type="audio/mp3"
         />
-      )}
+      </audio>
 
-      {/* FLOATING STARS */}
+      {/* STARS */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {[...Array(60)].map((_, i) => (
           <motion.div
@@ -161,7 +168,6 @@ export default function App() {
               height: `${2 + Math.random() * 4}px`,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              filter: "blur(1px)",
             }}
           />
         ))}
@@ -170,9 +176,9 @@ export default function App() {
       {/* MUSIC BUTTON */}
       <button
         onClick={() => setMusicPlaying(!musicPlaying)}
-        className="fixed top-6 right-6 z-50 glass p-4 rounded-full hover:scale-110 transition"
+        className="fixed top-5 right-5 z-50 glass p-3 sm:p-4 rounded-full hover:scale-110 transition"
       >
-        <Music2 size={22} />
+        <Music2 size={20} />
       </button>
 
       {/* ENTRY */}
@@ -188,16 +194,16 @@ export default function App() {
               initial={{ y: 40 }}
               animate={{ y: 0 }}
               transition={{ duration: 1.5 }}
-              className="heading-font text-[5rem] md:text-[8rem] font-light leading-none text-center"
+              className="heading-font text-[3.5rem] sm:text-[5rem] md:text-[8rem] font-light leading-none text-center px-2"
             >
               Before you enter...
             </motion.h1>
 
-            <p className="mt-8 text-xl text-blue-100/70 max-w-xl leading-relaxed">
+            <p className="mt-8 text-lg sm:text-xl text-blue-100/70 max-w-xl leading-relaxed px-2">
               I couldn’t fit everything I feel for you into messages.
             </p>
 
-            <p className="mt-5 text-3xl italic text-blue-200 heading-font">
+            <p className="mt-5 text-2xl sm:text-3xl italic text-blue-200 heading-font">
               So I made this instead.
             </p>
 
@@ -208,7 +214,7 @@ export default function App() {
                 setEntered(true);
                 setMusicPlaying(true);
               }}
-              className="mt-14 px-12 py-4 rounded-full glass text-xl"
+              className="mt-14 px-10 py-4 rounded-full glass text-lg sm:text-xl"
             >
               Enter
             </motion.button>
@@ -217,20 +223,20 @@ export default function App() {
       ) : (
         <>
           {/* BALLOONS */}
-          <section className="min-h-screen relative flex flex-col items-center justify-center px-6 pt-10 pb-4">
+          <section className="min-h-screen relative flex flex-col items-center justify-center px-4 sm:px-6 pt-10 pb-4">
             <motion.h1
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              className="heading-font text-5xl md:text-7xl text-center leading-tight"
+              className="heading-font text-4xl sm:text-5xl md:text-7xl text-center leading-tight px-4"
             >
               Some feelings are too big for texts.
             </motion.h1>
 
-            <p className="mt-5 text-blue-100/70 text-xl text-center">
+            <p className="mt-5 text-blue-100/70 text-lg sm:text-xl text-center">
               Pop the balloons.
             </p>
 
-            <div className="relative mt-8 w-full max-w-6xl h-[700px]">
+            <div className="relative mt-8 w-full max-w-6xl h-[520px] sm:h-[700px]">
               {notes.map((note, index) => (
                 <FloatingBalloon
                   key={index}
@@ -242,18 +248,18 @@ export default function App() {
             </div>
           </section>
 
-          {/* MOOD SECTION */}
-          <section className="py-10 px-6">
+          {/* MOODS */}
+          <section className="py-10 px-4 sm:px-6">
             <div className="max-w-6xl mx-auto">
-              <h2 className="heading-font text-6xl text-center mb-5">
+              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
                 What Do You Need Right Now?
               </h2>
 
-              <p className="text-center text-blue-100/60 mb-12 text-lg">
+              <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
                 There’s something here for every mood.
               </p>
 
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {moods.map((mood, index) => (
                   <motion.button
                     key={index}
@@ -284,23 +290,23 @@ export default function App() {
           </section>
 
           {/* FRIENDS SECTION */}
-          <section className="py-14 px-6">
-            <h2 className="heading-font text-6xl text-center mb-12">
+          <section className="py-14 px-4 sm:px-6">
+            <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-12 px-4">
               The One Where...
             </h2>
 
-            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
               {episodeCards.map((card, index) => (
                 <motion.div
                   key={index}
                   whileHover={{ y: -8 }}
-                  className="glass rounded-[32px] p-10"
+                  className="glass rounded-[32px] p-8 sm:p-10"
                 >
-                  <h3 className="heading-font text-4xl mb-6 text-blue-200">
+                  <h3 className="heading-font text-3xl sm:text-4xl mb-6 text-blue-200">
                     {card.title}
                   </h3>
 
-                  <p className="text-blue-50/75 leading-relaxed text-lg">
+                  <p className="text-blue-50/75 leading-relaxed text-base sm:text-lg">
                     {card.text}
                   </p>
                 </motion.div>
@@ -309,7 +315,7 @@ export default function App() {
           </section>
 
           {/* CONSTELLATION */}
-          <section className="py-20 px-6 text-center relative overflow-hidden">
+          <section className="py-20 px-4 sm:px-6 text-center relative overflow-hidden">
             <div className="absolute inset-0">
               {[...Array(70)].map((_, i) => (
                 <Star
@@ -327,27 +333,27 @@ export default function App() {
             <motion.h2
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              className="heading-font text-6xl relative z-10"
+              className="heading-font text-4xl sm:text-5xl md:text-6xl relative z-10 px-4"
             >
               In every universe,
             </motion.h2>
 
-            <p className="mt-6 text-2xl text-blue-100/70 relative z-10">
+            <p className="mt-6 text-xl sm:text-2xl text-blue-100/70 relative z-10 px-4">
               I think I’d still find you.
             </p>
           </section>
 
-          {/* FINAL LETTER */}
-          <section className="py-16 px-6 flex justify-center">
+          {/* LETTER */}
+          <section className="py-16 px-4 sm:px-6 flex justify-center">
             <motion.div
               whileHover={{ scale: 1.01 }}
-              className="glass max-w-3xl rounded-[40px] p-12"
+              className="glass max-w-3xl rounded-[40px] p-8 sm:p-12"
             >
-              <h2 className="heading-font text-6xl mb-10 text-center">
+              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl mb-10 text-center">
                 To You
               </h2>
 
-              <div className="space-y-6 text-lg leading-relaxed text-blue-50/80">
+              <div className="space-y-6 text-base sm:text-lg leading-relaxed text-blue-50/80">
                 <p>
                   Loving you has changed the way I experience life.
                 </p>
@@ -368,7 +374,7 @@ export default function App() {
                   Thank you for existing in my life.
                 </p>
 
-                <p className="text-blue-200 text-3xl mt-10 heading-font">
+                <p className="text-blue-200 text-2xl sm:text-3xl mt-10 heading-font">
                   Always you.
                 </p>
               </div>
@@ -439,7 +445,7 @@ export default function App() {
 function Popup({ text, close }) {
   return (
     <motion.div
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-center justify-center px-6"
+      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-center justify-center px-4 sm:px-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -449,7 +455,7 @@ function Popup({ text, close }) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.7, opacity: 0 }}
         transition={{ duration: 0.4 }}
-        className="glass max-w-lg p-12 rounded-[35px] relative"
+        className="glass w-full max-w-lg p-8 sm:p-12 rounded-[35px] relative"
       >
         <button
           onClick={close}
@@ -460,7 +466,7 @@ function Popup({ text, close }) {
 
         <Heart className="text-blue-200 mb-6" />
 
-        <p className="heading-font text-4xl leading-relaxed text-blue-50">
+        <p className="heading-font text-3xl sm:text-4xl leading-relaxed text-blue-50">
           {text}
         </p>
 
@@ -498,6 +504,8 @@ function FloatingBalloon({ note, index, popBalloon }) {
 
   const position = positions[index % positions.length];
 
+  const isMobile = window.innerWidth < 640;
+
   return (
     <motion.div
       initial={{
@@ -527,7 +535,6 @@ function FloatingBalloon({ note, index, popBalloon }) {
         top: position.top,
       }}
     >
-      {/* STRING */}
       <motion.div
         animate={{
           rotate: [-1, 1, -1],
@@ -537,28 +544,25 @@ function FloatingBalloon({ note, index, popBalloon }) {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute left-1/2 top-[118px] w-[2px] h-24 bg-white/20 origin-top"
+        className="absolute left-1/2 top-[90px] sm:top-[118px] w-[2px] h-16 sm:h-24 bg-white/20 origin-top"
       />
 
-      {/* BALLOON */}
       <motion.div
         whileHover={{
           y: -4,
         }}
         className="relative rounded-full"
         style={{
-          width: "110px",
-          height: "140px",
+          width: isMobile ? "78px" : "110px",
+          height: isMobile ? "98px" : "140px",
           background: `linear-gradient(145deg, ${
             colors[index % colors.length]
           }, #d9e9ff)`,
           boxShadow: "0 25px 50px rgba(100,160,255,0.25)",
         }}
       >
-        {/* GLOSS */}
         <div className="absolute top-5 left-5 w-7 h-12 rounded-full bg-white/35 blur-sm" />
 
-        {/* TAIL */}
         <div
           className="absolute -bottom-3 left-1/2 -translate-x-1/2"
           style={{
