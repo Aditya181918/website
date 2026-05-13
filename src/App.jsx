@@ -1,9 +1,10 @@
 // App.jsx
-// FINAL PREMIUM MOBILE + SONG SELECTOR VERSION
+// FINAL PREMIUM VERSION — with Open When Letters, Late Night Thoughts,
+// Memory Constellation, Tiny Things, Emergency Hug Button
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Music2, X, Star } from "lucide-react";
+import { Heart, Music2, X, Mail, Hand } from "lucide-react";
 
 const notes = [
   "You make ordinary moments feel important.",
@@ -68,36 +69,81 @@ const moods = [
 ];
 
 const songs = [
+  { name: "Khat", code: "LUgpPmj6nR8" },
+  { name: "I Like Me Better", code: "a7fzkqLozwA" },
+  { name: "Future Looks Good", code: "KkGhYIPcAHg" },
+  { name: "High On You", code: "gI1Z4UHg9o0" },
+  { name: "Yellow", code: "yKNxeF4KMsY" },
+  { name: "Tum Ho Toh", code: "rOUuGvJkBrQ" },
+];
+
+// ============ NEW: OPEN WHEN LETTERS ============
+const letters = [
   {
-    name: "Khat",
-    code: "LUgpPmj6nR8",
+    title: "Open when you miss me",
+    text: "Close your eyes. I'm right there. In the pause between your thoughts. In the warmth on the side of your neck. I never actually leave — I just become quieter for a while. Missing me means I'm with you in a different way. Don't fight it. Sit with it. I'm sitting with it too.",
   },
   {
-    name: "I Like Me Better",
-    code: "a7fzkqLozwA",
+    title: "Open when you're overthinking",
+    text: "Your brain is being loud again, isn't it? Listen — none of it is as big as it feels right now. Not even close. Whatever you said, whatever you didn't say, whatever you're replaying — it's okay. I promise. You are allowed to put the thought down. I've got you.",
   },
   {
-    name: "Future Looks Good",
-    code: "KkGhYIPcAHg",
+    title: "Open when you can't sleep",
+    text: "Hi. Hello. It's late. Your eyes are heavy but your mind won't slow down. I know that feeling. Here — borrow my calm for tonight. Imagine my hand resting on your back. Imagine my voice saying nothing in particular. The day is over. You did enough. You are enough. Sleep, my love.",
   },
   {
-    name: "High On You",
-    code: "gI1Z4UHg9o0",
+    title: "Open when you need reassurance",
+    text: "You are not too much. You are not too little. You are not a project. You are not on trial. You are not at risk of being left. I'm not going anywhere — not when it's hard, not when you're quiet, not when you're convinced you're unlovable. Especially not then. You are loved. Past tense, present tense, future tense.",
   },
   {
-    name: "Yellow",
-    code: "yKNxeF4KMsY",
+    title: "Open when life feels heavy",
+    text: "Put it down. Whatever it is. Just for a few minutes. Read this slowly. Breathe. The weight you're carrying is real, but it's not yours alone. I'm here. We'll figure it out — or we won't, and we'll figure out how to live with it together. Either way, you are not alone in this. Not for one second.",
   },
-  {
-    name: "Tum Ho Toh",
-    code: "rOUuGvJkBrQ",
-  },
+];
+
+// ============ NEW: LATE NIGHT THOUGHTS ============
+const lateNightThoughts = [
+  "I wonder if you know how often you cross my mind.",
+  "You made life feel less lonely somehow.",
+  "You feel strangely familiar to my soul.",
+  "Sometimes I catch myself smiling for no reason. It's always you.",
+  "I hope someone has told you today how rare you are.",
+  "Loving you doesn't feel like a decision. It feels like remembering.",
+  "You are the softest part of my day.",
+  "If overthinking is a love language, I speak it fluently — and it's always about you.",
+];
+
+// ============ NEW: MEMORY CONSTELLATION ============
+const constellationMemories = [
+  { x: 12, y: 25, text: "You are my favourite coincidence." },
+  { x: 28, y: 60, text: "I still smile at your texts." },
+  { x: 45, y: 18, text: "The first time you laughed at something I said — I knew." },
+  { x: 62, y: 70, text: "You are the reason I believe in slow, real love." },
+  { x: 78, y: 35, text: "Some people feel like home. You feel like mine." },
+  { x: 88, y: 75, text: "In every version of this life, I'd still pick you." },
+  { x: 35, y: 85, text: "You make me want to be gentler with everything." },
+  { x: 55, y: 45, text: "You are my favourite quiet." },
+];
+
+// ============ NEW: TINY THINGS ============
+const tinyThings = [
+  "The way you say 'hmm' while thinking.",
+  "How you go quiet when something matters to you.",
+  "Your random expressions over the smallest things.",
+  "The way you text in bursts when you're excited.",
+  "Your late-night energy that I secretly love.",
+  "How you make even ordinary things sound like a story.",
+  "The pause before you laugh — like you're deciding if it's worth it.",
+  "How your name has started to feel like a soft place.",
 ];
 
 export default function App() {
   const [entered, setEntered] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [selectedMood, setSelectedMood] = useState(null);
+  const [selectedLetter, setSelectedLetter] = useState(null);
+  const [selectedMemory, setSelectedMemory] = useState(null);
+  const [hugOpen, setHugOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
   const [currentSong, setCurrentSong] = useState(null);
   const [confetti, setConfetti] = useState([]);
@@ -126,16 +172,10 @@ export default function App() {
 
   return (
     <motion.div
-      animate={{
-        background,
-      }}
-      transition={{
-        duration: 1.2,
-      }}
+      animate={{ background }}
+      transition={{ duration: 1.2 }}
       className="min-h-screen overflow-x-hidden text-white relative"
-      style={{
-        fontFamily: "Inter, sans-serif",
-      }}
+      style={{ fontFamily: "Inter, sans-serif" }}
     >
       {/* YOUTUBE PLAYER */}
       {currentSong && (
@@ -148,7 +188,7 @@ export default function App() {
         />
       )}
 
-      {/* FONTS */}
+      {/* FONTS + GLASS */}
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
@@ -162,10 +202,13 @@ export default function App() {
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255,255,255,0.1);
           }
+
+          .no-scrollbar::-webkit-scrollbar { display: none; }
+          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         `}
       </style>
 
-      {/* STARS */}
+      {/* STARS BACKGROUND */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {[...Array(60)].map((_, i) => (
           <motion.div
@@ -197,6 +240,31 @@ export default function App() {
         <Music2 size={20} />
       </button>
 
+      {/* ============ EMERGENCY HUG BUTTON (floating, after entry) ============ */}
+      {entered && (
+        <motion.button
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 1.5, type: "spring", stiffness: 120 }}
+          onClick={() => setHugOpen(true)}
+          className="fixed bottom-5 left-5 z-50 glass rounded-full p-4 sm:p-5"
+          style={{
+            boxShadow: "0 0 40px rgba(158,197,255,0.25)",
+          }}
+        >
+          <motion.div
+            animate={{ scale: [1, 1.15, 1] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+            className="flex items-center gap-2"
+          >
+            <Hand size={20} className="text-blue-200" />
+            <span className="text-sm sm:text-base text-blue-100 hidden sm:inline">
+              need a hug?
+            </span>
+          </motion.div>
+        </motion.button>
+      )}
+
       {/* ENTRY */}
       {!entered ? (
         <section className="h-screen flex items-center justify-center px-6 relative">
@@ -226,9 +294,7 @@ export default function App() {
             <motion.button
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.96 }}
-              onClick={() => {
-                setEntered(true);
-              }}
+              onClick={() => setEntered(true)}
               className="mt-14 px-10 py-4 rounded-full glass text-lg sm:text-xl"
             >
               Enter
@@ -278,13 +344,8 @@ export default function App() {
                 {moods.map((mood, index) => (
                   <motion.button
                     key={index}
-                    whileHover={{
-                      y: -6,
-                      scale: 1.03,
-                    }}
-                    whileTap={{
-                      scale: 0.98,
-                    }}
+                    whileHover={{ y: -6, scale: 1.03 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => {
                       setSelectedMood(mood);
                       setBackground(mood.bg);
@@ -294,10 +355,7 @@ export default function App() {
                     <h3 className="heading-font text-3xl text-blue-200 mb-3">
                       {mood.title}
                     </h3>
-
-                    <p className="text-blue-50/65">
-                      click to open
-                    </p>
+                    <p className="text-blue-50/65">click to open</p>
                   </motion.button>
                 ))}
               </div>
@@ -320,7 +378,6 @@ export default function App() {
                   <h3 className="heading-font text-3xl sm:text-4xl mb-6 text-blue-200">
                     {card.title}
                   </h3>
-
                   <p className="text-blue-50/75 leading-relaxed text-base sm:text-lg">
                     {card.text}
                   </p>
@@ -329,33 +386,164 @@ export default function App() {
             </div>
           </section>
 
-          {/* CONSTELLATION */}
-          <section className="py-20 px-4 sm:px-6 text-center relative overflow-hidden">
-            <div className="absolute inset-0">
-              {[...Array(70)].map((_, i) => (
-                <Star
-                  key={i}
-                  className="absolute text-white/30"
-                  size={10}
-                  style={{
-                    top: `${Math.random() * 100}%`,
-                    left: `${Math.random() * 100}%`,
-                  }}
-                />
-              ))}
+          {/* ============ NEW: OPEN WHEN LETTERS ============ */}
+          <section className="py-16 px-4 sm:px-6">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+                Open When...
+              </h2>
+              <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
+                Letters for whenever you need them.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {letters.map((letter, index) => (
+                  <motion.button
+                    key={index}
+                    whileHover={{ y: -8, scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setSelectedLetter(letter)}
+                    className="glass rounded-[28px] p-7 text-left flex flex-col items-start gap-4"
+                  >
+                    <div
+                      className="rounded-full p-3"
+                      style={{ background: "rgba(158,197,255,0.12)" }}
+                    >
+                      <Mail size={20} className="text-blue-200" />
+                    </div>
+                    <h3 className="heading-font text-2xl sm:text-3xl text-blue-100 leading-snug">
+                      {letter.title}
+                    </h3>
+                    <p className="text-blue-100/40 text-sm">tap to open</p>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ============ NEW: LATE NIGHT THOUGHTS ============ */}
+          <section className="py-16 overflow-hidden">
+            <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+              Late Night Thoughts
+            </h2>
+            <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
+              The things I think about when the world is quiet.
+            </p>
+
+            <div className="overflow-x-auto no-scrollbar px-4 sm:px-6">
+              <div className="flex gap-5 pb-4" style={{ width: "max-content" }}>
+                {lateNightThoughts.map((thought, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.08 }}
+                    className="glass rounded-[28px] p-8 sm:p-10"
+                    style={{
+                      width: "280px",
+                      minHeight: "200px",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <p className="heading-font text-xl sm:text-2xl text-blue-50/85 leading-relaxed italic">
+                      “{thought}”
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
+            <p className="text-center text-blue-100/30 text-xs mt-6 px-4">
+              ← swipe →
+            </p>
+          </section>
+
+          {/* ============ NEW: MEMORY CONSTELLATION ============ */}
+          <section className="py-20 px-4 sm:px-6 relative overflow-hidden">
             <motion.h2
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              className="heading-font text-4xl sm:text-5xl md:text-6xl relative z-10 px-4"
+              viewport={{ once: true }}
+              className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4 relative z-10"
             >
               In every universe,
             </motion.h2>
-
-            <p className="mt-6 text-xl sm:text-2xl text-blue-100/70 relative z-10 px-4">
-              I think I’d still find you.
+            <p className="text-center text-blue-100/60 mb-10 text-base sm:text-lg px-4 relative z-10">
+              I think I’d still find you. Tap the stars.
             </p>
+
+            <div
+              className="relative max-w-5xl mx-auto"
+              style={{ height: "440px" }}
+            >
+              {constellationMemories.map((memory, i) => (
+                <motion.button
+                  key={i}
+                  onClick={() => setSelectedMemory(memory)}
+                  className="absolute"
+                  style={{
+                    left: `${memory.x}%`,
+                    top: `${memory.y}%`,
+                  }}
+                  whileHover={{ scale: 1.4 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <motion.div
+                    animate={{
+                      opacity: [0.4, 1, 0.4],
+                      scale: [1, 1.2, 1],
+                    }}
+                    transition={{
+                      duration: 3 + (i % 4),
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                    className="rounded-full"
+                    style={{
+                      width: "14px",
+                      height: "14px",
+                      background:
+                        "radial-gradient(circle, #ffffff 0%, #9ec5ff 60%, transparent 100%)",
+                      boxShadow: "0 0 20px rgba(158,197,255,0.8)",
+                    }}
+                  />
+                </motion.button>
+              ))}
+            </div>
+          </section>
+
+          {/* ============ NEW: TINY THINGS I LOVE ABOUT YOU ============ */}
+          <section className="py-16 px-4 sm:px-6">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+                Tiny Things I Love About You
+              </h2>
+              <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
+                The little things no one else would notice.
+              </p>
+
+              <div className="space-y-4">
+                {tinyThings.map((thing, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.06 }}
+                    className="glass rounded-2xl p-5 sm:p-6 flex items-start gap-4"
+                  >
+                    <Heart
+                      size={18}
+                      className="text-blue-200 flex-shrink-0 mt-1"
+                    />
+                    <p className="text-blue-50/85 text-base sm:text-lg leading-relaxed">
+                      {thing}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
           </section>
 
           {/* LETTER */}
@@ -369,26 +557,17 @@ export default function App() {
               </h2>
 
               <div className="space-y-6 text-base sm:text-lg leading-relaxed text-blue-50/80">
+                <p>Loving you has changed the way I experience life.</p>
+                <p>Somehow, the world became softer after you entered it.</p>
                 <p>
-                  Loving you has changed the way I experience life.
+                  You make ordinary days feel meaningful. You make silence feel
+                  comforting. You make happiness feel easy.
                 </p>
-
                 <p>
-                  Somehow, the world became softer after you entered it.
+                  I hope you always remember how deeply appreciated, admired,
+                  and loved you are.
                 </p>
-
-                <p>
-                  You make ordinary days feel meaningful. You make silence feel comforting. You make happiness feel easy.
-                </p>
-
-                <p>
-                  I hope you always remember how deeply appreciated, admired, and loved you are.
-                </p>
-
-                <p>
-                  Thank you for existing in my life.
-                </p>
-
+                <p>Thank you for existing in my life.</p>
                 <p className="text-blue-200 text-2xl sm:text-3xl mt-10 heading-font">
                   Always you.
                 </p>
@@ -428,21 +607,15 @@ export default function App() {
                 {songs.map((song, index) => (
                   <motion.button
                     key={index}
-                    whileHover={{
-                      scale: 1.03,
-                    }}
-                    whileTap={{
-                      scale: 0.98,
-                    }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => {
                       setCurrentSong(song.code);
                       setMusicOpen(false);
                     }}
                     className="w-full glass rounded-2xl p-5 text-left"
                   >
-                    <p className="text-xl text-blue-50">
-                      {song.name}
-                    </p>
+                    <p className="text-xl text-blue-50">{song.name}</p>
                   </motion.button>
                 ))}
               </div>
@@ -455,12 +628,7 @@ export default function App() {
       {confetti.map((piece, i) => (
         <motion.div
           key={i}
-          initial={{
-            opacity: 1,
-            x: piece.x,
-            y: piece.y,
-            scale: 1,
-          }}
+          initial={{ opacity: 1, x: piece.x, y: piece.y, scale: 1 }}
           animate={{
             x: piece.x + (Math.random() - 0.5) * 500,
             y: piece.y - Math.random() * 350,
@@ -468,21 +636,15 @@ export default function App() {
             scale: 0,
             rotate: Math.random() * 720,
           }}
-          transition={{
-            duration: 1.6,
-            ease: "easeOut",
-          }}
+          transition={{ duration: 1.6, ease: "easeOut" }}
           className="fixed z-[9999]"
           style={{
             width: `${4 + Math.random() * 8}px`,
             height: `${4 + Math.random() * 8}px`,
             borderRadius: "999px",
-            background: [
-              "#9ec5ff",
-              "#ffffff",
-              "#d6e7ff",
-              "#7db2ff",
-            ][Math.floor(Math.random() * 4)],
+            background: ["#9ec5ff", "#ffffff", "#d6e7ff", "#7db2ff"][
+              Math.floor(Math.random() * 4)
+            ],
           }}
         />
       ))}
@@ -506,10 +668,36 @@ export default function App() {
           />
         )}
       </AnimatePresence>
+
+      {/* LETTER POPUP */}
+      <AnimatePresence>
+        {selectedLetter && (
+          <LetterPopup
+            letter={selectedLetter}
+            close={() => setSelectedLetter(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* MEMORY POPUP */}
+      <AnimatePresence>
+        {selectedMemory && (
+          <Popup
+            text={selectedMemory.text}
+            close={() => setSelectedMemory(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* HUG POPUP */}
+      <AnimatePresence>
+        {hugOpen && <HugPopup close={() => setHugOpen(false)} />}
+      </AnimatePresence>
     </motion.div>
   );
 }
 
+/* ============ EXISTING POPUP ============ */
 function Popup({ text, close }) {
   return (
     <motion.div
@@ -546,14 +734,104 @@ function Popup({ text, close }) {
   );
 }
 
+/* ============ NEW: LETTER POPUP ============ */
+function LetterPopup({ letter, close }) {
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center px-4 sm:px-6 py-8 overflow-y-auto"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        initial={{ scale: 0.7, opacity: 0, y: 30 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.7, opacity: 0, y: 30 }}
+        transition={{ duration: 0.5 }}
+        className="glass w-full max-w-xl p-8 sm:p-12 rounded-[35px] relative my-auto"
+      >
+        <button
+          onClick={close}
+          className="absolute top-5 right-5 text-white/70 hover:text-white"
+        >
+          <X />
+        </button>
+
+        <Mail className="text-blue-200 mb-6" size={22} />
+
+        <h3 className="heading-font text-2xl sm:text-3xl text-blue-100 mb-6 leading-snug">
+          {letter.title}
+        </h3>
+
+        <p className="text-blue-50/85 text-base sm:text-lg leading-relaxed">
+          {letter.text}
+        </p>
+
+        <p className="mt-8 text-sm text-blue-100/50 italic">
+          — yours, always.
+        </p>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ============ NEW: HUG POPUP ============ */
+function HugPopup({ close }) {
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center px-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.5, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 120, damping: 14 }}
+        className="glass w-full max-w-md p-10 sm:p-12 rounded-[40px] relative text-center"
+      >
+        <button
+          onClick={close}
+          className="absolute top-5 right-5 text-white/70 hover:text-white"
+        >
+          <X />
+        </button>
+
+        <motion.div
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="inline-block mb-6"
+        >
+          <Hand size={42} className="text-blue-200 mx-auto" />
+        </motion.div>
+
+        <h3 className="heading-font text-3xl sm:text-4xl text-blue-100 mb-6 leading-snug">
+          Come here for 10 seconds.
+        </h3>
+
+        <p className="text-blue-50/85 text-base sm:text-lg leading-relaxed mb-3">
+          Close your eyes. Breathe in. Hold it.
+        </p>
+        <p className="text-blue-50/85 text-base sm:text-lg leading-relaxed mb-6">
+          Breathe out, slowly.
+        </p>
+
+        <p className="text-blue-200 heading-font text-xl sm:text-2xl italic">
+          You’re going to be okay.
+        </p>
+
+        <p className="mt-8 text-sm text-blue-100/50">
+          I’m right here. Always.
+        </p>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ============ EXISTING BALLOON ============ */
 function FloatingBalloon({ note, index, popBalloon }) {
-  const colors = [
-    "#9ec5ff",
-    "#74a7ff",
-    "#b7d4ff",
-    "#6f9cff",
-    "#89b6ff",
-  ];
+  const colors = ["#9ec5ff", "#74a7ff", "#b7d4ff", "#6f9cff", "#89b6ff"];
 
   const positions = [
     { left: "8%", top: "20%" },
@@ -572,14 +850,11 @@ function FloatingBalloon({ note, index, popBalloon }) {
 
   const position = positions[index % positions.length];
 
-  const isMobile = window.innerWidth < 640;
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 
   return (
     <motion.div
-      initial={{
-        y: 0,
-        rotate: -2,
-      }}
+      initial={{ y: 0, rotate: -2 }}
       animate={{
         y: [-10, 10, -10],
         rotate: [-2, 2, -2],
@@ -590,35 +865,20 @@ function FloatingBalloon({ note, index, popBalloon }) {
         repeat: Infinity,
         ease: "easeInOut",
       }}
-      whileHover={{
-        scale: 1.08,
-      }}
-      whileTap={{
-        scale: 1.15,
-      }}
+      whileHover={{ scale: 1.08 }}
+      whileTap={{ scale: 1.15 }}
       onClick={(e) => popBalloon(note, e)}
       className="absolute cursor-pointer"
-      style={{
-        left: position.left,
-        top: position.top,
-      }}
+      style={{ left: position.left, top: position.top }}
     >
       <motion.div
-        animate={{
-          rotate: [-1, 1, -1],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
+        animate={{ rotate: [-1, 1, -1] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         className="absolute left-1/2 top-[90px] sm:top-[118px] w-[2px] h-16 sm:h-24 bg-white/20 origin-top"
       />
 
       <motion.div
-        whileHover={{
-          y: -4,
-        }}
+        whileHover={{ y: -4 }}
         className="relative rounded-full"
         style={{
           width: isMobile ? "78px" : "110px",
