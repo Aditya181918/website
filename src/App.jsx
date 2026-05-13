@@ -943,13 +943,15 @@ function HugPopup({ close }) {
     "I've got you.",
   ];
 
-  // Step timing — each line gets ~3.5s, except the final pause is longer
+
+// Step timing — each line gets ~3.5s, except the "hold the world still" line which lingers for 5s
   useEffect(() => {
-    if (closing) return;
-    if (step < lines.length - 1) {
-      const t = setTimeout(() => setStep(step + 1), 3500);
-      return () => clearTimeout(t);
-    } else {
+  if (closing) return;
+  if (step < lines.length - 1) {
+    const duration = step === 3 ? 5000 : 3500;
+    const t = setTimeout(() => setStep(step + 1), duration);
+    return () => clearTimeout(t);
+  } else {
       // After the last line, hold for 4s, then begin closing
       const t = setTimeout(() => {
         setClosing(true);
