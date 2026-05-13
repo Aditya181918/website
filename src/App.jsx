@@ -936,11 +936,11 @@ function HugPopup({ close }) {
   const [showAftermath, setShowAftermath] = useState(false);
 
   const lines = [
-    "Hey.",
+    "Hey Babyyy.",
     "I know some days feel heavier than others.",
     "But you never have to go through them alone.",
     "Stay here for a few seconds. Let me hold the world still for you.",
-    "I've got you.",
+    "I've got you my baby girl!",
   ];
 
 
@@ -948,7 +948,7 @@ function HugPopup({ close }) {
   useEffect(() => {
   if (closing) return;
   if (step < lines.length - 1) {
-    const duration = step === 3 ? 5000 : 3500;
+    const duration = step === 3 ? 6000 : 3500;
     const t = setTimeout(() => setStep(step + 1), duration);
     return () => clearTimeout(t);
   } else {
