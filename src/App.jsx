@@ -115,14 +115,14 @@ const lateNightThoughts = [
 
 // ============ NEW: MEMORY CONSTELLATION ============
 const constellationMemories = [
-  { x: 12, y: 25, text: "You are my favourite coincidence." },
-  { x: 28, y: 60, text: "I still smile at your texts." },
+  { x: 12, y: 25, text: "Being loved by you feels like one of life’s rarest things." },
+  { x: 28, y: 60, text: "I could listen to you talk for hours and still want more." },
   { x: 45, y: 18, text: "The first time you laughed at something I said — I knew." },
   { x: 62, y: 70, text: "You are the reason I believe in slow, real love." },
   { x: 78, y: 35, text: "Some people feel like home. You feel like mine." },
   { x: 88, y: 75, text: "In every version of this life, I'd still pick you." },
   { x: 35, y: 85, text: "You make me want to be gentler with everything." },
-  { x: 55, y: 45, text: "You are my favourite quiet." },
+  { x: 55, y: 45, text: "There’s something incredibly beautiful about the way you exist." },
 ];
 
 // ============ NEW: TINY THINGS ============
