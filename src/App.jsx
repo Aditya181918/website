@@ -15,7 +15,7 @@ const notes = [
   "You are my favourite part of every day.",
   "Somehow the world feels lighter with you in it.",
   "You matter to me in ways I still struggle to explain.",
-  "You are my favourite plot twist.",
+  "You are my first and the last thought of every day.",
   "You make silence feel comforting.",
   "I hope life gives us slow mornings together.",
   "You are the kind of person people write about.",
@@ -127,13 +127,13 @@ const constellationMemories = [
 
 // ============ NEW: TINY THINGS ============
 const tinyThings = [
-  "The way you say 'hmm' while thinking.",
-  "How you go quiet when something matters to you.",
-  "Your random expressions over the smallest things.",
+  "The way you say 'Come here' and 'Nothing, I Love You' when you don't want to tell me something.",
+  "How you take care of me when I am stressed because of work.",
+  "Your 'OMG Aditya' expressions when I say silly things",
   "The way you text in bursts when you're excited.",
-  "Your late-night energy that I secretly love.",
-  "How you make even ordinary things sound like a story.",
-  "The pause before you laugh — like you're deciding if it's worth it.",
+  "Our late night instagram scrolling and QnA sessions.",
+  "How you make sure you involve me in the smallest of things.",
+  "The uncontrollable laughter on your own jokes. ",
   "How your name has started to feel like a soft place.",
 ];
 
@@ -259,7 +259,7 @@ export default function App() {
           >
             <Hand size={20} className="text-blue-200" />
             <span className="text-sm sm:text-base text-blue-100 hidden sm:inline">
-              need a hug?
+              Need a hug?
             </span>
           </motion.div>
         </motion.button>
@@ -727,7 +727,7 @@ function Popup({ text, close }) {
         </p>
 
         <p className="mt-8 text-sm text-blue-100/50">
-          Come back whenever you need to.
+          I am always here.
         </p>
       </motion.div>
     </motion.div>
