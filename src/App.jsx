@@ -2,7 +2,7 @@
 // FINAL PREMIUM VERSION — with Open When Letters, Late Night Thoughts,
 // Memory Constellation, Tiny Things, Emergency Hug Button
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Music2, X, Mail, Hand } from "lucide-react";
 
@@ -240,29 +240,9 @@ export default function App() {
         <Music2 size={20} />
       </button>
 
-      {/* ============ EMERGENCY HUG BUTTON (floating, after entry) ============ */}
-      {entered && (
-        <motion.button
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 1.5, type: "spring", stiffness: 120 }}
-          onClick={() => setHugOpen(true)}
-          className="fixed bottom-5 left-5 z-50 glass rounded-full p-4 sm:p-5"
-          style={{
-            boxShadow: "0 0 40px rgba(158,197,255,0.25)",
-          }}
-        >
-          <motion.div
-            animate={{ scale: [1, 1.15, 1] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-            className="flex items-center gap-2"
-          >
-            <Hand size={20} className="text-blue-200" />
-            <span className="text-sm sm:text-base text-blue-100 hidden sm:inline">
-              Need a hug?
-            </span>
-          </motion.div>
-        </motion.button>
+      {/* ============ EMERGENCY HUG BUTTON (hold-to-hug, after entry) ============ */}
+      {entered && !hugOpen && (
+        <HugButton onTriggered={() => setHugOpen(true)} />
       )}
 
       {/* ENTRY */}
@@ -727,7 +707,7 @@ function Popup({ text, close }) {
         </p>
 
         <p className="mt-8 text-sm text-blue-100/50">
-          I am always here.
+          Come back whenever you need to.
         </p>
       </motion.div>
     </motion.div>
@@ -775,56 +755,354 @@ function LetterPopup({ letter, close }) {
   );
 }
 
-/* ============ NEW: HUG POPUP ============ */
-function HugPopup({ close }) {
+/* ============ NEW: HOLD-TO-HUG BUTTON ============ */
+function HugButton({ onTriggered }) {
+  const [holding, setHolding] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const intervalRef = useRef(null);
+  const triggeredRef = useRef(false);
+
+  const HOLD_DURATION = 2000; // ms
+  const TICK = 30;
+
+  const startHold = () => {
+    if (triggeredRef.current) return;
+    triggeredRef.current = false;
+    setHolding(true);
+
+    // Subtle haptic on devices that support it (Android; iOS silently no-ops)
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(15);
+    }
+
+    const start = Date.now();
+    intervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.min(elapsed / HOLD_DURATION, 1);
+      setProgress(pct);
+
+      if (pct >= 1 && !triggeredRef.current) {
+        triggeredRef.current = true;
+        clearInterval(intervalRef.current);
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          navigator.vibrate([30, 60, 30]);
+        }
+        onTriggered();
+      }
+    }, TICK);
+  };
+
+  const endHold = () => {
+    clearInterval(intervalRef.current);
+    if (!triggeredRef.current) {
+      setHolding(false);
+      setProgress(0);
+    }
+  };
+
+  useEffect(() => {
+    return () => clearInterval(intervalRef.current);
+  }, []);
+
   return (
     <motion.div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center px-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ delay: 1.5, type: "spring", stiffness: 120 }}
+      className="fixed bottom-5 left-5 z-50"
     >
-      <motion.div
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.5, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 120, damping: 14 }}
-        className="glass w-full max-w-md p-10 sm:p-12 rounded-[40px] relative text-center"
+      {/* Expanding glow while holding */}
+      <AnimatePresence>
+        {holding && (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{
+              scale: 1 + progress * 2.5,
+              opacity: 0.5 - progress * 0.3,
+            }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 rounded-full pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(158,197,255,0.5) 0%, transparent 70%)",
+              filter: "blur(20px)",
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Floating particles while holding */}
+      <AnimatePresence>
+        {holding &&
+          [...Array(6)].map((_, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 0, x: 0 }}
+              animate={{
+                opacity: [0, 0.8, 0],
+                y: -60 - Math.random() * 40,
+                x: (Math.random() - 0.5) * 50,
+              }}
+              transition={{
+                duration: 1.5 + Math.random(),
+                repeat: Infinity,
+                delay: i * 0.2,
+              }}
+              className="absolute left-1/2 top-1/2 w-1.5 h-1.5 rounded-full bg-blue-200/80 pointer-events-none"
+              style={{ boxShadow: "0 0 8px rgba(158,197,255,0.9)" }}
+            />
+          ))}
+      </AnimatePresence>
+
+      <motion.button
+        onMouseDown={startHold}
+        onMouseUp={endHold}
+        onMouseLeave={endHold}
+        onTouchStart={startHold}
+        onTouchEnd={endHold}
+        onTouchCancel={endHold}
+        animate={{
+          scale: holding ? 1 + progress * 0.15 : [1, 1.04, 1],
+        }}
+        transition={
+          holding
+            ? { duration: 0.15 }
+            : { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
+        }
+        className="relative glass rounded-full p-4 sm:p-5 select-none"
+        style={{
+          boxShadow: `0 0 ${40 + progress * 60}px rgba(158,197,255,${
+            0.25 + progress * 0.5
+          })`,
+          touchAction: "manipulation",
+        }}
       >
-        <button
-          onClick={close}
-          className="absolute top-5 right-5 text-white/70 hover:text-white"
-        >
-          <X />
-        </button>
+        <div className="flex items-center gap-2">
+          <motion.div
+            animate={
+              holding
+                ? { scale: [1, 1.3, 1] }
+                : { scale: 1 }
+            }
+            transition={
+              holding
+                ? { duration: 0.7, repeat: Infinity, ease: "easeInOut" }
+                : { duration: 0.3 }
+            }
+          >
+            <Hand size={20} className="text-blue-200" />
+          </motion.div>
+          <span className="text-sm sm:text-base text-blue-100 hidden sm:inline">
+            {holding ? "hold on..." : "need a hug?"}
+          </span>
+        </div>
 
+        {/* Progress ring */}
+        {holding && (
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none -rotate-90"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+          >
+            <circle
+              cx="50"
+              cy="50"
+              r="48"
+              fill="none"
+              stroke="rgba(158,197,255,0.9)"
+              strokeWidth="2"
+              strokeDasharray={`${progress * 301.6} 301.6`}
+              style={{ transition: "stroke-dasharray 0.05s linear" }}
+            />
+          </svg>
+        )}
+      </motion.button>
+
+      {/* Mobile-only tiny instruction the first time */}
+      {!holding && (
+        <p className="absolute -top-6 left-2 text-[10px] text-blue-100/40 whitespace-nowrap sm:hidden">
+          hold me
+        </p>
+      )}
+    </motion.div>
+  );
+}
+
+/* ============ NEW: HUG EXPERIENCE (full-screen, sequenced) ============ */
+function HugPopup({ close }) {
+  const [step, setStep] = useState(0);
+  const [closing, setClosing] = useState(false);
+  const [showAftermath, setShowAftermath] = useState(false);
+
+  const lines = [
+    "Hey.",
+    "I know some days feel heavier than others.",
+    "But you never have to go through them alone.",
+    "Stay here for a few seconds. Let me hold the world still for you.",
+    "I've got you.",
+  ];
+
+  // Step timing — each line gets ~3.5s, except the final pause is longer
+  useEffect(() => {
+    if (closing) return;
+    if (step < lines.length - 1) {
+      const t = setTimeout(() => setStep(step + 1), 3500);
+      return () => clearTimeout(t);
+    } else {
+      // After the last line, hold for 4s, then begin closing
+      const t = setTimeout(() => {
+        setClosing(true);
+        setTimeout(() => {
+          setShowAftermath(true);
+          // Show the aftermath line for 4s, then fully close
+          setTimeout(() => {
+            close();
+          }, 4500);
+        }, 1500);
+      }, 4000);
+      return () => clearTimeout(t);
+    }
+  }, [step, closing, lines.length, close]);
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[100] flex items-center justify-center px-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: closing && showAftermath ? 0.6 : 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1.2 }}
+      style={{
+        background:
+          "radial-gradient(circle at center, rgba(35,57,93,0.95) 0%, rgba(8,12,28,0.98) 60%, rgba(5,8,22,1) 100%)",
+        backdropFilter: "blur(40px)",
+      }}
+    >
+      {/* Breathing ambient bloom */}
+      <motion.div
+        animate={{
+          scale: [1, 1.15, 1],
+          opacity: [0.4, 0.7, 0.4],
+        }}
+        transition={{
+          duration: 5,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle at center, rgba(158,197,255,0.18) 0%, transparent 55%)",
+        }}
+      />
+
+      {/* Floating particles */}
+      {[...Array(20)].map((_, i) => (
         <motion.div
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="inline-block mb-6"
+          key={i}
+          initial={{
+            opacity: 0,
+            x: `${Math.random() * 100}%`,
+            y: "100%",
+          }}
+          animate={{
+            opacity: [0, 0.7, 0],
+            y: "-10%",
+          }}
+          transition={{
+            duration: 8 + Math.random() * 6,
+            repeat: Infinity,
+            delay: i * 0.4,
+            ease: "linear",
+          }}
+          className="absolute rounded-full bg-blue-200/60 pointer-events-none"
+          style={{
+            width: `${2 + Math.random() * 3}px`,
+            height: `${2 + Math.random() * 3}px`,
+            left: `${Math.random() * 100}%`,
+            boxShadow: "0 0 12px rgba(158,197,255,0.6)",
+          }}
+        />
+      ))}
+
+      {/* Close (X) — discreet, top-right */}
+      {!closing && (
+        <button
+          onClick={() => {
+            setClosing(true);
+            setTimeout(() => close(), 800);
+          }}
+          className="absolute top-6 right-6 text-white/30 hover:text-white/70 transition-colors z-10"
+          aria-label="close"
         >
-          <Hand size={42} className="text-blue-200 mx-auto" />
-        </motion.div>
+          <X size={20} />
+        </button>
+      )}
 
-        <h3 className="heading-font text-3xl sm:text-4xl text-blue-100 mb-6 leading-snug">
-          Come here for 10 seconds.
-        </h3>
+      {/* The sequenced text */}
+      {!closing && (
+        <div className="relative z-10 max-w-2xl text-center">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -10, filter: "blur(8px)" }}
+              transition={{ duration: 1.4, ease: "easeOut" }}
+            >
+              <motion.p
+                animate={{
+                  // Subtle heartbeat on every line
+                  scale: [1, 1.015, 1, 1.015, 1],
+                }}
+                transition={{
+                  duration: 1.2,
+                  times: [0, 0.15, 0.3, 0.45, 1],
+                  repeat: Infinity,
+                  repeatDelay: 1.2,
+                  ease: "easeInOut",
+                }}
+                className="heading-font text-3xl sm:text-5xl md:text-6xl text-blue-50 leading-relaxed px-4"
+                style={{
+                  textShadow: "0 0 40px rgba(158,197,255,0.3)",
+                }}
+              >
+                {lines[step]}
+              </motion.p>
+            </motion.div>
+          </AnimatePresence>
 
-        <p className="text-blue-50/85 text-base sm:text-lg leading-relaxed mb-3">
-          Close your eyes. Breathe in. Hold it.
-        </p>
-        <p className="text-blue-50/85 text-base sm:text-lg leading-relaxed mb-6">
-          Breathe out, slowly.
-        </p>
+          {/* Tiny step indicator dots */}
+          <div className="mt-16 flex items-center justify-center gap-2">
+            {lines.map((_, i) => (
+              <motion.div
+                key={i}
+                animate={{
+                  opacity: i <= step ? 0.6 : 0.15,
+                  scale: i === step ? 1.3 : 1,
+                }}
+                transition={{ duration: 0.6 }}
+                className="w-1.5 h-1.5 rounded-full bg-blue-200"
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
-        <p className="text-blue-200 heading-font text-xl sm:text-2xl italic">
-          You’re going to be okay.
-        </p>
-
-        <p className="mt-8 text-sm text-blue-100/50">
-          I’m right here. Always.
-        </p>
-      </motion.div>
+      {/* Aftermath line */}
+      <AnimatePresence>
+        {showAftermath && (
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 0.7, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5 }}
+            className="absolute bottom-12 left-0 right-0 text-center text-blue-100/70 heading-font text-xl sm:text-2xl italic px-6"
+          >
+            Come back whenever you need this.
+          </motion.p>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
