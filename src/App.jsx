@@ -45,26 +45,31 @@ const moods = [
     title: "Need reassurance?",
     text: "You are deeply loved. Even on the days your mind tells you otherwise.",
     bg: "radial-gradient(circle at top, #23395d 0%, #10192d 50%, #050816 100%)",
+    accent: "rgba(158, 197, 255, 0.18)", // soft blue (default)
   },
   {
     title: "Missing me?",
     text: "I’m probably missing you too. More than I admit sometimes.",
     bg: "radial-gradient(circle at top, #294d6b 0%, #122235 50%, #050816 100%)",
+    accent: "rgba(196, 180, 255, 0.18)", // soft lavender
   },
   {
     title: "Need a smile?",
     text: "You’re cute even when you’re being dramatic.",
     bg: "radial-gradient(circle at top, #355c7d 0%, #16263a 50%, #050816 100%)",
+    accent: "rgba(255, 210, 160, 0.22)", // warm amber
   },
   {
     title: "Overthinking?",
     text: "Your heart is safe with me. You don’t have to carry every thought alone.",
     bg: "radial-gradient(circle at top, #1d3557 0%, #10192d 50%, #050816 100%)",
+    accent: "rgba(180, 220, 220, 0.18)", // soft teal
   },
   {
     title: "Need love?",
     text: "If I could, I’d wrap you in the safest hug right now.",
     bg: "radial-gradient(circle at top, #27496d 0%, #142033 50%, #050816 100%)",
+    accent: "rgba(255, 180, 200, 0.22)", // soft rose
   },
 ];
 
@@ -676,34 +681,68 @@ export default function App() {
           </section>
 
           {/* MOODS */}
-          <section className="py-8 sm:py-10 px-4 sm:px-6">
+          <section className="py-16 sm:py-24 px-4 sm:px-6">
             <div className="max-w-6xl mx-auto">
-              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-4 sm:mb-6 px-4">
                 What Do You Need Right Now?
               </h2>
 
-              <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
+              <p className="text-center text-blue-100/60 mb-8 text-base sm:text-lg px-4 italic">
                 There’s something here for every mood.
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
-                {moods.map((mood, index) => (
-                  <motion.button
-                    key={index}
-                    whileHover={{ y: -6, scale: 1.03 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      setSelectedMood(mood);
-                      setBackground(mood.bg);
-                    }}
-                    className="glass rounded-[24px] sm:rounded-[30px] p-6 sm:p-8 text-left"
-                  >
-                    <h3 className="heading-font text-2xl sm:text-3xl text-blue-200 mb-2 sm:mb-3">
-                      {mood.title}
-                    </h3>
-                    <p className="text-blue-50/65 text-sm sm:text-base">tap to open</p>
-                  </motion.button>
-                ))}
+              {/* Small lily ornament between heading and grid */}
+              <div className="flex justify-center mb-12 sm:mb-16 text-blue-200/50">
+                <Lily size={28} opacity={0.5} />
+              </div>
+
+              {/* Responsive layout: 1 col mobile, 2 col tablet, 5-card balanced layout on desktop */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-5 sm:gap-6 lg:gap-7">
+                {moods.map((mood, index) => {
+                  // On desktop (lg+), span the cards across 6 cols to make 5 fit gracefully:
+                  // Row 1: card 0 (cols 1-2), card 1 (cols 3-4), card 2 (cols 5-6)
+                  // Row 2: card 3 (cols 2-3), card 4 (cols 4-5) — centered
+                  const desktopSpan = index < 3
+                    ? "lg:col-span-2"
+                    : "lg:col-span-2";
+                  const desktopStart = index === 3
+                    ? "lg:col-start-2"
+                    : index === 4
+                    ? "lg:col-start-4"
+                    : "";
+
+                  return (
+                    <motion.button
+                      key={index}
+                      whileHover={{ y: -8, scale: 1.03 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setSelectedMood(mood);
+                        setBackground(mood.bg);
+                      }}
+                      className={`glass rounded-[24px] sm:rounded-[30px] p-7 sm:p-8 text-left relative overflow-hidden ${desktopSpan} ${desktopStart}`}
+                      style={{
+                        boxShadow: `0 8px 32px ${mood.accent}, inset 0 1px 0 rgba(255,255,255,0.08)`,
+                      }}
+                    >
+                      {/* Accent glow blob in corner */}
+                      <div
+                        className="absolute -top-10 -right-10 w-32 h-32 rounded-full pointer-events-none"
+                        style={{
+                          background: `radial-gradient(circle, ${mood.accent} 0%, transparent 70%)`,
+                          filter: "blur(20px)",
+                        }}
+                      />
+
+                      <h3 className="heading-font text-2xl sm:text-3xl text-blue-100 mb-2 sm:mb-3 relative z-10">
+                        {mood.title}
+                      </h3>
+                      <p className="text-blue-50/55 text-sm relative z-10">
+                        tap to open
+                      </p>
+                    </motion.button>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -719,12 +758,26 @@ export default function App() {
                 <motion.div
                   key={index}
                   whileHover={{ y: -8 }}
-                  className="glass rounded-[28px] sm:rounded-[32px] p-6 sm:p-10"
+                  className="glass rounded-[28px] sm:rounded-[32px] p-6 sm:p-10 relative overflow-hidden"
+                  style={{
+                    boxShadow:
+                      "0 8px 32px rgba(255, 210, 160, 0.08), inset 0 1px 0 rgba(255,255,255,0.08)",
+                  }}
                 >
-                  <h3 className="heading-font text-2xl sm:text-4xl mb-4 sm:mb-6 text-blue-200">
+                  {/* Soft amber glow in top-right corner — film/tv warmth */}
+                  <div
+                    className="absolute -top-12 -right-12 w-40 h-40 rounded-full pointer-events-none"
+                    style={{
+                      background:
+                        "radial-gradient(circle, rgba(255, 210, 160, 0.18) 0%, transparent 70%)",
+                      filter: "blur(20px)",
+                    }}
+                  />
+
+                  <h3 className="heading-font text-2xl sm:text-4xl mb-4 sm:mb-6 text-blue-200 relative z-10">
                     {card.title}
                   </h3>
-                  <p className="text-blue-50/75 leading-relaxed text-base sm:text-lg">
+                  <p className="text-blue-50/75 leading-relaxed text-base sm:text-lg relative z-10">
                     {card.text}
                   </p>
                 </motion.div>
@@ -890,9 +943,19 @@ export default function App() {
                     style={{
                       width: "14px",
                       height: "14px",
+                      // Most stars are cool blue, but every 3rd is warm — creates variety
                       background:
-                        "radial-gradient(circle, #ffffff 0%, #9ec5ff 60%, transparent 100%)",
-                      boxShadow: "0 0 20px rgba(158,197,255,0.8)",
+                        i % 3 === 1
+                          ? "radial-gradient(circle, #ffffff 0%, #ffcfa3 60%, transparent 100%)"
+                          : i % 3 === 2
+                          ? "radial-gradient(circle, #ffffff 0%, #ffb8c8 60%, transparent 100%)"
+                          : "radial-gradient(circle, #ffffff 0%, #9ec5ff 60%, transparent 100%)",
+                      boxShadow:
+                        i % 3 === 1
+                          ? "0 0 20px rgba(255, 200, 150, 0.7)"
+                          : i % 3 === 2
+                          ? "0 0 20px rgba(255, 180, 200, 0.7)"
+                          : "0 0 20px rgba(158,197,255,0.8)",
                     }}
                   />
                 </motion.button>
@@ -1020,7 +1083,7 @@ export default function App() {
                           </p>
                         </div>
 
-                        {/* BACK (revealed promise) */}
+                        {/* BACK (revealed promise) — warm gold/cream accent */}
                         <div
                           className="absolute inset-0 glass rounded-[24px] flex items-center justify-center p-4 sm:p-5"
                           style={{
@@ -1028,7 +1091,9 @@ export default function App() {
                             WebkitBackfaceVisibility: "hidden",
                             transform: "rotateY(180deg)",
                             background:
-                              "linear-gradient(145deg, rgba(158,197,255,0.18), rgba(255,255,255,0.08))",
+                              "linear-gradient(145deg, rgba(255, 215, 175, 0.22) 0%, rgba(255, 230, 200, 0.10) 50%, rgba(255,255,255,0.06) 100%)",
+                            boxShadow:
+                              "inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 24px rgba(255, 200, 150, 0.12)",
                           }}
                         >
                           <p className="text-blue-50 text-xs sm:text-sm leading-relaxed text-left">
