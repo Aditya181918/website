@@ -121,73 +121,88 @@ const lateNightThoughts = [
 ];
 
 // ============ NEW: MEMORY CONSTELLATION ============
-// 8 stars arranged in the shape of the letter "A" — Aashi's initial.
-// The chain forms: apex → left leg → bottom-left, plus apex → right leg → bottom-right,
-// with a crossbar connecting the mid-points of both legs.
+// Stars arranged in the Cancer constellation — Aashi's zodiac.
+// The real Cancer constellation is a faint Y/upside-down crab shape made of 5 main stars:
+//   - Altarf (β Cnc) — brightest, bottom
+//   - Asellus Australis (δ Cnc) — central hub
+//   - Acubens (α Cnc) — lower-left
+//   - Asellus Borealis (γ Cnc) — upper-right
+//   - Tegmine (ζ Cnc) — upper-left
+// 3 additional memory stars fill in without breaking the shape.
 //
-//          [0] apex
-//         /   \
-//       [1]   [4]
-//       /       \
-//     [2]------[5]    <- crossbar
-//     /           \
-//   [3]           [6]
-//                  \
-//                  [7]
+// Y-topology:
+//          [4 Tegmine]    [3 Borealis]
+//                  \      /
+//             [5]   \    /   [6]
+//                \   \  /   /
+//                  [2 Australis] (hub)
+//                       |
+//                      [7]
+//                       |
+//                    [1 Altarf] (brightest)
+//                       |
+//                    [0 Acubens]
 //
-// `lead: true` = prominent star (apex + bottom corners). Others are smaller.
-// `connects` = indices of stars this one is line-connected to.
+// `lead: true` = real Cancer star (brighter, bigger).
+// `connects` = indices line-connected to this star.
 const constellationMemories = [
-  // 0: APEX (top, lead)
+  // 0: Acubens — lower-left endpoint
   {
-    x: 50, y: 8,
-    text: "Being loved by you, Aashi, feels like one of life’s rarest things.",
-    lead: true,
-    connects: [1, 4],
-  },
-  // 1: Upper-left leg
-  {
-    x: 40, y: 30,
-    text: "I could listen to you talk for hours and still want more.",
-    connects: [2],
-  },
-  // 2: Mid-left (crossbar left end)
-  {
-    x: 32, y: 52,
-    text: "The first time you laughed at something I said — I knew.",
-    connects: [3, 5],
-  },
-  // 3: Bottom-left (lead)
-  {
-    x: 18, y: 88,
+    x: 30, y: 82,
     text: "You make me want to be gentler with everything.",
     lead: true,
-    connects: [],
+    name: "Acubens",
+    connects: [1],
   },
-  // 4: Upper-right leg
+  // 1: Altarf — brightest star, mid-bottom
   {
-    x: 60, y: 30,
-    text: "Some people feel like home. You feel like mine.",
-    connects: [5],
-  },
-  // 5: Mid-right (crossbar right end)
-  {
-    x: 68, y: 52,
-    text: "There’s something incredibly beautiful about the way you exist.",
+    x: 42, y: 65,
+    text: "Being loved by you, Aashi, feels like one of life’s rarest things.",
+    lead: true,
+    name: "Altarf",
     connects: [7],
   },
-  // 6: Bottom-right (lead)
+  // 2: Asellus Australis — central hub
   {
-    x: 82, y: 88,
-    text: "In every version of this life, I'd still pick you.",
+    x: 50, y: 45,
+    text: "The first time you laughed at something I said — I knew.",
     lead: true,
+    name: "Asellus Australis",
+    connects: [3, 4],
+  },
+  // 3: Asellus Borealis — upper-right of Y
+  {
+    x: 72, y: 22,
+    text: "Some people feel like home. You feel like mine.",
+    lead: true,
+    name: "Asellus Borealis",
     connects: [],
   },
-  // 7: Tail between crossbar-right and bottom-right
+  // 4: Tegmine — upper-left of Y
   {
-    x: 75, y: 70,
+    x: 22, y: 18,
+    text: "In every version of this life, I'd still pick you.",
+    lead: true,
+    name: "Tegmine",
+    connects: [],
+  },
+  // 5: Memory star — upper-left fill
+  {
+    x: 35, y: 32,
+    text: "I could listen to you talk for hours and still want more.",
+    connects: [],
+  },
+  // 6: Memory star — upper-right fill
+  {
+    x: 62, y: 32,
+    text: "There’s something incredibly beautiful about the way you exist.",
+    connects: [],
+  },
+  // 7: Memory star — bridge between Altarf and Australis
+  {
+    x: 46, y: 55,
     text: "You are the reason I believe in slow, real love.",
-    connects: [6],
+    connects: [2],
   },
 ];
 
@@ -1196,17 +1211,22 @@ export default function App() {
               })}
             </div>
 
-            {/* "A" reveal hint when all found */}
+            {/* Cancer constellation reveal when all found */}
             <AnimatePresence>
               {foundMemories.length === constellationMemories.length && (
-                <motion.p
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1.5, duration: 1.5 }}
-                  className="text-center heading-font italic text-blue-200/70 mt-8 text-lg sm:text-xl"
+                  className="text-center mt-8"
                 >
-                  written in the stars. always.
-                </motion.p>
+                  <p className="heading-font italic text-blue-200/70 text-lg sm:text-xl">
+                    cancer. your stars.
+                  </p>
+                  <p className="text-blue-100/40 text-xs sm:text-sm mt-2 italic">
+                    written for you, always.
+                  </p>
+                </motion.div>
               )}
             </AnimatePresence>
           </section>
@@ -1507,11 +1527,11 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* MEMORY POPUP */}
+      {/* MEMORY POPUP — custom for constellation, shows Cancer star name when present */}
       <AnimatePresence>
         {selectedMemory && (
-          <Popup
-            text={selectedMemory.text}
+          <MemoryPopup
+            memory={selectedMemory}
             close={() => setSelectedMemory(null)}
           />
         )}
@@ -1556,6 +1576,66 @@ function Popup({ text, close }) {
 
         <p className="mt-8 text-sm text-blue-100/50">
           Come back whenever you need to.
+        </p>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ============ NEW: MEMORY POPUP (constellation star) ============ */
+function MemoryPopup({ memory, close }) {
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center px-4 sm:px-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        initial={{ scale: 0.7, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.7, opacity: 0 }}
+        transition={{ duration: 0.4 }}
+        className="glass w-full max-w-lg p-6 sm:p-12 rounded-[28px] sm:rounded-[35px] relative"
+      >
+        <button
+          onClick={close}
+          className="absolute top-5 right-5 text-white/70 hover:text-white"
+        >
+          <X />
+        </button>
+
+        {/* Star icon — glowing */}
+        <motion.div
+          animate={{
+            opacity: [0.7, 1, 0.7],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="mb-6 rounded-full"
+          style={{
+            width: "16px",
+            height: "16px",
+            background:
+              "radial-gradient(circle, #ffffff 0%, #ffe5b0 60%, #ffcfa3 100%)",
+            boxShadow:
+              "0 0 24px rgba(255,220,160,0.9), 0 0 8px rgba(255,255,255,0.8)",
+          }}
+        />
+
+        {/* Cancer star name — only shown if this is a named star */}
+        {memory.name && (
+          <p className="text-xs uppercase tracking-[0.2em] text-blue-100/40 mb-3">
+            {memory.name} · cancer
+          </p>
+        )}
+
+        <p className="heading-font text-2xl sm:text-4xl leading-relaxed text-blue-50">
+          {memory.text}
+        </p>
+
+        <p className="mt-8 text-sm text-blue-100/50 italic">
+          come back whenever you need to.
         </p>
       </motion.div>
     </motion.div>
