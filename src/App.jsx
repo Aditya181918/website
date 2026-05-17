@@ -159,24 +159,24 @@ function getGreeting() {
 
   // Late night (midnight to 5am)
   if (hour >= 0 && hour < 5) {
-    return "You're up late again. come here.";
+    return "you're up late again. come here.";
   }
   // Early morning (5–11)
   if (hour >= 5 && hour < 11) {
-    if (day === 0) return "Sunday morning. i hope it's slow for you.";
-    if (day === 6) return "Saturday morning. take your time today.";
-    return "Good morning. i hope today is gentle with you.";
+    if (day === 0) return "sunday morning. i hope it's slow for you.";
+    if (day === 6) return "saturday morning. take your time today.";
+    return "good morning. i hope today is gentle with you.";
   }
   // Midday (11–16)
   if (hour >= 11 && hour < 16) {
-    return "I was just thinking about you.";
+    return "i was just thinking about you.";
   }
   // Evening (16–20)
   if (hour >= 16 && hour < 20) {
-    return "Hi baby, how was your day?";
+    return "hi. how was your day?";
   }
   // Night (20–24)
-  return "The day's winding down. so glad you're here.";
+  return "the day's winding down. so glad you're here.";
 }
 
 export default function App() {
@@ -191,6 +191,15 @@ export default function App() {
   const [muted, setMuted] = useState(false);
   const [confetti, setConfetti] = useState([]);
   const [flippedPromises, setFlippedPromises] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Track viewport size for mobile-specific layout
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   // Compute the greeting once when component mounts
   const greeting = useRef(getGreeting()).current;
@@ -325,7 +334,7 @@ export default function App() {
               setMuted(true);
             }
           }}
-          className="fixed top-5 right-20 z-50 glass p-3 sm:p-4 rounded-full hover:scale-110 transition text-base"
+          className="fixed top-5 right-[4.5rem] sm:right-20 z-50 glass p-3 sm:p-4 rounded-full hover:scale-110 transition text-base"
           aria-label={muted ? "unmute" : "mute"}
         >
           {muted ? "🔇" : "🔊"}
@@ -337,6 +346,20 @@ export default function App() {
         {`
           @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
 
+          html, body {
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+          }
+
+          * {
+            -webkit-tap-highlight-color: transparent;
+          }
+
+          button {
+            touch-action: manipulation;
+          }
+
           .heading-font {
             font-family: 'Cormorant Garamond', serif;
           }
@@ -344,6 +367,7 @@ export default function App() {
           .glass {
             background: rgba(255,255,255,0.08);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255,255,255,0.1);
           }
 
@@ -354,7 +378,7 @@ export default function App() {
 
       {/* STARS BACKGROUND */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {[...Array(60)].map((_, i) => (
+        {[...Array(isMobile ? 30 : 60)].map((_, i) => (
           <motion.div
             key={i}
             animate={{
@@ -391,7 +415,7 @@ export default function App() {
 
       {/* ENTRY */}
       {!entered ? (
-        <section className="h-screen flex items-center justify-center px-6 relative">
+        <section className="min-h-[100dvh] h-screen flex items-center justify-center px-6 relative">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -412,7 +436,7 @@ export default function App() {
               initial={{ y: 40 }}
               animate={{ y: 0 }}
               transition={{ duration: 1.5 }}
-              className="heading-font text-[3.5rem] sm:text-[5rem] md:text-[8rem] font-light leading-none text-center px-2"
+              className="heading-font text-[2.75rem] sm:text-[5rem] md:text-[8rem] font-light leading-[0.95] text-center px-2"
             >
               Before you enter...
             </motion.h1>
@@ -442,7 +466,7 @@ export default function App() {
             <motion.h1
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              className="heading-font text-4xl sm:text-5xl md:text-7xl text-center leading-tight px-4"
+              className="heading-font text-3xl sm:text-5xl md:text-7xl text-center leading-tight px-4"
             >
               Some feelings are too big for texts.
             </motion.h1>
@@ -451,22 +475,23 @@ export default function App() {
               Pop the balloons.
             </p>
 
-            <div className="relative mt-8 w-full max-w-6xl h-[520px] sm:h-[700px]">
-              {notes.map((note, index) => (
+            <div className="relative mt-8 w-full max-w-6xl h-[560px] sm:h-[700px]">
+              {(isMobile ? notes.slice(0, 8) : notes).map((note, index) => (
                 <FloatingBalloon
                   key={index}
                   note={note}
                   index={index}
                   popBalloon={popBalloon}
+                  isMobile={isMobile}
                 />
               ))}
             </div>
           </section>
 
           {/* MOODS */}
-          <section className="py-10 px-4 sm:px-6">
+          <section className="py-8 sm:py-10 px-4 sm:px-6">
             <div className="max-w-6xl mx-auto">
-              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
                 What Do You Need Right Now?
               </h2>
 
@@ -474,7 +499,7 @@ export default function App() {
                 There’s something here for every mood.
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
                 {moods.map((mood, index) => (
                   <motion.button
                     key={index}
@@ -484,12 +509,12 @@ export default function App() {
                       setSelectedMood(mood);
                       setBackground(mood.bg);
                     }}
-                    className="glass rounded-[30px] p-8 text-left"
+                    className="glass rounded-[24px] sm:rounded-[30px] p-6 sm:p-8 text-left"
                   >
-                    <h3 className="heading-font text-3xl text-blue-200 mb-3">
+                    <h3 className="heading-font text-2xl sm:text-3xl text-blue-200 mb-2 sm:mb-3">
                       {mood.title}
                     </h3>
-                    <p className="text-blue-50/65">click to open</p>
+                    <p className="text-blue-50/65 text-sm sm:text-base">tap to open</p>
                   </motion.button>
                 ))}
               </div>
@@ -497,19 +522,19 @@ export default function App() {
           </section>
 
           {/* FRIENDS SECTION */}
-          <section className="py-14 px-4 sm:px-6">
-            <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-12 px-4">
+          <section className="py-10 sm:py-14 px-4 sm:px-6">
+            <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-8 sm:mb-12 px-4">
               The One Where...
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 max-w-6xl mx-auto">
               {episodeCards.map((card, index) => (
                 <motion.div
                   key={index}
                   whileHover={{ y: -8 }}
-                  className="glass rounded-[32px] p-8 sm:p-10"
+                  className="glass rounded-[28px] sm:rounded-[32px] p-6 sm:p-10"
                 >
-                  <h3 className="heading-font text-3xl sm:text-4xl mb-6 text-blue-200">
+                  <h3 className="heading-font text-2xl sm:text-4xl mb-4 sm:mb-6 text-blue-200">
                     {card.title}
                   </h3>
                   <p className="text-blue-50/75 leading-relaxed text-base sm:text-lg">
@@ -521,9 +546,9 @@ export default function App() {
           </section>
 
           {/* ============ NEW: OPEN WHEN LETTERS ============ */}
-          <section className="py-16 px-4 sm:px-6">
+          <section className="py-12 sm:py-16 px-4 sm:px-6">
             <div className="max-w-6xl mx-auto">
-              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
                 Open When...
               </h2>
               <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
@@ -556,16 +581,22 @@ export default function App() {
           </section>
 
           {/* ============ NEW: LATE NIGHT THOUGHTS ============ */}
-          <section className="py-16 overflow-hidden">
-            <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+          <section className="py-12 sm:py-16 overflow-hidden">
+            <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
               Late Night Thoughts
             </h2>
             <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
               The things I think about when the world is quiet.
             </p>
 
-            <div className="overflow-x-auto no-scrollbar px-4 sm:px-6">
-              <div className="flex gap-5 pb-4" style={{ width: "max-content" }}>
+            <div
+              className="overflow-x-auto no-scrollbar px-4 sm:px-6"
+              style={{
+                scrollSnapType: "x mandatory",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              <div className="flex gap-4 sm:gap-5 pb-4" style={{ width: "max-content" }}>
                 {lateNightThoughts.map((thought, index) => (
                   <motion.div
                     key={index}
@@ -573,14 +604,15 @@ export default function App() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.08 }}
-                    className="glass rounded-[28px] p-8 sm:p-10"
+                    className="glass rounded-[28px] p-7 sm:p-10"
                     style={{
-                      width: "280px",
+                      width: "260px",
                       minHeight: "200px",
                       flexShrink: 0,
+                      scrollSnapAlign: "center",
                     }}
                   >
-                    <p className="heading-font text-xl sm:text-2xl text-blue-50/85 leading-relaxed italic">
+                    <p className="heading-font text-lg sm:text-2xl text-blue-50/85 leading-relaxed italic">
                       “{thought}”
                     </p>
                   </motion.div>
@@ -594,12 +626,12 @@ export default function App() {
           </section>
 
           {/* ============ NEW: MEMORY CONSTELLATION ============ */}
-          <section className="py-20 px-4 sm:px-6 relative overflow-hidden">
+          <section className="py-14 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
             <motion.h2
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4 relative z-10"
+              className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4 relative z-10"
             >
               In every universe,
             </motion.h2>
@@ -608,20 +640,23 @@ export default function App() {
             </p>
 
             <div
-              className="relative max-w-5xl mx-auto"
-              style={{ height: "440px" }}
+              className="relative max-w-5xl mx-auto h-[320px] sm:h-[440px]"
             >
               {constellationMemories.map((memory, i) => (
                 <motion.button
                   key={i}
                   onClick={() => setSelectedMemory(memory)}
-                  className="absolute"
+                  className="absolute flex items-center justify-center"
                   style={{
                     left: `${memory.x}%`,
                     top: `${memory.y}%`,
+                    width: "44px",
+                    height: "44px",
+                    transform: "translate(-50%, -50%)",
                   }}
                   whileHover={{ scale: 1.4 }}
                   whileTap={{ scale: 0.9 }}
+                  aria-label="memory"
                 >
                   <motion.div
                     animate={{
@@ -648,9 +683,9 @@ export default function App() {
           </section>
 
           {/* ============ NEW: TINY THINGS I LOVE ABOUT YOU ============ */}
-          <section className="py-16 px-4 sm:px-6">
+          <section className="py-12 sm:py-16 px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
-              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
                 Tiny Things I Love About You
               </h2>
               <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
@@ -681,9 +716,9 @@ export default function App() {
           </section>
 
           {/* ============ NEW: PROMISE JAR ============ */}
-          <section className="py-16 px-4 sm:px-6">
+          <section className="py-12 sm:py-16 px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
-              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
                 A Jar Of Promises
               </h2>
               <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
@@ -785,12 +820,12 @@ export default function App() {
           </section>
 
           {/* LETTER */}
-          <section className="py-16 px-4 sm:px-6 flex justify-center">
+          <section className="py-12 sm:py-16 px-4 sm:px-6 flex justify-center">
             <motion.div
               whileHover={{ scale: 1.01 }}
-              className="glass max-w-3xl rounded-[40px] p-8 sm:p-12"
+              className="glass max-w-3xl rounded-[28px] sm:rounded-[40px] p-7 sm:p-12"
             >
-              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl mb-10 text-center">
+              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl mb-10 text-center">
                 To You
               </h2>
 
@@ -828,7 +863,7 @@ export default function App() {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              className="glass w-full max-w-md p-8 rounded-[35px] relative"
+              className="glass w-full max-w-md p-6 sm:p-8 rounded-[28px] sm:rounded-[35px] relative"
             >
               <button
                 onClick={() => setMusicOpen(false)}
@@ -949,7 +984,7 @@ function Popup({ text, close }) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.7, opacity: 0 }}
         transition={{ duration: 0.4 }}
-        className="glass w-full max-w-lg p-8 sm:p-12 rounded-[35px] relative"
+        className="glass w-full max-w-lg p-6 sm:p-12 rounded-[28px] sm:rounded-[35px] relative"
       >
         <button
           onClick={close}
@@ -960,7 +995,7 @@ function Popup({ text, close }) {
 
         <Heart className="text-blue-200 mb-6" />
 
-        <p className="heading-font text-3xl sm:text-4xl leading-relaxed text-blue-50">
+        <p className="heading-font text-2xl sm:text-4xl leading-relaxed text-blue-50">
           {text}
         </p>
 
@@ -986,7 +1021,7 @@ function LetterPopup({ letter, close }) {
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.7, opacity: 0, y: 30 }}
         transition={{ duration: 0.5 }}
-        className="glass w-full max-w-xl p-8 sm:p-12 rounded-[35px] relative my-auto"
+        className="glass w-full max-w-xl p-6 sm:p-12 rounded-[28px] sm:rounded-[35px] relative my-auto"
       >
         <button
           onClick={close}
@@ -1067,7 +1102,8 @@ function HugButton({ onTriggered }) {
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 1.5, type: "spring", stiffness: 120 }}
-      className="fixed bottom-5 left-5 z-50"
+      className="fixed left-5 z-50"
+      style={{ bottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}
     >
       {/* Expanding glow while holding */}
       <AnimatePresence>
@@ -1368,10 +1404,11 @@ function HugPopup({ close }) {
 }
 
 /* ============ EXISTING BALLOON ============ */
-function FloatingBalloon({ note, index, popBalloon }) {
+function FloatingBalloon({ note, index, popBalloon, isMobile }) {
   const colors = ["#9ec5ff", "#74a7ff", "#b7d4ff", "#6f9cff", "#89b6ff"];
 
-  const positions = [
+  // Desktop positions — 12 balloons spread across wider canvas
+  const desktopPositions = [
     { left: "8%", top: "20%" },
     { left: "22%", top: "55%" },
     { left: "38%", top: "25%" },
@@ -1386,9 +1423,20 @@ function FloatingBalloon({ note, index, popBalloon }) {
     { left: "88%", top: "22%" },
   ];
 
-  const position = positions[index % positions.length];
+  // Mobile positions — 8 balloons, spaced wider to avoid overlap on small screens
+  const mobilePositions = [
+    { left: "8%", top: "8%" },
+    { left: "55%", top: "12%" },
+    { left: "30%", top: "30%" },
+    { left: "65%", top: "38%" },
+    { left: "10%", top: "52%" },
+    { left: "50%", top: "62%" },
+    { left: "25%", top: "78%" },
+    { left: "60%", top: "85%" },
+  ];
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+  const positions = isMobile ? mobilePositions : desktopPositions;
+  const position = positions[index % positions.length];
 
   return (
     <motion.div
