@@ -75,6 +75,8 @@ const songs = [
   { name: "High On You", code: "gI1Z4UHg9o0" },
   { name: "Yellow", code: "yKNxeF4KMsY" },
   { name: "Tum Ho Toh", code: "rOUuGvJkBrQ" },
+  { name: "Dhun", code: "cUmUOb7j3dc" },
+  { name: "Ishq Hai", code: "BcSejVIxB0E" },
 ];
 
 // ============ NEW: OPEN WHEN LETTERS ============
@@ -137,6 +139,46 @@ const tinyThings = [
   "How your name has started to feel like a soft place.",
 ];
 
+// ============ NEW: PROMISES (edit these freely — they hit hardest when specific) ============
+const promises = [
+  "I promise to always answer when you call. Even when I shouldn't be on my phone.",
+  "I promise to never let a fight end without one of us reaching out first.",
+  "I promise to keep noticing the small things — the new earrings, the haircut, the mood you're hiding.",
+  "I promise to never make you feel like a burden, especially on the days you feel like one.",
+  "I promise to be honest with you, even when the easy thing is to stay quiet.",
+  "I promise to choose you again on the hard days. Not just the good ones.",
+  "I promise to remember what matters to you, and care about it even when you forget.",
+  "I promise to grow with you. Not away from you.",
+];
+
+// ============ NEW: TIME-AWARE GREETING ============
+function getGreeting() {
+  const now = new Date();
+  const hour = now.getHours();
+  const day = now.getDay(); // 0 = Sunday
+
+  // Late night (midnight to 5am)
+  if (hour >= 0 && hour < 5) {
+    return "you're up late again. come here.";
+  }
+  // Early morning (5–11)
+  if (hour >= 5 && hour < 11) {
+    if (day === 0) return "sunday morning. i hope it's slow for you.";
+    if (day === 6) return "saturday morning. take your time today.";
+    return "good morning. i hope today is gentle with you.";
+  }
+  // Midday (11–16)
+  if (hour >= 11 && hour < 16) {
+    return "i was just thinking about you.";
+  }
+  // Evening (16–20)
+  if (hour >= 16 && hour < 20) {
+    return "hi. how was your day?";
+  }
+  // Night (20–24)
+  return "the day's winding down. so glad you're here.";
+}
+
 export default function App() {
   const [entered, setEntered] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
@@ -146,7 +188,84 @@ export default function App() {
   const [hugOpen, setHugOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
   const [currentSong, setCurrentSong] = useState(null);
+  const [muted, setMuted] = useState(false);
   const [confetti, setConfetti] = useState([]);
+  const [flippedPromises, setFlippedPromises] = useState([]);
+
+  // Compute the greeting once when component mounts
+  const greeting = useRef(getGreeting()).current;
+
+  const playerRef = useRef(null);
+  const apiReadyRef = useRef(false);
+
+  // Load YouTube IFrame API once
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.YT && window.YT.Player) {
+      apiReadyRef.current = true;
+      return;
+    }
+    if (!document.getElementById("yt-iframe-api")) {
+      const tag = document.createElement("script");
+      tag.id = "yt-iframe-api";
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.body.appendChild(tag);
+    }
+    window.onYouTubeIframeAPIReady = () => {
+      apiReadyRef.current = true;
+    };
+  }, []);
+
+  // Play the chosen song. Must be called from inside a tap handler
+  // so iOS/Safari counts it as a user gesture and unlocks audio.
+  const playSong = (videoId) => {
+    setCurrentSong(videoId);
+
+    const start = () => {
+      if (!playerRef.current) {
+        playerRef.current = new window.YT.Player("yt-player", {
+          height: "1",
+          width: "1",
+          videoId,
+          playerVars: {
+            autoplay: 1,
+            loop: 1,
+            playlist: videoId,
+            controls: 0,
+            playsinline: 1,
+          },
+          events: {
+            onReady: (e) => {
+              e.target.setVolume(60);
+              e.target.playVideo();
+            },
+            onStateChange: (e) => {
+              if (e.data === window.YT.PlayerState.ENDED) {
+                e.target.playVideo();
+              }
+            },
+          },
+        });
+      } else {
+        playerRef.current.loadVideoById(videoId);
+        playerRef.current.playVideo();
+      }
+      setMuted(false);
+    };
+
+    if (apiReadyRef.current && window.YT && window.YT.Player) {
+      start();
+    } else {
+      const poll = setInterval(() => {
+        if (window.YT && window.YT.Player) {
+          clearInterval(poll);
+          apiReadyRef.current = true;
+          start();
+        }
+      }, 100);
+      setTimeout(() => clearInterval(poll), 8000);
+    }
+  };
 
   const [background, setBackground] = useState(
     "radial-gradient(circle at top, #13203d 0%, #070b1a 45%, #050816 100%)"
@@ -177,15 +296,40 @@ export default function App() {
       className="min-h-screen overflow-x-hidden text-white relative"
       style={{ fontFamily: "Inter, sans-serif" }}
     >
-      {/* YOUTUBE PLAYER */}
+      {/* YOUTUBE PLAYER — uses IFrame API for reliable mobile playback */}
+      <div
+        id="yt-player"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          width: "1px",
+          height: "1px",
+          opacity: 0.01,
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* MUTE / UNMUTE — appears once a song is selected */}
       {currentSong && (
-        <iframe
-          width="0"
-          height="0"
-          allow="autoplay"
-          src={`https://www.youtube.com/embed/${currentSong}?autoplay=1&loop=1&playlist=${currentSong}&controls=0`}
-          title="music-player"
-        />
+        <button
+          onClick={() => {
+            const p = playerRef.current;
+            if (!p) return;
+            if (muted) {
+              p.unMute();
+              p.setVolume(60);
+              setMuted(false);
+            } else {
+              p.mute();
+              setMuted(true);
+            }
+          }}
+          className="fixed top-5 right-20 z-50 glass p-3 sm:p-4 rounded-full hover:scale-110 transition text-base"
+          aria-label={muted ? "unmute" : "mute"}
+        >
+          {muted ? "🔇" : "🔊"}
+        </button>
       )}
 
       {/* FONTS + GLASS */}
@@ -254,6 +398,16 @@ export default function App() {
             transition={{ duration: 2 }}
             className="w-full max-w-5xl mx-auto text-center flex flex-col items-center"
           >
+            {/* Time-aware greeting */}
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.8, delay: 0.4 }}
+              className="text-blue-200/70 text-base sm:text-lg mb-6 italic px-4"
+            >
+              {greeting}
+            </motion.p>
+
             <motion.h1
               initial={{ y: 40 }}
               animate={{ y: 0 }}
@@ -526,6 +680,110 @@ export default function App() {
             </div>
           </section>
 
+          {/* ============ NEW: PROMISE JAR ============ */}
+          <section className="py-16 px-4 sm:px-6">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+                A Jar Of Promises
+              </h2>
+              <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
+                Tap one whenever you need to be reminded.
+              </p>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+                {promises.map((promise, index) => {
+                  const isFlipped = flippedPromises.includes(index);
+                  return (
+                    <motion.button
+                      key={index}
+                      onClick={() => {
+                        if (!isFlipped) {
+                          setFlippedPromises([...flippedPromises, index]);
+                        }
+                      }}
+                      whileHover={!isFlipped ? { y: -4, scale: 1.03 } : {}}
+                      whileTap={!isFlipped ? { scale: 0.97 } : {}}
+                      className="relative w-full"
+                      style={{
+                        aspectRatio: "3 / 4",
+                        perspective: "1000px",
+                      }}
+                    >
+                      <motion.div
+                        animate={{ rotateY: isFlipped ? 180 : 0 }}
+                        transition={{ duration: 0.8, ease: "easeInOut" }}
+                        className="relative w-full h-full"
+                        style={{
+                          transformStyle: "preserve-3d",
+                        }}
+                      >
+                        {/* FRONT (face down) */}
+                        <div
+                          className="absolute inset-0 glass rounded-[24px] flex flex-col items-center justify-center p-4"
+                          style={{
+                            backfaceVisibility: "hidden",
+                            WebkitBackfaceVisibility: "hidden",
+                          }}
+                        >
+                          <motion.div
+                            animate={{
+                              opacity: [0.3, 0.7, 0.3],
+                              scale: [1, 1.1, 1],
+                            }}
+                            transition={{
+                              duration: 3 + (index % 3),
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                            }}
+                            className="rounded-full mb-3"
+                            style={{
+                              width: "10px",
+                              height: "10px",
+                              background:
+                                "radial-gradient(circle, #ffffff 0%, #9ec5ff 60%, transparent 100%)",
+                              boxShadow: "0 0 15px rgba(158,197,255,0.7)",
+                            }}
+                          />
+                          <p className="heading-font text-blue-100/70 text-base sm:text-lg italic">
+                            a promise
+                          </p>
+                          <p className="text-blue-100/30 text-xs mt-2">
+                            tap to open
+                          </p>
+                        </div>
+
+                        {/* BACK (revealed promise) */}
+                        <div
+                          className="absolute inset-0 glass rounded-[24px] flex items-center justify-center p-4 sm:p-5"
+                          style={{
+                            backfaceVisibility: "hidden",
+                            WebkitBackfaceVisibility: "hidden",
+                            transform: "rotateY(180deg)",
+                            background:
+                              "linear-gradient(145deg, rgba(158,197,255,0.18), rgba(255,255,255,0.08))",
+                          }}
+                        >
+                          <p className="text-blue-50 text-xs sm:text-sm leading-relaxed text-left">
+                            {promise}
+                          </p>
+                        </div>
+                      </motion.div>
+                    </motion.button>
+                  );
+                })}
+              </div>
+
+              {/* Subtle progress hint */}
+              {flippedPromises.length > 0 && (
+                <p className="text-center text-blue-100/40 text-xs mt-8 italic">
+                  {flippedPromises.length === promises.length
+                    ? "all promises opened. every single one is yours."
+                    : `${flippedPromises.length} of ${promises.length} opened.`}
+                </p>
+              )}
+            </div>
+          </section>
+
           {/* LETTER */}
           <section className="py-16 px-4 sm:px-6 flex justify-center">
             <motion.div
@@ -590,7 +848,7 @@ export default function App() {
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
-                      setCurrentSong(song.code);
+                      playSong(song.code);
                       setMusicOpen(false);
                     }}
                     className="w-full glass rounded-2xl p-5 text-left"
