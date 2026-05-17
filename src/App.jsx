@@ -117,7 +117,7 @@ const lateNightThoughts = [
 
 // ============ NEW: MEMORY CONSTELLATION ============
 const constellationMemories = [
-  { x: 12, y: 25, text: "Being loved by you feels like one of life’s rarest things." },
+  { x: 12, y: 25, text: "Being loved by you, Aashi, feels like one of life’s rarest things." },
   { x: 28, y: 60, text: "I could listen to you talk for hours and still want more." },
   { x: 45, y: 18, text: "The first time you laughed at something I said — I knew." },
   { x: 62, y: 70, text: "You are the reason I believe in slow, real love." },
@@ -152,6 +152,9 @@ const promises = [
 ];
 
 // ============ NEW: TIME-AWARE GREETING ============
+// ============ NEW: HER NAME (change here to update everywhere) ============
+const NAME = "Aashi";
+
 function getGreeting() {
   const now = new Date();
   const hour = now.getHours();
@@ -159,24 +162,73 @@ function getGreeting() {
 
   // Late night (midnight to 5am)
   if (hour >= 0 && hour < 5) {
-    return "you're up late again. come here.";
+    return `you're up late again, ${NAME.toLowerCase()}. come here.`;
   }
   // Early morning (5–11)
   if (hour >= 5 && hour < 11) {
-    if (day === 0) return "sunday morning. i hope it's slow for you.";
-    if (day === 6) return "saturday morning. take your time today.";
-    return "good morning. i hope today is gentle with you.";
+    if (day === 0) return `sunday morning, ${NAME.toLowerCase()}. i hope it's slow for you.`;
+    if (day === 6) return `saturday morning, ${NAME.toLowerCase()}. take your time today.`;
+    return `good morning, ${NAME.toLowerCase()}. i hope today is gentle with you.`;
   }
   // Midday (11–16)
   if (hour >= 11 && hour < 16) {
-    return "i was just thinking about you.";
+    return `i was just thinking about you, ${NAME.toLowerCase()}.`;
   }
   // Evening (16–20)
   if (hour >= 16 && hour < 20) {
-    return "hi. how was your day?";
+    return `hi ${NAME.toLowerCase()}. how was your day?`;
   }
   // Night (20–24)
-  return "the day's winding down. so glad you're here.";
+  return `the day's winding down. so glad you're here, ${NAME.toLowerCase()}.`;
+}
+
+// ============ NEW: LILY MOTIF (signature visual) ============
+// Stylized line-drawn lily — used as watermark, divider, accent
+function Lily({ size = 40, opacity = 0.4, className = "", strokeWidth = 0.8 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ opacity }}
+    >
+      {/* Six petals radiating from center */}
+      <g stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" fill="none">
+        {/* Top petal */}
+        <path d="M 50 50 Q 45 30 50 15 Q 55 30 50 50" />
+        {/* Top-right petal */}
+        <path d="M 50 50 Q 65 35 80 30 Q 70 45 50 50" />
+        {/* Bottom-right petal */}
+        <path d="M 50 50 Q 70 55 78 70 Q 60 65 50 50" />
+        {/* Bottom petal */}
+        <path d="M 50 50 Q 55 70 50 85 Q 45 70 50 50" />
+        {/* Bottom-left petal */}
+        <path d="M 50 50 Q 30 65 22 70 Q 30 55 50 50" />
+        {/* Top-left petal */}
+        <path d="M 50 50 Q 30 45 20 30 Q 35 35 50 50" />
+        {/* Center detail — 3 small stamens */}
+        <circle cx="50" cy="50" r="2" fill="currentColor" opacity="0.6" />
+        <circle cx="46" cy="48" r="1" fill="currentColor" opacity="0.4" />
+        <circle cx="54" cy="48" r="1" fill="currentColor" opacity="0.4" />
+      </g>
+    </svg>
+  );
+}
+
+// ============ NEW: SECTION DIVIDER (lily-flanked line) ============
+function Divider() {
+  return (
+    <div className="flex items-center justify-center gap-4 sm:gap-6 my-2 sm:my-4 px-4">
+      <div className="h-px w-16 sm:w-32 bg-gradient-to-r from-transparent to-blue-200/30" />
+      <div className="text-blue-200/50">
+        <Lily size={28} opacity={0.5} />
+      </div>
+      <div className="h-px w-16 sm:w-32 bg-gradient-to-l from-transparent to-blue-200/30" />
+    </div>
+  );
 }
 
 export default function App() {
@@ -192,6 +244,8 @@ export default function App() {
   const [confetti, setConfetti] = useState([]);
   const [flippedPromises, setFlippedPromises] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
+  const [cursorVisible, setCursorVisible] = useState(false);
 
   // Track viewport size for mobile-specific layout
   useEffect(() => {
@@ -199,6 +253,31 @@ export default function App() {
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Track cursor/touch for glow trail
+  useEffect(() => {
+    const onMove = (e) => {
+      setCursorPos({ x: e.clientX, y: e.clientY });
+      setCursorVisible(true);
+    };
+    const onTouch = (e) => {
+      if (e.touches && e.touches[0]) {
+        setCursorPos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+        setCursorVisible(true);
+      }
+    };
+    const onLeave = () => setCursorVisible(false);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("touchmove", onTouch);
+    window.addEventListener("touchstart", onTouch);
+    window.addEventListener("mouseleave", onLeave);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchmove", onTouch);
+      window.removeEventListener("touchstart", onTouch);
+      window.removeEventListener("mouseleave", onLeave);
+    };
   }, []);
 
   // Compute the greeting once when component mounts
@@ -230,6 +309,28 @@ export default function App() {
   const playSong = (videoId) => {
     setCurrentSong(videoId);
 
+    // The trick: start MUTED so iOS/Safari permits playback to begin,
+    // then immediately unmute. The unmute call rides on the same tap
+    // gesture that triggered playSong, so iOS accepts it.
+    const unmuteAfterStart = (player) => {
+      // Try unmuting a few times — sometimes the player isn't ready instantly
+      let attempts = 0;
+      const tryUnmute = () => {
+        attempts++;
+        try {
+          player.unMute();
+          player.setVolume(60);
+          setMuted(false);
+        } catch (err) {
+          // Player not ready yet
+        }
+        if (attempts < 10) {
+          setTimeout(tryUnmute, 150);
+        }
+      };
+      tryUnmute();
+    };
+
     const start = () => {
       if (!playerRef.current) {
         playerRef.current = new window.YT.Player("yt-player", {
@@ -238,6 +339,7 @@ export default function App() {
           videoId,
           playerVars: {
             autoplay: 1,
+            mute: 1, // start muted — required for iOS autoplay
             loop: 1,
             playlist: videoId,
             controls: 0,
@@ -245,10 +347,19 @@ export default function App() {
           },
           events: {
             onReady: (e) => {
-              e.target.setVolume(60);
               e.target.playVideo();
+              unmuteAfterStart(e.target);
             },
             onStateChange: (e) => {
+              // When playback actually starts, unmute again (belt and braces)
+              if (e.data === window.YT.PlayerState.PLAYING) {
+                if (e.target.isMuted && e.target.isMuted()) {
+                  e.target.unMute();
+                  e.target.setVolume(60);
+                  setMuted(false);
+                }
+              }
+              // Loop fallback
               if (e.data === window.YT.PlayerState.ENDED) {
                 e.target.playVideo();
               }
@@ -256,10 +367,11 @@ export default function App() {
           },
         });
       } else {
+        // Player already exists — switching to a new song
         playerRef.current.loadVideoById(videoId);
         playerRef.current.playVideo();
+        unmuteAfterStart(playerRef.current);
       }
-      setMuted(false);
     };
 
     if (apiReadyRef.current && window.YT && window.YT.Player) {
@@ -365,16 +477,53 @@ export default function App() {
           }
 
           .glass {
-            background: rgba(255,255,255,0.08);
+            background:
+              url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+              linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.06) 50%, rgba(158,197,255,0.09) 100%);
+            background-blend-mode: overlay, normal;
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
           }
 
           .no-scrollbar::-webkit-scrollbar { display: none; }
           .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         `}
       </style>
+
+      {/* WARM LIGHT BLOOMS — drifting amber/rose orbs for warmth */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {[
+          { color: "rgba(255, 200, 170, 0.18)", size: 600, startX: -10, startY: -10, dur: 28 },
+          { color: "rgba(255, 180, 200, 0.14)", size: 500, startX: 70, startY: 20, dur: 32 },
+          { color: "rgba(200, 180, 255, 0.12)", size: 550, startX: 30, startY: 70, dur: 36 },
+          { color: "rgba(255, 210, 180, 0.10)", size: 450, startX: 80, startY: 80, dur: 30 },
+        ].map((bloom, i) => (
+          <motion.div
+            key={`bloom-${i}`}
+            animate={{
+              x: ["0%", "10%", "-5%", "0%"],
+              y: ["0%", "-8%", "5%", "0%"],
+              scale: [1, 1.15, 0.95, 1],
+            }}
+            transition={{
+              duration: bloom.dur,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute rounded-full"
+            style={{
+              width: `${bloom.size}px`,
+              height: `${bloom.size}px`,
+              left: `${bloom.startX}%`,
+              top: `${bloom.startY}%`,
+              background: `radial-gradient(circle, ${bloom.color} 0%, transparent 70%)`,
+              filter: "blur(40px)",
+            }}
+          />
+        ))}
+      </div>
 
       {/* STARS BACKGROUND */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -400,6 +549,29 @@ export default function App() {
         ))}
       </div>
 
+      {/* CURSOR / TOUCH GLOW TRAIL */}
+      <motion.div
+        className="fixed pointer-events-none z-30"
+        animate={{
+          x: cursorPos.x - 75,
+          y: cursorPos.y - 75,
+          opacity: cursorVisible ? 1 : 0,
+        }}
+        transition={{
+          x: { type: "spring", damping: 25, stiffness: 200, mass: 0.5 },
+          y: { type: "spring", damping: 25, stiffness: 200, mass: 0.5 },
+          opacity: { duration: 0.6 },
+        }}
+        style={{
+          width: "150px",
+          height: "150px",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, rgba(158,197,255,0.15) 0%, rgba(255,200,170,0.08) 40%, transparent 70%)",
+          filter: "blur(20px)",
+        }}
+      />
+
       {/* MUSIC BUTTON */}
       <button
         onClick={() => setMusicOpen(true)}
@@ -416,11 +588,26 @@ export default function App() {
       {/* ENTRY */}
       {!entered ? (
         <section className="min-h-[100dvh] h-screen flex items-center justify-center px-6 relative">
+          {/* Lily watermark — large, soft, behind everything */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ duration: 3, delay: 0.5 }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none text-blue-200"
+          >
+            <motion.div
+              animate={{ rotate: [0, 5, 0, -5, 0] }}
+              transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Lily size={isMobile ? 320 : 500} opacity={0.06} strokeWidth={0.5} />
+            </motion.div>
+          </motion.div>
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 2 }}
-            className="w-full max-w-5xl mx-auto text-center flex flex-col items-center"
+            className="w-full max-w-5xl mx-auto text-center flex flex-col items-center relative z-10"
           >
             {/* Time-aware greeting */}
             <motion.p
@@ -442,7 +629,7 @@ export default function App() {
             </motion.h1>
 
             <p className="mt-8 text-lg sm:text-xl text-blue-100/70 max-w-xl leading-relaxed px-2">
-              I couldn’t fit everything I feel for you into messages.
+              I couldn't fit everything I feel for you into messages, {NAME}.
             </p>
 
             <p className="mt-5 text-2xl sm:text-3xl italic text-blue-200 heading-font">
@@ -546,6 +733,7 @@ export default function App() {
           </section>
 
           {/* ============ NEW: OPEN WHEN LETTERS ============ */}
+          <Divider />
           <section className="py-12 sm:py-16 px-4 sm:px-6">
             <div className="max-w-6xl mx-auto">
               <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
@@ -626,6 +814,36 @@ export default function App() {
           </section>
 
           {/* ============ NEW: MEMORY CONSTELLATION ============ */}
+          <Divider />
+
+          {/* ============ NEW: HUGE TYPOGRAPHY MOMENT ============ */}
+          <section className="min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center px-6 relative overflow-hidden">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 2, ease: "easeOut" }}
+              className="text-center relative"
+            >
+              <p className="text-blue-100/40 text-sm sm:text-base mb-6 italic">
+                if i could only say one thing,
+              </p>
+              <h2 className="heading-font text-[4rem] sm:text-[8rem] md:text-[11rem] leading-[0.95] text-blue-50">
+                it'd be
+              </h2>
+              <h2 className="heading-font text-[5rem] sm:text-[10rem] md:text-[14rem] leading-[0.9] italic text-blue-200 mt-2">
+                you.
+              </h2>
+              <motion.div
+                initial={{ width: 0 }}
+                whileInView={{ width: "60%" }}
+                viewport={{ once: true }}
+                transition={{ duration: 2, delay: 0.5 }}
+                className="h-px bg-gradient-to-r from-transparent via-blue-200/40 to-transparent mx-auto mt-12"
+              />
+            </motion.div>
+          </section>
+
           <section className="py-14 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
             <motion.h2
               initial={{ opacity: 0 }}
@@ -684,15 +902,22 @@ export default function App() {
 
           {/* ============ NEW: TINY THINGS I LOVE ABOUT YOU ============ */}
           <section className="py-12 sm:py-16 px-4 sm:px-6">
-            <div className="max-w-5xl mx-auto">
-              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
-                Tiny Things I Love About You
-              </h2>
-              <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
-                The little things no one else would notice.
-              </p>
+            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {/* Heading column — left side, sticky on desktop */}
+              <div className="lg:col-span-5 lg:sticky lg:top-24 text-center lg:text-left">
+                <div className="hidden lg:block text-blue-200/30 mb-6">
+                  <Lily size={50} opacity={0.4} />
+                </div>
+                <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl mb-4 px-4 lg:px-0 leading-tight">
+                  Tiny Things I Love About You
+                </h2>
+                <p className="text-blue-100/60 mb-8 lg:mb-12 text-base sm:text-lg px-4 lg:px-0 italic">
+                  The little things no one else would notice.
+                </p>
+              </div>
 
-              <div className="space-y-4">
+              {/* Cards column — right side, offset */}
+              <div className="lg:col-span-7 space-y-4">
                 {tinyThings.map((thing, index) => (
                   <motion.div
                     key={index}
@@ -701,6 +926,13 @@ export default function App() {
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.06 }}
                     className="glass rounded-2xl p-5 sm:p-6 flex items-start gap-4"
+                    style={{
+                      // Subtle horizontal stagger on desktop for visual rhythm
+                      marginLeft:
+                        typeof window !== "undefined" && window.innerWidth >= 1024
+                          ? `${(index % 2) * 24}px`
+                          : "0",
+                    }}
                   >
                     <Heart
                       size={18}
@@ -716,6 +948,7 @@ export default function App() {
           </section>
 
           {/* ============ NEW: PROMISE JAR ============ */}
+          <Divider />
           <section className="py-12 sm:py-16 px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
               <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
@@ -820,14 +1053,23 @@ export default function App() {
           </section>
 
           {/* LETTER */}
+          <Divider />
           <section className="py-12 sm:py-16 px-4 sm:px-6 flex justify-center">
             <motion.div
               whileHover={{ scale: 1.01 }}
-              className="glass max-w-3xl rounded-[28px] sm:rounded-[40px] p-7 sm:p-12"
+              className="glass max-w-3xl rounded-[28px] sm:rounded-[40px] p-7 sm:p-12 relative"
             >
-              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl mb-10 text-center">
-                To You
+              {/* Tiny lily in corner */}
+              <div className="absolute top-6 right-6 text-blue-200 opacity-40">
+                <Lily size={32} opacity={0.6} />
+              </div>
+
+              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl mb-2 text-center">
+                To {NAME},
               </h2>
+              <p className="text-center text-blue-100/40 text-sm italic mb-8 sm:mb-10">
+                a letter
+              </p>
 
               <div className="space-y-6 text-base sm:text-lg leading-relaxed text-blue-50/80">
                 <p>Loving you has changed the way I experience life.</p>
@@ -838,7 +1080,7 @@ export default function App() {
                 </p>
                 <p>
                   I hope you always remember how deeply appreciated, admired,
-                  and loved you are.
+                  and loved you are, {NAME}.
                 </p>
                 <p>Thank you for existing in my life.</p>
                 <p className="text-blue-200 text-2xl sm:text-3xl mt-10 heading-font">
