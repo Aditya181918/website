@@ -159,24 +159,24 @@ function getGreeting() {
 
   // Late night (midnight to 5am)
   if (hour >= 0 && hour < 5) {
-    return "you're up late again. come here.";
+    return "You're up late again. come here.";
   }
   // Early morning (5–11)
   if (hour >= 5 && hour < 11) {
-    if (day === 0) return "sunday morning. i hope it's slow for you.";
-    if (day === 6) return "saturday morning. take your time today.";
-    return "good morning. i hope today is gentle with you.";
+    if (day === 0) return "Sunday morning. i hope it's slow for you.";
+    if (day === 6) return "Saturday morning. take your time today.";
+    return "Good morning. i hope today is gentle with you.";
   }
   // Midday (11–16)
   if (hour >= 11 && hour < 16) {
-    return "i was just thinking about you.";
+    return "I was just thinking about you.";
   }
   // Evening (16–20)
   if (hour >= 16 && hour < 20) {
-    return "hi. how was your day?";
+    return "Hi baby, how was your day?";
   }
   // Night (20–24)
-  return "the day's winding down. so glad you're here.";
+  return "The day's winding down. so glad you're here.";
 }
 
 export default function App() {
