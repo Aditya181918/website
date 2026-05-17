@@ -979,7 +979,7 @@ export default function App() {
                 it'd be
               </h2>
               <h2 className="heading-font text-[5rem] sm:text-[10rem] md:text-[14rem] leading-[0.9] italic text-blue-200 mt-2">
-                you.
+                You.
               </h2>
               <motion.div
                 initial={{ width: 0 }}
