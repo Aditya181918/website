@@ -121,15 +121,74 @@ const lateNightThoughts = [
 ];
 
 // ============ NEW: MEMORY CONSTELLATION ============
+// 8 stars arranged in the shape of the letter "A" — Aashi's initial.
+// The chain forms: apex → left leg → bottom-left, plus apex → right leg → bottom-right,
+// with a crossbar connecting the mid-points of both legs.
+//
+//          [0] apex
+//         /   \
+//       [1]   [4]
+//       /       \
+//     [2]------[5]    <- crossbar
+//     /           \
+//   [3]           [6]
+//                  \
+//                  [7]
+//
+// `lead: true` = prominent star (apex + bottom corners). Others are smaller.
+// `connects` = indices of stars this one is line-connected to.
 const constellationMemories = [
-  { x: 12, y: 25, text: "Being loved by you, Aashi, feels like one of life’s rarest things." },
-  { x: 28, y: 60, text: "I could listen to you talk for hours and still want more." },
-  { x: 45, y: 18, text: "The first time you laughed at something I said — I knew." },
-  { x: 62, y: 70, text: "You are the reason I believe in slow, real love." },
-  { x: 78, y: 35, text: "Some people feel like home. You feel like mine." },
-  { x: 88, y: 75, text: "In every version of this life, I'd still pick you." },
-  { x: 35, y: 85, text: "You make me want to be gentler with everything." },
-  { x: 55, y: 45, text: "There’s something incredibly beautiful about the way you exist." },
+  // 0: APEX (top, lead)
+  {
+    x: 50, y: 8,
+    text: "Being loved by you, Aashi, feels like one of life’s rarest things.",
+    lead: true,
+    connects: [1, 4],
+  },
+  // 1: Upper-left leg
+  {
+    x: 40, y: 30,
+    text: "I could listen to you talk for hours and still want more.",
+    connects: [2],
+  },
+  // 2: Mid-left (crossbar left end)
+  {
+    x: 32, y: 52,
+    text: "The first time you laughed at something I said — I knew.",
+    connects: [3, 5],
+  },
+  // 3: Bottom-left (lead)
+  {
+    x: 18, y: 88,
+    text: "You make me want to be gentler with everything.",
+    lead: true,
+    connects: [],
+  },
+  // 4: Upper-right leg
+  {
+    x: 60, y: 30,
+    text: "Some people feel like home. You feel like mine.",
+    connects: [5],
+  },
+  // 5: Mid-right (crossbar right end)
+  {
+    x: 68, y: 52,
+    text: "There’s something incredibly beautiful about the way you exist.",
+    connects: [7],
+  },
+  // 6: Bottom-right (lead)
+  {
+    x: 82, y: 88,
+    text: "In every version of this life, I'd still pick you.",
+    lead: true,
+    connects: [],
+  },
+  // 7: Tail between crossbar-right and bottom-right
+  {
+    x: 75, y: 70,
+    text: "You are the reason I believe in slow, real love.",
+    connects: [6],
+  },
 ];
 
 // ============ NEW: TINY THINGS ============
@@ -248,6 +307,8 @@ export default function App() {
   const [muted, setMuted] = useState(false);
   const [confetti, setConfetti] = useState([]);
   const [flippedPromises, setFlippedPromises] = useState([]);
+  const [foundMemories, setFoundMemories] = useState([]);
+  const [shootingStarKey, setShootingStarKey] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
   const [cursorVisible, setCursorVisible] = useState(false);
@@ -282,6 +343,24 @@ export default function App() {
       window.removeEventListener("touchmove", onTouch);
       window.removeEventListener("touchstart", onTouch);
       window.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
+
+  // Trigger a shooting star every 15-25 seconds
+  useEffect(() => {
+    const trigger = () => {
+      setShootingStarKey((k) => k + 1);
+    };
+    // First one after 3-6 seconds for early atmosphere
+    const firstDelay = 3000 + Math.random() * 3000;
+    const initial = setTimeout(trigger, firstDelay);
+    const interval = setInterval(
+      trigger,
+      15000 + Math.random() * 10000
+    );
+    return () => {
+      clearTimeout(initial);
+      clearInterval(interval);
     };
   }, []);
 
@@ -906,61 +985,230 @@ export default function App() {
             >
               In every universe,
             </motion.h2>
-            <p className="text-center text-blue-100/60 mb-10 text-base sm:text-lg px-4 relative z-10">
-              I think I’d still find you. Tap the stars.
+            <p className="text-center text-blue-100/60 mb-3 text-base sm:text-lg px-4 relative z-10">
+              I think I’d still find you.
             </p>
 
+            {/* Progress hint — updates as she finds more stars */}
+            <p className="text-center text-blue-100/40 mb-10 text-xs sm:text-sm px-4 relative z-10 italic h-5">
+              {foundMemories.length === 0 && "tap the stars to find me."}
+              {foundMemories.length > 0 && foundMemories.length < 4 &&
+                `${foundMemories.length} of ${constellationMemories.length} found.`}
+              {foundMemories.length >= 4 && foundMemories.length < constellationMemories.length &&
+                `halfway home. ${constellationMemories.length - foundMemories.length} more to go.`}
+              {foundMemories.length === constellationMemories.length &&
+                "you found me again. every single one."}
+            </p>
+
+            {/* Constellation canvas */}
             <div
-              className="relative max-w-5xl mx-auto h-[320px] sm:h-[440px]"
+              className="relative max-w-3xl mx-auto h-[400px] sm:h-[560px]"
             >
-              {constellationMemories.map((memory, i) => (
-                <motion.button
-                  key={i}
-                  onClick={() => setSelectedMemory(memory)}
-                  className="absolute flex items-center justify-center"
-                  style={{
-                    left: `${memory.x}%`,
-                    top: `${memory.y}%`,
-                    width: "44px",
-                    height: "44px",
-                    transform: "translate(-50%, -50%)",
-                  }}
-                  whileHover={{ scale: 1.4 }}
-                  whileTap={{ scale: 0.9 }}
-                  aria-label="memory"
-                >
+              {/* DUST STARS — non-interactive background texture */}
+              {[...Array(40)].map((_, i) => {
+                // Stable pseudo-random positions per index
+                const x = (i * 37) % 100;
+                const y = (i * 53) % 100;
+                const size = 1 + ((i * 7) % 3);
+                const delay = (i * 0.3) % 5;
+                return (
                   <motion.div
+                    key={`dust-${i}`}
                     animate={{
-                      opacity: [0.4, 1, 0.4],
-                      scale: [1, 1.2, 1],
+                      opacity: [0.15, 0.5, 0.15],
                     }}
                     transition={{
-                      duration: 3 + (i % 4),
+                      duration: 3 + ((i * 0.4) % 4),
                       repeat: Infinity,
+                      delay,
                       ease: "easeInOut",
                     }}
-                    className="rounded-full"
+                    className="absolute rounded-full bg-white pointer-events-none"
                     style={{
-                      width: "14px",
-                      height: "14px",
-                      // Most stars are cool blue, but every 3rd is warm — creates variety
-                      background:
-                        i % 3 === 1
-                          ? "radial-gradient(circle, #ffffff 0%, #ffcfa3 60%, transparent 100%)"
-                          : i % 3 === 2
-                          ? "radial-gradient(circle, #ffffff 0%, #ffb8c8 60%, transparent 100%)"
-                          : "radial-gradient(circle, #ffffff 0%, #9ec5ff 60%, transparent 100%)",
-                      boxShadow:
-                        i % 3 === 1
-                          ? "0 0 20px rgba(255, 200, 150, 0.7)"
-                          : i % 3 === 2
-                          ? "0 0 20px rgba(255, 180, 200, 0.7)"
-                          : "0 0 20px rgba(158,197,255,0.8)",
+                      width: `${size}px`,
+                      height: `${size}px`,
+                      left: `${x}%`,
+                      top: `${y}%`,
+                      boxShadow: "0 0 4px rgba(255,255,255,0.5)",
                     }}
                   />
-                </motion.button>
-              ))}
+                );
+              })}
+
+              {/* CONNECTING LINES — SVG overlay drawn between memory stars */}
+              <svg
+                className="absolute inset-0 w-full h-full pointer-events-none"
+                preserveAspectRatio="none"
+                viewBox="0 0 100 100"
+              >
+                {constellationMemories.map((memory, i) =>
+                  (memory.connects || []).map((targetIdx) => {
+                    const target = constellationMemories[targetIdx];
+                    if (!target) return null;
+                    // Line is bright if BOTH endpoints have been found, else dim
+                    const bothFound =
+                      foundMemories.includes(i) && foundMemories.includes(targetIdx);
+                    return (
+                      <motion.line
+                        key={`line-${i}-${targetIdx}`}
+                        x1={memory.x}
+                        y1={memory.y}
+                        x2={target.x}
+                        y2={target.y}
+                        stroke={bothFound ? "rgba(255, 240, 200, 0.55)" : "rgba(158,197,255,0.10)"}
+                        strokeWidth={bothFound ? 0.35 : 0.15}
+                        strokeLinecap="round"
+                        animate={{
+                          opacity: bothFound ? [0.7, 1, 0.7] : 0.4,
+                        }}
+                        transition={{
+                          duration: bothFound ? 3 : 1,
+                          repeat: bothFound ? Infinity : 0,
+                          ease: "easeInOut",
+                        }}
+                      />
+                    );
+                  })
+                )}
+              </svg>
+
+              {/* SHOOTING STAR — animates across the field on key change */}
+              <AnimatePresence>
+                <motion.div
+                  key={shootingStarKey}
+                  initial={{
+                    x: "-10%",
+                    y: `${10 + Math.random() * 40}%`,
+                    opacity: 0,
+                  }}
+                  animate={{
+                    x: "110%",
+                    y: `${50 + Math.random() * 30}%`,
+                    opacity: [0, 1, 1, 0],
+                  }}
+                  transition={{ duration: 2, ease: "easeOut" }}
+                  className="absolute pointer-events-none"
+                  style={{
+                    width: "60px",
+                    height: "1.5px",
+                    background:
+                      "linear-gradient(to right, transparent 0%, rgba(255,255,255,0.9) 50%, rgba(158,197,255,0.6) 100%)",
+                    filter: "blur(0.5px)",
+                    boxShadow: "0 0 8px rgba(158,197,255,0.8)",
+                  }}
+                />
+              </AnimatePresence>
+
+              {/* MEMORY STARS — the interactive A */}
+              {constellationMemories.map((memory, i) => {
+                const isFound = foundMemories.includes(i);
+                const isLead = memory.lead;
+                const visibleSize = isLead ? 18 : 11;
+                const hitSize = 48;
+
+                return (
+                  <motion.button
+                    key={i}
+                    onClick={() => {
+                      setSelectedMemory(memory);
+                      if (!foundMemories.includes(i)) {
+                        setFoundMemories([...foundMemories, i]);
+                      }
+                    }}
+                    className="absolute flex items-center justify-center group"
+                    style={{
+                      left: `${memory.x}%`,
+                      top: `${memory.y}%`,
+                      width: `${hitSize}px`,
+                      height: `${hitSize}px`,
+                      transform: "translate(-50%, -50%)",
+                    }}
+                    whileHover={{ scale: 1.4 }}
+                    whileTap={{ scale: 0.9 }}
+                    aria-label={`memory ${i + 1}`}
+                  >
+                    {/* Outer halo — bigger when found */}
+                    <motion.div
+                      animate={{
+                        opacity: isFound ? [0.4, 0.8, 0.4] : [0.15, 0.35, 0.15],
+                        scale: isFound ? [1, 1.3, 1] : [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 3 + (i % 3),
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      className="absolute rounded-full pointer-events-none"
+                      style={{
+                        width: `${visibleSize * 2.5}px`,
+                        height: `${visibleSize * 2.5}px`,
+                        background: isFound
+                          ? "radial-gradient(circle, rgba(255,240,200,0.4) 0%, transparent 70%)"
+                          : "radial-gradient(circle, rgba(158,197,255,0.3) 0%, transparent 70%)",
+                        filter: "blur(4px)",
+                      }}
+                    />
+
+                    {/* Star core */}
+                    <motion.div
+                      animate={{
+                        opacity: isFound ? [0.7, 1, 0.7] : [0.5, 0.95, 0.5],
+                        scale: [1, 1.15, 1],
+                      }}
+                      transition={{
+                        duration: 3 + (i % 4),
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      className="rounded-full relative z-10"
+                      style={{
+                        width: `${visibleSize}px`,
+                        height: `${visibleSize}px`,
+                        background: isFound
+                          ? "radial-gradient(circle, #ffffff 0%, #ffe5b0 50%, #ffcfa3 100%)"
+                          : isLead
+                          ? "radial-gradient(circle, #ffffff 0%, #c5dcff 60%, #9ec5ff 100%)"
+                          : "radial-gradient(circle, #ffffff 0%, #9ec5ff 70%, transparent 100%)",
+                        boxShadow: isFound
+                          ? "0 0 24px rgba(255,220,160,0.9), 0 0 8px rgba(255,255,255,0.8)"
+                          : isLead
+                          ? "0 0 18px rgba(158,197,255,0.9), 0 0 4px rgba(255,255,255,0.6)"
+                          : "0 0 12px rgba(158,197,255,0.7)",
+                      }}
+                    />
+
+                    {/* Tiny number label — only visible on hover/found, very subtle */}
+                    {isFound && (
+                      <motion.span
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 0.5, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                        className="absolute text-[9px] text-blue-100/60 font-light pointer-events-none"
+                        style={{
+                          top: "-14px",
+                        }}
+                      >
+                        {i + 1}
+                      </motion.span>
+                    )}
+                  </motion.button>
+                );
+              })}
             </div>
+
+            {/* "A" reveal hint when all found */}
+            <AnimatePresence>
+              {foundMemories.length === constellationMemories.length && (
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.5, duration: 1.5 }}
+                  className="text-center heading-font italic text-blue-200/70 mt-8 text-lg sm:text-xl"
+                >
+                  written in the stars. always.
+                </motion.p>
+              )}
+            </AnimatePresence>
           </section>
 
           {/* ============ NEW: TINY THINGS I LOVE ABOUT YOU ============ */}
