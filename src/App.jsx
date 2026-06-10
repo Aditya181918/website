@@ -784,7 +784,7 @@ export default function App() {
   return (
     <div className="body-font" style={{ color: "#EAE6F0", background: "#0A0E27", minHeight: "100dvh" }}>
       <StyleTag />
-      <Ambient scrollProgress={entered ? scrollYProgress : { current: 0 }} />
+      <Ambient scrollProgress={scrollYProgress} />
 
       {/* hidden youtube player */}
       <div id="yt-player" style={{ position: "fixed", bottom: 0, left: 0, width: 1, height: 1, opacity: 0.01, pointerEvents: "none" }} />
