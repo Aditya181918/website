@@ -397,10 +397,10 @@ function TiltPhoto({ src, caption, deviceTilt }) {
         onMouseMove={onMove}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => { setHover(false); onLeave(); }}
-        initial={{ opacity: 0, y: 60, scale: 0.82, filter: "blur(14px)" }}
+        initial={{ opacity: 0, y: 80, scale: 0.75, filter: "blur(20px)" }}
         whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-        viewport={{ once: true, amount: 0.35 }}
-        transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
         style={{ rotateX: rx, rotateY: ry, transformStyle: "preserve-3d" }}
         className="relative mx-auto"
       >
@@ -1005,10 +1005,19 @@ export default function App() {
               transition={{ duration: 3, delay: 0.3 }}
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
-              {/* SECRET: tap the lily 3 times */}
+              {/* SECRET: tap the lily 3 times — gentle periodic breath invites discovery */}
               <motion.div
-                animate={lilyTaps > 0 && lilyTaps < 3 ? { scale: [1, 1.06, 1], rotate: [0, 4, 0, -4, 0] } : { rotate: [0, 4, 0, -4, 0] }}
-                transition={{ rotate: { duration: 34, repeat: Infinity, ease: "easeInOut" }, scale: { duration: 0.4 } }}
+                animate={
+                  lilyTaps > 0 && lilyTaps < 3
+                    ? { scale: [1, 1.06, 1], rotate: [0, 4, 0, -4, 0] }
+                    : { rotate: [0, 4, 0, -4, 0], scale: [1, 1, 1.04, 1, 1] }
+                }
+                transition={{
+                  rotate: { duration: 34, repeat: Infinity, ease: "easeInOut" },
+                  scale: lilyTaps > 0 && lilyTaps < 3
+                    ? { duration: 0.4 }
+                    : { duration: 10, repeat: Infinity, ease: "easeInOut" },
+                }}
                 onClick={() => {
                   const n = lilyTaps + 1;
                   setLilyTaps(n);
@@ -1021,7 +1030,7 @@ export default function App() {
               </motion.div>
             </motion.div>
 
-            <div className="relative text-center flex flex-col items-center" style={{ zIndex: 2 }}>
+            <div className="relative text-center flex flex-col items-center pointer-events-none" style={{ zIndex: 2 }}>
               <motion.p initial={{ opacity: 0, y: -8 }} animate={{ opacity: 0.8, y: 0 }} transition={{ duration: 1.6, delay: 0.5 }}
                 className="italic text-[15px] sm:text-lg mb-10" style={{ color: "#A8C5F0" }}>{greeting}</motion.p>
               <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.8, delay: 0.7 }}
@@ -1035,7 +1044,7 @@ export default function App() {
               <motion.button initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.4, delay: 1.9 }}
                 whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} onClick={handleEnter}
                 className="display mt-12 px-12 py-4 rounded-full text-lg relative grain"
-                style={{ color: "#0A0E27", background: "linear-gradient(135deg, #E8C39E, #f3d9bd)", boxShadow: "0 8px 40px rgba(232,195,158,0.3)" }}>
+                style={{ color: "#0A0E27", background: "linear-gradient(135deg, #E8C39E, #f3d9bd)", boxShadow: "0 8px 40px rgba(232,195,158,0.3)", pointerEvents: "auto" }}>
                 Come in
               </motion.button>
             </div>
@@ -1298,6 +1307,19 @@ export default function App() {
               </HoldSecret>
               <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 0.5, y: 0 }} viewport={{ once: true }} transition={{ duration: 2, delay: 0.8 }}
                 className="text-center text-xs mt-10 eyebrow" style={{ color: "#A8C5F0" }}>the end · and also, the beginning</motion.p>
+
+              {/* HINTS: cryptic clues to the hidden things */}
+              <motion.div
+                initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+                transition={{ duration: 2.5, delay: 2 }}
+                className="mt-12 text-center space-y-2"
+              >
+                <p className="eyebrow text-[9px] mb-3" style={{ color: "rgba(232,195,158,0.5)" }}>p.s. — this place keeps secrets</p>
+                <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>the flower at the door remembers being touched three times.</p>
+                <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>the sky does something for those who find every star.</p>
+                <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>open every promise. all eight.</p>
+                <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>and sometimes, if you stay long enough, it rains petals.</p>
+              </motion.div>
             </div>
           </Scene>
         </motion.div>
