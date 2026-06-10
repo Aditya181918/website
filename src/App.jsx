@@ -45,31 +45,26 @@ const moods = [
     title: "Need reassurance?",
     text: "You are deeply loved. Even on the days your mind tells you otherwise.",
     bg: "radial-gradient(circle at top, #23395d 0%, #10192d 50%, #050816 100%)",
-    accent: "rgba(158, 197, 255, 0.18)", // soft blue (default)
   },
   {
     title: "Missing me?",
     text: "I’m probably missing you too. More than I admit sometimes.",
     bg: "radial-gradient(circle at top, #294d6b 0%, #122235 50%, #050816 100%)",
-    accent: "rgba(196, 180, 255, 0.18)", // soft lavender
   },
   {
     title: "Need a smile?",
     text: "You’re cute even when you’re being dramatic.",
     bg: "radial-gradient(circle at top, #355c7d 0%, #16263a 50%, #050816 100%)",
-    accent: "rgba(255, 210, 160, 0.22)", // warm amber
   },
   {
     title: "Overthinking?",
     text: "Your heart is safe with me. You don’t have to carry every thought alone.",
     bg: "radial-gradient(circle at top, #1d3557 0%, #10192d 50%, #050816 100%)",
-    accent: "rgba(180, 220, 220, 0.18)", // soft teal
   },
   {
     title: "Need love?",
     text: "If I could, I’d wrap you in the safest hug right now.",
     bg: "radial-gradient(circle at top, #27496d 0%, #142033 50%, #050816 100%)",
-    accent: "rgba(255, 180, 200, 0.22)", // soft rose
   },
 ];
 
@@ -80,8 +75,6 @@ const songs = [
   { name: "High On You", code: "gI1Z4UHg9o0" },
   { name: "Yellow", code: "yKNxeF4KMsY" },
   { name: "Tum Ho Toh", code: "rOUuGvJkBrQ" },
-  { name: "Dhun", code: "cUmUOb7j3dc" },
-  { name: "Ishq Hai", code: "BcSejVIxB0E" },
 ];
 
 // ============ NEW: OPEN WHEN LETTERS ============
@@ -121,89 +114,15 @@ const lateNightThoughts = [
 ];
 
 // ============ NEW: MEMORY CONSTELLATION ============
-// Stars arranged in the Cancer constellation — Aashi's zodiac.
-// The real Cancer constellation is a faint Y/upside-down crab shape made of 5 main stars:
-//   - Altarf (β Cnc) — brightest, bottom
-//   - Asellus Australis (δ Cnc) — central hub
-//   - Acubens (α Cnc) — lower-left
-//   - Asellus Borealis (γ Cnc) — upper-right
-//   - Tegmine (ζ Cnc) — upper-left
-// 3 additional memory stars fill in without breaking the shape.
-//
-// Y-topology:
-//          [4 Tegmine]    [3 Borealis]
-//                  \      /
-//             [5]   \    /   [6]
-//                \   \  /   /
-//                  [2 Australis] (hub)
-//                       |
-//                      [7]
-//                       |
-//                    [1 Altarf] (brightest)
-//                       |
-//                    [0 Acubens]
-//
-// `lead: true` = real Cancer star (brighter, bigger).
-// `connects` = indices line-connected to this star.
 const constellationMemories = [
-  // 0: Acubens — lower-left endpoint
-  {
-    x: 30, y: 82,
-    text: "You make me want to be gentler with everything.",
-    lead: true,
-    name: "Acubens",
-    connects: [1],
-  },
-  // 1: Altarf — brightest star, mid-bottom
-  {
-    x: 42, y: 65,
-    text: "Being loved by you, Aashi, feels like one of life’s rarest things.",
-    lead: true,
-    name: "Altarf",
-    connects: [7],
-  },
-  // 2: Asellus Australis — central hub
-  {
-    x: 50, y: 45,
-    text: "The first time you laughed at something I said — I knew.",
-    lead: true,
-    name: "Asellus Australis",
-    connects: [3, 4],
-  },
-  // 3: Asellus Borealis — upper-right of Y
-  {
-    x: 72, y: 22,
-    text: "Some people feel like home. You feel like mine.",
-    lead: true,
-    name: "Asellus Borealis",
-    connects: [],
-  },
-  // 4: Tegmine — upper-left of Y
-  {
-    x: 22, y: 18,
-    text: "In every version of this life, I'd still pick you.",
-    lead: true,
-    name: "Tegmine",
-    connects: [],
-  },
-  // 5: Memory star — upper-left fill
-  {
-    x: 35, y: 32,
-    text: "I could listen to you talk for hours and still want more.",
-    connects: [],
-  },
-  // 6: Memory star — upper-right fill
-  {
-    x: 62, y: 32,
-    text: "There’s something incredibly beautiful about the way you exist.",
-    connects: [],
-  },
-  // 7: Memory star — bridge between Altarf and Australis
-  {
-    x: 46, y: 55,
-    text: "You are the reason I believe in slow, real love.",
-    connects: [2],
-  },
+  { x: 12, y: 25, text: "Being loved by you feels like one of life’s rarest things." },
+  { x: 28, y: 60, text: "I could listen to you talk for hours and still want more." },
+  { x: 45, y: 18, text: "The first time you laughed at something I said — I knew." },
+  { x: 62, y: 70, text: "You are the reason I believe in slow, real love." },
+  { x: 78, y: 35, text: "Some people feel like home. You feel like mine." },
+  { x: 88, y: 75, text: "In every version of this life, I'd still pick you." },
+  { x: 35, y: 85, text: "You make me want to be gentler with everything." },
+  { x: 55, y: 45, text: "There’s something incredibly beautiful about the way you exist." },
 ];
 
 // ============ NEW: TINY THINGS ============
@@ -218,98 +137,6 @@ const tinyThings = [
   "How your name has started to feel like a soft place.",
 ];
 
-// ============ NEW: PROMISES (edit these freely — they hit hardest when specific) ============
-const promises = [
-  "I promise to always answer when you call. Even when I shouldn't be on my phone.",
-  "I promise to never let a fight end without one of us reaching out first.",
-  "I promise to keep noticing the small things — the new earrings, the haircut, the mood you're hiding.",
-  "I promise to never make you feel like a burden, especially on the days you feel like one.",
-  "I promise to be honest with you, even when the easy thing is to stay quiet.",
-  "I promise to choose you again on the hard days. Not just the good ones.",
-  "I promise to remember what matters to you, and care about it even when you forget.",
-  "I promise to grow with you. Not away from you.",
-];
-
-// ============ NEW: TIME-AWARE GREETING ============
-// ============ NEW: HER NAME (change here to update everywhere) ============
-const NAME = "Aashi";
-
-function getGreeting() {
-  const now = new Date();
-  const hour = now.getHours();
-  const day = now.getDay(); // 0 = Sunday
-
-  // Late night (midnight to 5am)
-  if (hour >= 0 && hour < 5) {
-    return `you're up late again, ${NAME.toLowerCase()}. come here.`;
-  }
-  // Early morning (5–11)
-  if (hour >= 5 && hour < 11) {
-    if (day === 0) return `sunday morning, ${NAME.toLowerCase()}. i hope it's slow for you.`;
-    if (day === 6) return `saturday morning, ${NAME.toLowerCase()}. take your time today.`;
-    return `good morning, ${NAME.toLowerCase()}. i hope today is gentle with you.`;
-  }
-  // Midday (11–16)
-  if (hour >= 11 && hour < 16) {
-    return `i was just thinking about you, ${NAME.toLowerCase()}.`;
-  }
-  // Evening (16–20)
-  if (hour >= 16 && hour < 20) {
-    return `hi ${NAME.toLowerCase()}. how was your day?`;
-  }
-  // Night (20–24)
-  return `the day's winding down. so glad you're here, ${NAME.toLowerCase()}.`;
-}
-
-// ============ NEW: LILY MOTIF (signature visual) ============
-// Stylized line-drawn lily — used as watermark, divider, accent
-function Lily({ size = 40, opacity = 0.4, className = "", strokeWidth = 0.8 }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      style={{ opacity }}
-    >
-      {/* Six petals radiating from center */}
-      <g stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" fill="none">
-        {/* Top petal */}
-        <path d="M 50 50 Q 45 30 50 15 Q 55 30 50 50" />
-        {/* Top-right petal */}
-        <path d="M 50 50 Q 65 35 80 30 Q 70 45 50 50" />
-        {/* Bottom-right petal */}
-        <path d="M 50 50 Q 70 55 78 70 Q 60 65 50 50" />
-        {/* Bottom petal */}
-        <path d="M 50 50 Q 55 70 50 85 Q 45 70 50 50" />
-        {/* Bottom-left petal */}
-        <path d="M 50 50 Q 30 65 22 70 Q 30 55 50 50" />
-        {/* Top-left petal */}
-        <path d="M 50 50 Q 30 45 20 30 Q 35 35 50 50" />
-        {/* Center detail — 3 small stamens */}
-        <circle cx="50" cy="50" r="2" fill="currentColor" opacity="0.6" />
-        <circle cx="46" cy="48" r="1" fill="currentColor" opacity="0.4" />
-        <circle cx="54" cy="48" r="1" fill="currentColor" opacity="0.4" />
-      </g>
-    </svg>
-  );
-}
-
-// ============ NEW: SECTION DIVIDER (lily-flanked line) ============
-function Divider() {
-  return (
-    <div className="flex items-center justify-center gap-4 sm:gap-6 my-2 sm:my-4 px-4">
-      <div className="h-px w-16 sm:w-32 bg-gradient-to-r from-transparent to-blue-200/30" />
-      <div className="text-blue-200/50">
-        <Lily size={28} opacity={0.5} />
-      </div>
-      <div className="h-px w-16 sm:w-32 bg-gradient-to-l from-transparent to-blue-200/30" />
-    </div>
-  );
-}
-
 export default function App() {
   const [entered, setEntered] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
@@ -321,66 +148,6 @@ export default function App() {
   const [currentSong, setCurrentSong] = useState(null);
   const [muted, setMuted] = useState(false);
   const [confetti, setConfetti] = useState([]);
-  const [flippedPromises, setFlippedPromises] = useState([]);
-  const [foundMemories, setFoundMemories] = useState([]);
-  const [shootingStarKey, setShootingStarKey] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-  const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
-  const [cursorVisible, setCursorVisible] = useState(false);
-
-  // Track viewport size for mobile-specific layout
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-
-  // Track cursor/touch for glow trail
-  useEffect(() => {
-    const onMove = (e) => {
-      setCursorPos({ x: e.clientX, y: e.clientY });
-      setCursorVisible(true);
-    };
-    const onTouch = (e) => {
-      if (e.touches && e.touches[0]) {
-        setCursorPos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-        setCursorVisible(true);
-      }
-    };
-    const onLeave = () => setCursorVisible(false);
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("touchmove", onTouch);
-    window.addEventListener("touchstart", onTouch);
-    window.addEventListener("mouseleave", onLeave);
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("touchmove", onTouch);
-      window.removeEventListener("touchstart", onTouch);
-      window.removeEventListener("mouseleave", onLeave);
-    };
-  }, []);
-
-  // Trigger a shooting star every 15-25 seconds
-  useEffect(() => {
-    const trigger = () => {
-      setShootingStarKey((k) => k + 1);
-    };
-    // First one after 3-6 seconds for early atmosphere
-    const firstDelay = 3000 + Math.random() * 3000;
-    const initial = setTimeout(trigger, firstDelay);
-    const interval = setInterval(
-      trigger,
-      15000 + Math.random() * 10000
-    );
-    return () => {
-      clearTimeout(initial);
-      clearInterval(interval);
-    };
-  }, []);
-
-  // Compute the greeting once when component mounts
-  const greeting = useRef(getGreeting()).current;
 
   const playerRef = useRef(null);
   const apiReadyRef = useRef(false);
@@ -408,28 +175,6 @@ export default function App() {
   const playSong = (videoId) => {
     setCurrentSong(videoId);
 
-    // The trick: start MUTED so iOS/Safari permits playback to begin,
-    // then immediately unmute. The unmute call rides on the same tap
-    // gesture that triggered playSong, so iOS accepts it.
-    const unmuteAfterStart = (player) => {
-      // Try unmuting a few times — sometimes the player isn't ready instantly
-      let attempts = 0;
-      const tryUnmute = () => {
-        attempts++;
-        try {
-          player.unMute();
-          player.setVolume(60);
-          setMuted(false);
-        } catch (err) {
-          // Player not ready yet
-        }
-        if (attempts < 10) {
-          setTimeout(tryUnmute, 150);
-        }
-      };
-      tryUnmute();
-    };
-
     const start = () => {
       if (!playerRef.current) {
         playerRef.current = new window.YT.Player("yt-player", {
@@ -438,7 +183,6 @@ export default function App() {
           videoId,
           playerVars: {
             autoplay: 1,
-            mute: 1, // start muted — required for iOS autoplay
             loop: 1,
             playlist: videoId,
             controls: 0,
@@ -446,19 +190,10 @@ export default function App() {
           },
           events: {
             onReady: (e) => {
+              e.target.setVolume(60);
               e.target.playVideo();
-              unmuteAfterStart(e.target);
             },
             onStateChange: (e) => {
-              // When playback actually starts, unmute again (belt and braces)
-              if (e.data === window.YT.PlayerState.PLAYING) {
-                if (e.target.isMuted && e.target.isMuted()) {
-                  e.target.unMute();
-                  e.target.setVolume(60);
-                  setMuted(false);
-                }
-              }
-              // Loop fallback
               if (e.data === window.YT.PlayerState.ENDED) {
                 e.target.playVideo();
               }
@@ -466,11 +201,10 @@ export default function App() {
           },
         });
       } else {
-        // Player already exists — switching to a new song
         playerRef.current.loadVideoById(videoId);
         playerRef.current.playVideo();
-        unmuteAfterStart(playerRef.current);
       }
+      setMuted(false);
     };
 
     if (apiReadyRef.current && window.YT && window.YT.Player) {
@@ -545,7 +279,7 @@ export default function App() {
               setMuted(true);
             }
           }}
-          className="fixed top-5 right-[4.5rem] sm:right-20 z-50 glass p-3 sm:p-4 rounded-full hover:scale-110 transition text-base"
+          className="fixed top-5 right-20 z-50 glass p-3 sm:p-4 rounded-full hover:scale-110 transition text-base"
           aria-label={muted ? "unmute" : "mute"}
         >
           {muted ? "🔇" : "🔊"}
@@ -557,33 +291,14 @@ export default function App() {
         {`
           @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
 
-          html, body {
-            -webkit-text-size-adjust: 100%;
-            -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: none;
-          }
-
-          * {
-            -webkit-tap-highlight-color: transparent;
-          }
-
-          button {
-            touch-action: manipulation;
-          }
-
           .heading-font {
             font-family: 'Cormorant Garamond', serif;
           }
 
           .glass {
-            background:
-              url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-              linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.06) 50%, rgba(158,197,255,0.09) 100%);
-            background-blend-mode: overlay, normal;
+            background: rgba(255,255,255,0.08);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.12);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
           }
 
           .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -591,42 +306,9 @@ export default function App() {
         `}
       </style>
 
-      {/* WARM LIGHT BLOOMS — drifting amber/rose orbs for warmth */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {[
-          { color: "rgba(255, 200, 170, 0.18)", size: 600, startX: -10, startY: -10, dur: 28 },
-          { color: "rgba(255, 180, 200, 0.14)", size: 500, startX: 70, startY: 20, dur: 32 },
-          { color: "rgba(200, 180, 255, 0.12)", size: 550, startX: 30, startY: 70, dur: 36 },
-          { color: "rgba(255, 210, 180, 0.10)", size: 450, startX: 80, startY: 80, dur: 30 },
-        ].map((bloom, i) => (
-          <motion.div
-            key={`bloom-${i}`}
-            animate={{
-              x: ["0%", "10%", "-5%", "0%"],
-              y: ["0%", "-8%", "5%", "0%"],
-              scale: [1, 1.15, 0.95, 1],
-            }}
-            transition={{
-              duration: bloom.dur,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute rounded-full"
-            style={{
-              width: `${bloom.size}px`,
-              height: `${bloom.size}px`,
-              left: `${bloom.startX}%`,
-              top: `${bloom.startY}%`,
-              background: `radial-gradient(circle, ${bloom.color} 0%, transparent 70%)`,
-              filter: "blur(40px)",
-            }}
-          />
-        ))}
-      </div>
-
       {/* STARS BACKGROUND */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {[...Array(isMobile ? 30 : 60)].map((_, i) => (
+        {[...Array(60)].map((_, i) => (
           <motion.div
             key={i}
             animate={{
@@ -648,29 +330,6 @@ export default function App() {
         ))}
       </div>
 
-      {/* CURSOR / TOUCH GLOW TRAIL */}
-      <motion.div
-        className="fixed pointer-events-none z-30"
-        animate={{
-          x: cursorPos.x - 75,
-          y: cursorPos.y - 75,
-          opacity: cursorVisible ? 1 : 0,
-        }}
-        transition={{
-          x: { type: "spring", damping: 25, stiffness: 200, mass: 0.5 },
-          y: { type: "spring", damping: 25, stiffness: 200, mass: 0.5 },
-          opacity: { duration: 0.6 },
-        }}
-        style={{
-          width: "150px",
-          height: "150px",
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(158,197,255,0.15) 0%, rgba(255,200,170,0.08) 40%, transparent 70%)",
-          filter: "blur(20px)",
-        }}
-      />
-
       {/* MUSIC BUTTON */}
       <button
         onClick={() => setMusicOpen(true)}
@@ -686,49 +345,24 @@ export default function App() {
 
       {/* ENTRY */}
       {!entered ? (
-        <section className="min-h-[100dvh] h-screen flex items-center justify-center px-6 relative">
-          {/* Lily watermark — large, soft, behind everything */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 3, delay: 0.5 }}
-            className="absolute inset-0 flex items-center justify-center pointer-events-none text-blue-200"
-          >
-            <motion.div
-              animate={{ rotate: [0, 5, 0, -5, 0] }}
-              transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <Lily size={isMobile ? 320 : 500} opacity={0.06} strokeWidth={0.5} />
-            </motion.div>
-          </motion.div>
-
+        <section className="h-screen flex items-center justify-center px-6 relative">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 2 }}
-            className="w-full max-w-5xl mx-auto text-center flex flex-col items-center relative z-10"
+            className="w-full max-w-5xl mx-auto text-center flex flex-col items-center"
           >
-            {/* Time-aware greeting */}
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.8, delay: 0.4 }}
-              className="text-blue-200/70 text-base sm:text-lg mb-6 italic px-4"
-            >
-              {greeting}
-            </motion.p>
-
             <motion.h1
               initial={{ y: 40 }}
               animate={{ y: 0 }}
               transition={{ duration: 1.5 }}
-              className="heading-font text-[2.75rem] sm:text-[5rem] md:text-[8rem] font-light leading-[0.95] text-center px-2"
+              className="heading-font text-[3.5rem] sm:text-[5rem] md:text-[8rem] font-light leading-none text-center px-2"
             >
               Before you enter...
             </motion.h1>
 
             <p className="mt-8 text-lg sm:text-xl text-blue-100/70 max-w-xl leading-relaxed px-2">
-              I couldn't fit everything I feel for you into messages, {NAME}.
+              I couldn’t fit everything I feel for you into messages.
             </p>
 
             <p className="mt-5 text-2xl sm:text-3xl italic text-blue-200 heading-font">
@@ -752,7 +386,7 @@ export default function App() {
             <motion.h1
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              className="heading-font text-3xl sm:text-5xl md:text-7xl text-center leading-tight px-4"
+              className="heading-font text-4xl sm:text-5xl md:text-7xl text-center leading-tight px-4"
             >
               Some feelings are too big for texts.
             </motion.h1>
@@ -761,117 +395,68 @@ export default function App() {
               Pop the balloons.
             </p>
 
-            <div className="relative mt-8 w-full max-w-6xl h-[560px] sm:h-[700px]">
-              {(isMobile ? notes.slice(0, 8) : notes).map((note, index) => (
+            <div className="relative mt-8 w-full max-w-6xl h-[520px] sm:h-[700px]">
+              {notes.map((note, index) => (
                 <FloatingBalloon
                   key={index}
                   note={note}
                   index={index}
                   popBalloon={popBalloon}
-                  isMobile={isMobile}
                 />
               ))}
             </div>
           </section>
 
           {/* MOODS */}
-          <section className="py-16 sm:py-24 px-4 sm:px-6">
+          <section className="py-10 px-4 sm:px-6">
             <div className="max-w-6xl mx-auto">
-              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-4 sm:mb-6 px-4">
+              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
                 What Do You Need Right Now?
               </h2>
 
-              <p className="text-center text-blue-100/60 mb-8 text-base sm:text-lg px-4 italic">
+              <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
                 There’s something here for every mood.
               </p>
 
-              {/* Small lily ornament between heading and grid */}
-              <div className="flex justify-center mb-12 sm:mb-16 text-blue-200/50">
-                <Lily size={28} opacity={0.5} />
-              </div>
-
-              {/* Responsive layout: 1 col mobile, 2 col tablet, 5-card balanced layout on desktop */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-5 sm:gap-6 lg:gap-7">
-                {moods.map((mood, index) => {
-                  // On desktop (lg+), span the cards across 6 cols to make 5 fit gracefully:
-                  // Row 1: card 0 (cols 1-2), card 1 (cols 3-4), card 2 (cols 5-6)
-                  // Row 2: card 3 (cols 2-3), card 4 (cols 4-5) — centered
-                  const desktopSpan = index < 3
-                    ? "lg:col-span-2"
-                    : "lg:col-span-2";
-                  const desktopStart = index === 3
-                    ? "lg:col-start-2"
-                    : index === 4
-                    ? "lg:col-start-4"
-                    : "";
-
-                  return (
-                    <motion.button
-                      key={index}
-                      whileHover={{ y: -8, scale: 1.03 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        setSelectedMood(mood);
-                        setBackground(mood.bg);
-                      }}
-                      className={`glass rounded-[24px] sm:rounded-[30px] p-7 sm:p-8 text-left relative overflow-hidden ${desktopSpan} ${desktopStart}`}
-                      style={{
-                        boxShadow: `0 8px 32px ${mood.accent}, inset 0 1px 0 rgba(255,255,255,0.08)`,
-                      }}
-                    >
-                      {/* Accent glow blob in corner */}
-                      <div
-                        className="absolute -top-10 -right-10 w-32 h-32 rounded-full pointer-events-none"
-                        style={{
-                          background: `radial-gradient(circle, ${mood.accent} 0%, transparent 70%)`,
-                          filter: "blur(20px)",
-                        }}
-                      />
-
-                      <h3 className="heading-font text-2xl sm:text-3xl text-blue-100 mb-2 sm:mb-3 relative z-10">
-                        {mood.title}
-                      </h3>
-                      <p className="text-blue-50/55 text-sm relative z-10">
-                        tap to open
-                      </p>
-                    </motion.button>
-                  );
-                })}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {moods.map((mood, index) => (
+                  <motion.button
+                    key={index}
+                    whileHover={{ y: -6, scale: 1.03 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setSelectedMood(mood);
+                      setBackground(mood.bg);
+                    }}
+                    className="glass rounded-[30px] p-8 text-left"
+                  >
+                    <h3 className="heading-font text-3xl text-blue-200 mb-3">
+                      {mood.title}
+                    </h3>
+                    <p className="text-blue-50/65">click to open</p>
+                  </motion.button>
+                ))}
               </div>
             </div>
           </section>
 
           {/* FRIENDS SECTION */}
-          <section className="py-10 sm:py-14 px-4 sm:px-6">
-            <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-8 sm:mb-12 px-4">
+          <section className="py-14 px-4 sm:px-6">
+            <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-12 px-4">
               The One Where...
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
               {episodeCards.map((card, index) => (
                 <motion.div
                   key={index}
                   whileHover={{ y: -8 }}
-                  className="glass rounded-[28px] sm:rounded-[32px] p-6 sm:p-10 relative overflow-hidden"
-                  style={{
-                    boxShadow:
-                      "0 8px 32px rgba(255, 210, 160, 0.08), inset 0 1px 0 rgba(255,255,255,0.08)",
-                  }}
+                  className="glass rounded-[32px] p-8 sm:p-10"
                 >
-                  {/* Soft amber glow in top-right corner — film/tv warmth */}
-                  <div
-                    className="absolute -top-12 -right-12 w-40 h-40 rounded-full pointer-events-none"
-                    style={{
-                      background:
-                        "radial-gradient(circle, rgba(255, 210, 160, 0.18) 0%, transparent 70%)",
-                      filter: "blur(20px)",
-                    }}
-                  />
-
-                  <h3 className="heading-font text-2xl sm:text-4xl mb-4 sm:mb-6 text-blue-200 relative z-10">
+                  <h3 className="heading-font text-3xl sm:text-4xl mb-6 text-blue-200">
                     {card.title}
                   </h3>
-                  <p className="text-blue-50/75 leading-relaxed text-base sm:text-lg relative z-10">
+                  <p className="text-blue-50/75 leading-relaxed text-base sm:text-lg">
                     {card.text}
                   </p>
                 </motion.div>
@@ -880,10 +465,9 @@ export default function App() {
           </section>
 
           {/* ============ NEW: OPEN WHEN LETTERS ============ */}
-          <Divider />
-          <section className="py-12 sm:py-16 px-4 sm:px-6">
+          <section className="py-16 px-4 sm:px-6">
             <div className="max-w-6xl mx-auto">
-              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
                 Open When...
               </h2>
               <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
@@ -916,22 +500,16 @@ export default function App() {
           </section>
 
           {/* ============ NEW: LATE NIGHT THOUGHTS ============ */}
-          <section className="py-12 sm:py-16 overflow-hidden">
-            <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+          <section className="py-16 overflow-hidden">
+            <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
               Late Night Thoughts
             </h2>
             <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
               The things I think about when the world is quiet.
             </p>
 
-            <div
-              className="overflow-x-auto no-scrollbar px-4 sm:px-6"
-              style={{
-                scrollSnapType: "x mandatory",
-                WebkitOverflowScrolling: "touch",
-              }}
-            >
-              <div className="flex gap-4 sm:gap-5 pb-4" style={{ width: "max-content" }}>
+            <div className="overflow-x-auto no-scrollbar px-4 sm:px-6">
+              <div className="flex gap-5 pb-4" style={{ width: "max-content" }}>
                 {lateNightThoughts.map((thought, index) => (
                   <motion.div
                     key={index}
@@ -939,15 +517,14 @@ export default function App() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.08 }}
-                    className="glass rounded-[28px] p-7 sm:p-10"
+                    className="glass rounded-[28px] p-8 sm:p-10"
                     style={{
-                      width: "260px",
+                      width: "280px",
                       minHeight: "200px",
                       flexShrink: 0,
-                      scrollSnapAlign: "center",
                     }}
                   >
-                    <p className="heading-font text-lg sm:text-2xl text-blue-50/85 leading-relaxed italic">
+                    <p className="heading-font text-xl sm:text-2xl text-blue-50/85 leading-relaxed italic">
                       “{thought}”
                     </p>
                   </motion.div>
@@ -961,294 +538,70 @@ export default function App() {
           </section>
 
           {/* ============ NEW: MEMORY CONSTELLATION ============ */}
-          <Divider />
-
-          {/* ============ NEW: HUGE TYPOGRAPHY MOMENT ============ */}
-          <section className="min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center px-6 relative overflow-hidden">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 2, ease: "easeOut" }}
-              className="text-center relative"
-            >
-              <p className="text-blue-100/40 text-sm sm:text-base mb-6 italic">
-                if i could only say one thing,
-              </p>
-              <h2 className="heading-font text-[4rem] sm:text-[8rem] md:text-[11rem] leading-[0.95] text-blue-50">
-                it'd be
-              </h2>
-              <h2 className="heading-font text-[5rem] sm:text-[10rem] md:text-[14rem] leading-[0.9] italic text-blue-200 mt-2">
-                You.
-              </h2>
-              <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: "60%" }}
-                viewport={{ once: true }}
-                transition={{ duration: 2, delay: 0.5 }}
-                className="h-px bg-gradient-to-r from-transparent via-blue-200/40 to-transparent mx-auto mt-12"
-              />
-            </motion.div>
-          </section>
-
-          <section className="py-14 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
+          <section className="py-20 px-4 sm:px-6 relative overflow-hidden">
             <motion.h2
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4 relative z-10"
+              className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4 relative z-10"
             >
               In every universe,
             </motion.h2>
-            <p className="text-center text-blue-100/60 mb-3 text-base sm:text-lg px-4 relative z-10">
-              I think I’d still find you.
+            <p className="text-center text-blue-100/60 mb-10 text-base sm:text-lg px-4 relative z-10">
+              I think I’d still find you. Tap the stars.
             </p>
 
-            {/* Progress hint — updates as she finds more stars */}
-            <p className="text-center text-blue-100/40 mb-10 text-xs sm:text-sm px-4 relative z-10 italic h-5">
-              {foundMemories.length === 0 && "tap the stars to find me."}
-              {foundMemories.length > 0 && foundMemories.length < 4 &&
-                `${foundMemories.length} of ${constellationMemories.length} found.`}
-              {foundMemories.length >= 4 && foundMemories.length < constellationMemories.length &&
-                `halfway home. ${constellationMemories.length - foundMemories.length} more to go.`}
-              {foundMemories.length === constellationMemories.length &&
-                "you found me again. every single one."}
-            </p>
-
-            {/* Constellation canvas */}
             <div
-              className="relative max-w-3xl mx-auto h-[400px] sm:h-[560px]"
+              className="relative max-w-5xl mx-auto"
+              style={{ height: "440px" }}
             >
-              {/* DUST STARS — non-interactive background texture */}
-              {[...Array(40)].map((_, i) => {
-                // Stable pseudo-random positions per index
-                const x = (i * 37) % 100;
-                const y = (i * 53) % 100;
-                const size = 1 + ((i * 7) % 3);
-                const delay = (i * 0.3) % 5;
-                return (
+              {constellationMemories.map((memory, i) => (
+                <motion.button
+                  key={i}
+                  onClick={() => setSelectedMemory(memory)}
+                  className="absolute"
+                  style={{
+                    left: `${memory.x}%`,
+                    top: `${memory.y}%`,
+                  }}
+                  whileHover={{ scale: 1.4 }}
+                  whileTap={{ scale: 0.9 }}
+                >
                   <motion.div
-                    key={`dust-${i}`}
                     animate={{
-                      opacity: [0.15, 0.5, 0.15],
+                      opacity: [0.4, 1, 0.4],
+                      scale: [1, 1.2, 1],
                     }}
                     transition={{
-                      duration: 3 + ((i * 0.4) % 4),
+                      duration: 3 + (i % 4),
                       repeat: Infinity,
-                      delay,
                       ease: "easeInOut",
                     }}
-                    className="absolute rounded-full bg-white pointer-events-none"
+                    className="rounded-full"
                     style={{
-                      width: `${size}px`,
-                      height: `${size}px`,
-                      left: `${x}%`,
-                      top: `${y}%`,
-                      boxShadow: "0 0 4px rgba(255,255,255,0.5)",
+                      width: "14px",
+                      height: "14px",
+                      background:
+                        "radial-gradient(circle, #ffffff 0%, #9ec5ff 60%, transparent 100%)",
+                      boxShadow: "0 0 20px rgba(158,197,255,0.8)",
                     }}
                   />
-                );
-              })}
-
-              {/* CONNECTING LINES — SVG overlay drawn between memory stars */}
-              <svg
-                className="absolute inset-0 w-full h-full pointer-events-none"
-                preserveAspectRatio="none"
-                viewBox="0 0 100 100"
-              >
-                {constellationMemories.map((memory, i) =>
-                  (memory.connects || []).map((targetIdx) => {
-                    const target = constellationMemories[targetIdx];
-                    if (!target) return null;
-                    // Line is bright if BOTH endpoints have been found, else dim
-                    const bothFound =
-                      foundMemories.includes(i) && foundMemories.includes(targetIdx);
-                    return (
-                      <motion.line
-                        key={`line-${i}-${targetIdx}`}
-                        x1={memory.x}
-                        y1={memory.y}
-                        x2={target.x}
-                        y2={target.y}
-                        stroke={bothFound ? "rgba(255, 240, 200, 0.55)" : "rgba(158,197,255,0.10)"}
-                        strokeWidth={bothFound ? 0.35 : 0.15}
-                        strokeLinecap="round"
-                        animate={{
-                          opacity: bothFound ? [0.7, 1, 0.7] : 0.4,
-                        }}
-                        transition={{
-                          duration: bothFound ? 3 : 1,
-                          repeat: bothFound ? Infinity : 0,
-                          ease: "easeInOut",
-                        }}
-                      />
-                    );
-                  })
-                )}
-              </svg>
-
-              {/* SHOOTING STAR — animates across the field on key change */}
-              <AnimatePresence>
-                <motion.div
-                  key={shootingStarKey}
-                  initial={{
-                    x: "-10%",
-                    y: `${10 + Math.random() * 40}%`,
-                    opacity: 0,
-                  }}
-                  animate={{
-                    x: "110%",
-                    y: `${50 + Math.random() * 30}%`,
-                    opacity: [0, 1, 1, 0],
-                  }}
-                  transition={{ duration: 2, ease: "easeOut" }}
-                  className="absolute pointer-events-none"
-                  style={{
-                    width: "60px",
-                    height: "1.5px",
-                    background:
-                      "linear-gradient(to right, transparent 0%, rgba(255,255,255,0.9) 50%, rgba(158,197,255,0.6) 100%)",
-                    filter: "blur(0.5px)",
-                    boxShadow: "0 0 8px rgba(158,197,255,0.8)",
-                  }}
-                />
-              </AnimatePresence>
-
-              {/* MEMORY STARS — the interactive A */}
-              {constellationMemories.map((memory, i) => {
-                const isFound = foundMemories.includes(i);
-                const isLead = memory.lead;
-                const visibleSize = isLead ? 18 : 11;
-                const hitSize = 48;
-
-                return (
-                  <motion.button
-                    key={i}
-                    onClick={() => {
-                      setSelectedMemory(memory);
-                      if (!foundMemories.includes(i)) {
-                        setFoundMemories([...foundMemories, i]);
-                      }
-                    }}
-                    className="absolute flex items-center justify-center group"
-                    style={{
-                      left: `${memory.x}%`,
-                      top: `${memory.y}%`,
-                      width: `${hitSize}px`,
-                      height: `${hitSize}px`,
-                      transform: "translate(-50%, -50%)",
-                    }}
-                    whileHover={{ scale: 1.4 }}
-                    whileTap={{ scale: 0.9 }}
-                    aria-label={`memory ${i + 1}`}
-                  >
-                    {/* Outer halo — bigger when found */}
-                    <motion.div
-                      animate={{
-                        opacity: isFound ? [0.4, 0.8, 0.4] : [0.15, 0.35, 0.15],
-                        scale: isFound ? [1, 1.3, 1] : [1, 1.1, 1],
-                      }}
-                      transition={{
-                        duration: 3 + (i % 3),
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                      className="absolute rounded-full pointer-events-none"
-                      style={{
-                        width: `${visibleSize * 2.5}px`,
-                        height: `${visibleSize * 2.5}px`,
-                        background: isFound
-                          ? "radial-gradient(circle, rgba(255,240,200,0.4) 0%, transparent 70%)"
-                          : "radial-gradient(circle, rgba(158,197,255,0.3) 0%, transparent 70%)",
-                        filter: "blur(4px)",
-                      }}
-                    />
-
-                    {/* Star core */}
-                    <motion.div
-                      animate={{
-                        opacity: isFound ? [0.7, 1, 0.7] : [0.5, 0.95, 0.5],
-                        scale: [1, 1.15, 1],
-                      }}
-                      transition={{
-                        duration: 3 + (i % 4),
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                      className="rounded-full relative z-10"
-                      style={{
-                        width: `${visibleSize}px`,
-                        height: `${visibleSize}px`,
-                        background: isFound
-                          ? "radial-gradient(circle, #ffffff 0%, #ffe5b0 50%, #ffcfa3 100%)"
-                          : isLead
-                          ? "radial-gradient(circle, #ffffff 0%, #c5dcff 60%, #9ec5ff 100%)"
-                          : "radial-gradient(circle, #ffffff 0%, #9ec5ff 70%, transparent 100%)",
-                        boxShadow: isFound
-                          ? "0 0 24px rgba(255,220,160,0.9), 0 0 8px rgba(255,255,255,0.8)"
-                          : isLead
-                          ? "0 0 18px rgba(158,197,255,0.9), 0 0 4px rgba(255,255,255,0.6)"
-                          : "0 0 12px rgba(158,197,255,0.7)",
-                      }}
-                    />
-
-                    {/* Tiny number label — only visible on hover/found, very subtle */}
-                    {isFound && (
-                      <motion.span
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 0.5, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                        className="absolute text-[9px] text-blue-100/60 font-light pointer-events-none"
-                        style={{
-                          top: "-14px",
-                        }}
-                      >
-                        {i + 1}
-                      </motion.span>
-                    )}
-                  </motion.button>
-                );
-              })}
+                </motion.button>
+              ))}
             </div>
-
-            {/* Cancer constellation reveal when all found */}
-            <AnimatePresence>
-              {foundMemories.length === constellationMemories.length && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.5, duration: 1.5 }}
-                  className="text-center mt-8"
-                >
-                  <p className="heading-font italic text-blue-200/70 text-lg sm:text-xl">
-                    cancer. your stars.
-                  </p>
-                  <p className="text-blue-100/40 text-xs sm:text-sm mt-2 italic">
-                    written for you, always.
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </section>
 
           {/* ============ NEW: TINY THINGS I LOVE ABOUT YOU ============ */}
-          <section className="py-12 sm:py-16 px-4 sm:px-6">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Heading column — left side, sticky on desktop */}
-              <div className="lg:col-span-5 lg:sticky lg:top-24 text-center lg:text-left">
-                <div className="hidden lg:block text-blue-200/30 mb-6">
-                  <Lily size={50} opacity={0.4} />
-                </div>
-                <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl mb-4 px-4 lg:px-0 leading-tight">
-                  Tiny Things I Love About You
-                </h2>
-                <p className="text-blue-100/60 mb-8 lg:mb-12 text-base sm:text-lg px-4 lg:px-0 italic">
-                  The little things no one else would notice.
-                </p>
-              </div>
+          <section className="py-16 px-4 sm:px-6">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
+                Tiny Things I Love About You
+              </h2>
+              <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
+                The little things no one else would notice.
+              </p>
 
-              {/* Cards column — right side, offset */}
-              <div className="lg:col-span-7 space-y-4">
+              <div className="space-y-4">
                 {tinyThings.map((thing, index) => (
                   <motion.div
                     key={index}
@@ -1257,13 +610,6 @@ export default function App() {
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.06 }}
                     className="glass rounded-2xl p-5 sm:p-6 flex items-start gap-4"
-                    style={{
-                      // Subtle horizontal stagger on desktop for visual rhythm
-                      marginLeft:
-                        typeof window !== "undefined" && window.innerWidth >= 1024
-                          ? `${(index % 2) * 24}px`
-                          : "0",
-                    }}
                   >
                     <Heart
                       size={18}
@@ -1278,131 +624,15 @@ export default function App() {
             </div>
           </section>
 
-          {/* ============ NEW: PROMISE JAR ============ */}
-          <Divider />
-          <section className="py-12 sm:py-16 px-4 sm:px-6">
-            <div className="max-w-5xl mx-auto">
-              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl text-center mb-5 px-4">
-                A Jar Of Promises
-              </h2>
-              <p className="text-center text-blue-100/60 mb-12 text-base sm:text-lg px-4">
-                Tap one whenever you need to be reminded.
-              </p>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-                {promises.map((promise, index) => {
-                  const isFlipped = flippedPromises.includes(index);
-                  return (
-                    <motion.button
-                      key={index}
-                      onClick={() => {
-                        if (!isFlipped) {
-                          setFlippedPromises([...flippedPromises, index]);
-                        }
-                      }}
-                      whileHover={!isFlipped ? { y: -4, scale: 1.03 } : {}}
-                      whileTap={!isFlipped ? { scale: 0.97 } : {}}
-                      className="relative w-full"
-                      style={{
-                        aspectRatio: "3 / 4",
-                        perspective: "1000px",
-                      }}
-                    >
-                      <motion.div
-                        animate={{ rotateY: isFlipped ? 180 : 0 }}
-                        transition={{ duration: 0.8, ease: "easeInOut" }}
-                        className="relative w-full h-full"
-                        style={{
-                          transformStyle: "preserve-3d",
-                        }}
-                      >
-                        {/* FRONT (face down) */}
-                        <div
-                          className="absolute inset-0 glass rounded-[24px] flex flex-col items-center justify-center p-4"
-                          style={{
-                            backfaceVisibility: "hidden",
-                            WebkitBackfaceVisibility: "hidden",
-                          }}
-                        >
-                          <motion.div
-                            animate={{
-                              opacity: [0.3, 0.7, 0.3],
-                              scale: [1, 1.1, 1],
-                            }}
-                            transition={{
-                              duration: 3 + (index % 3),
-                              repeat: Infinity,
-                              ease: "easeInOut",
-                            }}
-                            className="rounded-full mb-3"
-                            style={{
-                              width: "10px",
-                              height: "10px",
-                              background:
-                                "radial-gradient(circle, #ffffff 0%, #9ec5ff 60%, transparent 100%)",
-                              boxShadow: "0 0 15px rgba(158,197,255,0.7)",
-                            }}
-                          />
-                          <p className="heading-font text-blue-100/70 text-base sm:text-lg italic">
-                            a promise
-                          </p>
-                          <p className="text-blue-100/30 text-xs mt-2">
-                            tap to open
-                          </p>
-                        </div>
-
-                        {/* BACK (revealed promise) — warm gold/cream accent */}
-                        <div
-                          className="absolute inset-0 glass rounded-[24px] flex items-center justify-center p-4 sm:p-5"
-                          style={{
-                            backfaceVisibility: "hidden",
-                            WebkitBackfaceVisibility: "hidden",
-                            transform: "rotateY(180deg)",
-                            background:
-                              "linear-gradient(145deg, rgba(255, 215, 175, 0.22) 0%, rgba(255, 230, 200, 0.10) 50%, rgba(255,255,255,0.06) 100%)",
-                            boxShadow:
-                              "inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 24px rgba(255, 200, 150, 0.12)",
-                          }}
-                        >
-                          <p className="text-blue-50 text-xs sm:text-sm leading-relaxed text-left">
-                            {promise}
-                          </p>
-                        </div>
-                      </motion.div>
-                    </motion.button>
-                  );
-                })}
-              </div>
-
-              {/* Subtle progress hint */}
-              {flippedPromises.length > 0 && (
-                <p className="text-center text-blue-100/40 text-xs mt-8 italic">
-                  {flippedPromises.length === promises.length
-                    ? "all promises opened. every single one is yours."
-                    : `${flippedPromises.length} of ${promises.length} opened.`}
-                </p>
-              )}
-            </div>
-          </section>
-
           {/* LETTER */}
-          <Divider />
-          <section className="py-12 sm:py-16 px-4 sm:px-6 flex justify-center">
+          <section className="py-16 px-4 sm:px-6 flex justify-center">
             <motion.div
               whileHover={{ scale: 1.01 }}
-              className="glass max-w-3xl rounded-[28px] sm:rounded-[40px] p-7 sm:p-12 relative"
+              className="glass max-w-3xl rounded-[40px] p-8 sm:p-12"
             >
-              {/* Tiny lily in corner */}
-              <div className="absolute top-6 right-6 text-blue-200 opacity-40">
-                <Lily size={32} opacity={0.6} />
-              </div>
-
-              <h2 className="heading-font text-3xl sm:text-5xl md:text-6xl mb-2 text-center">
-                To {NAME},
+              <h2 className="heading-font text-4xl sm:text-5xl md:text-6xl mb-10 text-center">
+                To You
               </h2>
-              <p className="text-center text-blue-100/40 text-sm italic mb-8 sm:mb-10">
-                a letter
-              </p>
 
               <div className="space-y-6 text-base sm:text-lg leading-relaxed text-blue-50/80">
                 <p>Loving you has changed the way I experience life.</p>
@@ -1413,7 +643,7 @@ export default function App() {
                 </p>
                 <p>
                   I hope you always remember how deeply appreciated, admired,
-                  and loved you are, {NAME}.
+                  and loved you are.
                 </p>
                 <p>Thank you for existing in my life.</p>
                 <p className="text-blue-200 text-2xl sm:text-3xl mt-10 heading-font">
@@ -1438,7 +668,7 @@ export default function App() {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              className="glass w-full max-w-md p-6 sm:p-8 rounded-[28px] sm:rounded-[35px] relative"
+              className="glass w-full max-w-md p-8 rounded-[35px] relative"
             >
               <button
                 onClick={() => setMusicOpen(false)}
@@ -1527,11 +757,11 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* MEMORY POPUP — custom for constellation, shows Cancer star name when present */}
+      {/* MEMORY POPUP */}
       <AnimatePresence>
         {selectedMemory && (
-          <MemoryPopup
-            memory={selectedMemory}
+          <Popup
+            text={selectedMemory.text}
             close={() => setSelectedMemory(null)}
           />
         )}
@@ -1559,7 +789,7 @@ function Popup({ text, close }) {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.7, opacity: 0 }}
         transition={{ duration: 0.4 }}
-        className="glass w-full max-w-lg p-6 sm:p-12 rounded-[28px] sm:rounded-[35px] relative"
+        className="glass w-full max-w-lg p-8 sm:p-12 rounded-[35px] relative"
       >
         <button
           onClick={close}
@@ -1570,72 +800,12 @@ function Popup({ text, close }) {
 
         <Heart className="text-blue-200 mb-6" />
 
-        <p className="heading-font text-2xl sm:text-4xl leading-relaxed text-blue-50">
+        <p className="heading-font text-3xl sm:text-4xl leading-relaxed text-blue-50">
           {text}
         </p>
 
         <p className="mt-8 text-sm text-blue-100/50">
           Come back whenever you need to.
-        </p>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-/* ============ NEW: MEMORY POPUP (constellation star) ============ */
-function MemoryPopup({ memory, close }) {
-  return (
-    <motion.div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center px-4 sm:px-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <motion.div
-        initial={{ scale: 0.7, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.7, opacity: 0 }}
-        transition={{ duration: 0.4 }}
-        className="glass w-full max-w-lg p-6 sm:p-12 rounded-[28px] sm:rounded-[35px] relative"
-      >
-        <button
-          onClick={close}
-          className="absolute top-5 right-5 text-white/70 hover:text-white"
-        >
-          <X />
-        </button>
-
-        {/* Star icon — glowing */}
-        <motion.div
-          animate={{
-            opacity: [0.7, 1, 0.7],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          className="mb-6 rounded-full"
-          style={{
-            width: "16px",
-            height: "16px",
-            background:
-              "radial-gradient(circle, #ffffff 0%, #ffe5b0 60%, #ffcfa3 100%)",
-            boxShadow:
-              "0 0 24px rgba(255,220,160,0.9), 0 0 8px rgba(255,255,255,0.8)",
-          }}
-        />
-
-        {/* Cancer star name — only shown if this is a named star */}
-        {memory.name && (
-          <p className="text-xs uppercase tracking-[0.2em] text-blue-100/40 mb-3">
-            {memory.name} · cancer
-          </p>
-        )}
-
-        <p className="heading-font text-2xl sm:text-4xl leading-relaxed text-blue-50">
-          {memory.text}
-        </p>
-
-        <p className="mt-8 text-sm text-blue-100/50 italic">
-          come back whenever you need to.
         </p>
       </motion.div>
     </motion.div>
@@ -1656,7 +826,7 @@ function LetterPopup({ letter, close }) {
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.7, opacity: 0, y: 30 }}
         transition={{ duration: 0.5 }}
-        className="glass w-full max-w-xl p-6 sm:p-12 rounded-[28px] sm:rounded-[35px] relative my-auto"
+        className="glass w-full max-w-xl p-8 sm:p-12 rounded-[35px] relative my-auto"
       >
         <button
           onClick={close}
@@ -1737,8 +907,7 @@ function HugButton({ onTriggered }) {
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 1.5, type: "spring", stiffness: 120 }}
-      className="fixed left-5 z-50"
-      style={{ bottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}
+      className="fixed bottom-5 left-5 z-50"
     >
       {/* Expanding glow while holding */}
       <AnimatePresence>
@@ -2039,11 +1208,10 @@ function HugPopup({ close }) {
 }
 
 /* ============ EXISTING BALLOON ============ */
-function FloatingBalloon({ note, index, popBalloon, isMobile }) {
+function FloatingBalloon({ note, index, popBalloon }) {
   const colors = ["#9ec5ff", "#74a7ff", "#b7d4ff", "#6f9cff", "#89b6ff"];
 
-  // Desktop positions — 12 balloons spread across wider canvas
-  const desktopPositions = [
+  const positions = [
     { left: "8%", top: "20%" },
     { left: "22%", top: "55%" },
     { left: "38%", top: "25%" },
@@ -2058,20 +1226,9 @@ function FloatingBalloon({ note, index, popBalloon, isMobile }) {
     { left: "88%", top: "22%" },
   ];
 
-  // Mobile positions — 8 balloons, spaced wider to avoid overlap on small screens
-  const mobilePositions = [
-    { left: "8%", top: "8%" },
-    { left: "55%", top: "12%" },
-    { left: "30%", top: "30%" },
-    { left: "65%", top: "38%" },
-    { left: "10%", top: "52%" },
-    { left: "50%", top: "62%" },
-    { left: "25%", top: "78%" },
-    { left: "60%", top: "85%" },
-  ];
-
-  const positions = isMobile ? mobilePositions : desktopPositions;
   const position = positions[index % positions.length];
+
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 
   return (
     <motion.div
