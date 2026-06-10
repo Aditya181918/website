@@ -278,7 +278,7 @@ function HoldSecret({ children }) {
             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
             transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0 flex items-center justify-center rounded-[20px] p-8 text-center"
-            style={{ background: "rgba(10,14,39,0.88)", backdropFilter: "blur(8px)", zIndex: 10 }}
+            style={{ background: "rgba(10,14,39,0.88)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 10 }}
             onClick={() => setRevealed(false)}
           >
             <div>
@@ -616,7 +616,7 @@ function HugExperience({ close }) {
   return (
     <motion.div
       className="fixed inset-0 flex items-center justify-center px-6"
-      style={{ zIndex: 110, background: "radial-gradient(circle at center, rgba(35,30,50,0.96) 0%, rgba(10,14,39,0.98) 60%, rgba(5,8,22,1) 100%)", backdropFilter: "blur(40px)" }}
+      style={{ zIndex: 110, background: "radial-gradient(circle at center, rgba(35,30,50,0.96) 0%, rgba(10,14,39,0.98) 60%, rgba(5,8,22,1) 100%)", backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)" }}
       initial={{ opacity: 0 }} animate={{ opacity: closing && aftermath ? 0.6 : 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.2 }}
     >
       <motion.div
@@ -948,14 +948,40 @@ export default function App() {
       {/* hidden youtube player */}
       <div id="yt-player" style={{ position: "fixed", bottom: 0, left: 0, width: 1, height: 1, opacity: 0.01, pointerEvents: "none" }} />
 
-      {/* top controls */}
-      <button onClick={() => setMusicOpen(true)} className="fixed top-5 right-5 z-40 p-3 sm:p-4 rounded-full grain"
-        style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", border: "1px solid rgba(232,195,158,0.18)" }} aria-label="music">
+      {/* top controls — inline-positioned, safe-area aware, above everything except modals */}
+      <button
+        onClick={() => setMusicOpen(true)}
+        className="p-3 sm:p-4 rounded-full grain"
+        aria-label="music"
+        style={{
+          position: "fixed",
+          top: "calc(1.25rem + env(safe-area-inset-top, 0px))",
+          right: "calc(1.25rem + env(safe-area-inset-right, 0px))",
+          zIndex: 60,
+          background: "rgba(255,255,255,0.06)",
+          backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          border: "1px solid rgba(232,195,158,0.18)",
+        }}
+      >
         <Music2 size={20} style={{ color: "#E8C39E" }} />
       </button>
       {currentSong && (
-        <button onClick={toggleMute} className="fixed top-5 right-[4.5rem] sm:right-20 z-40 p-3 sm:p-4 rounded-full grain"
-          style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", border: "1px solid rgba(232,195,158,0.18)" }} aria-label="mute">
+        <button
+          onClick={toggleMute}
+          className="p-3 sm:p-4 rounded-full grain"
+          aria-label="mute"
+          style={{
+            position: "fixed",
+            top: "calc(1.25rem + env(safe-area-inset-top, 0px))",
+            right: "calc(4.75rem + env(safe-area-inset-right, 0px))",
+            zIndex: 60,
+            background: "rgba(255,255,255,0.06)",
+            backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            border: "1px solid rgba(232,195,158,0.18)",
+          }}
+        >
           {muted ? <VolumeX size={20} style={{ color: "#E8C39E" }} /> : <Volume2 size={20} style={{ color: "#E8C39E" }} />}
         </button>
       )}
@@ -977,7 +1003,7 @@ export default function App() {
             <motion.div
               initial={{ opacity: 0, scale: 0.85, rotate: -8 }} animate={{ opacity: 1, scale: 1, rotate: 0 }}
               transition={{ duration: 3, delay: 0.3 }}
-              className="absolute inset-0 flex items-center justify-center"
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
               {/* SECRET: tap the lily 3 times */}
               <motion.div
@@ -1046,7 +1072,7 @@ export default function App() {
                   <motion.button key={i} whileHover={{ y: -8, scale: 1.03 }} whileTap={{ scale: 0.98 }}
                     onClick={() => setSelectedMood(m)}
                     className="text-left p-7 rounded-[24px] relative overflow-hidden grain"
-                    style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: `0 8px 32px ${m.accent}22` }}>
+                    style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: `0 8px 32px ${m.accent}22` }}>
                     <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${m.accent}33 0%, transparent 70%)`, filter: "blur(20px)" }} />
                     <h3 className="display text-2xl mb-2 relative z-10" style={{ color: "#EAE6F0" }}>{m.title}</h3>
                     <p className="text-sm relative z-10" style={{ color: "rgba(234,230,240,0.5)" }}>tap to open</p>
@@ -1068,7 +1094,7 @@ export default function App() {
                 {episodeCards.map((c, i) => (
                   <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                     whileHover={{ y: -6 }} className="p-7 sm:p-9 rounded-[26px] relative overflow-hidden grain"
-                    style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 8px 32px rgba(232,195,158,0.06)" }}>
+                    style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 8px 32px rgba(232,195,158,0.06)" }}>
                     <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(232,195,158,0.15) 0%, transparent 70%)", filter: "blur(20px)" }} />
                     <h3 className="display text-2xl sm:text-3xl mb-4 relative z-10" style={{ color: "#E8C39E" }}>{c.title}</h3>
                     <p className="leading-relaxed relative z-10" style={{ color: "rgba(234,230,240,0.75)" }}>{c.text}</p>
@@ -1088,7 +1114,7 @@ export default function App() {
                 {letters.map((l, i) => (
                   <motion.button key={i} whileHover={{ y: -8, scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setSelectedLetter(l)}
                     className="text-left p-6 rounded-[22px] flex flex-col gap-3 grain"
-                    style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" }}>
                     <div className="rounded-full p-2.5 w-fit" style={{ background: "rgba(232,195,158,0.12)" }}><Lily size={18} opacity={0.7} /></div>
                     <h3 className="display text-xl sm:text-2xl leading-snug" style={{ color: "#EAE6F0" }}>{l.title}</h3>
                     <span className="text-xs" style={{ color: "rgba(234,230,240,0.35)" }}>tap to open</span>
@@ -1107,7 +1133,7 @@ export default function App() {
               <div className="overflow-x-auto no-scrollbar px-4" style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
                 <div className="flex gap-4 pb-4 mx-auto" style={{ width: "max-content" }}>
                   {lateNightThoughts.map((t, i) => (
-                    <div key={i} className="rounded-[26px] p-8 grain" style={{ width: 270, minHeight: 200, flexShrink: 0, scrollSnapAlign: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    <div key={i} className="rounded-[26px] p-8 grain" style={{ width: 270, minHeight: 200, flexShrink: 0, scrollSnapAlign: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" }}>
                       <p className="display text-lg sm:text-xl italic leading-relaxed" style={{ color: "rgba(234,230,240,0.85)" }}>"{t}"</p>
                     </div>
                   ))}
@@ -1149,7 +1175,7 @@ export default function App() {
                 {tinyThings.map((t, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}
                     className="rounded-2xl p-5 sm:p-6 flex items-start gap-4 grain"
-                    style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)", marginLeft: (i % 2) * 16 }}>
+                    style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)", marginLeft: (i % 2) * 16 }}>
                     <div className="mt-1 flex-shrink-0"><Lily size={16} opacity={0.6} /></div>
                     <p className="leading-relaxed" style={{ color: "rgba(234,230,240,0.85)" }}>{t}</p>
                   </motion.div>
@@ -1173,7 +1199,7 @@ export default function App() {
                   return (
                     <button key={i} onClick={() => { if (!isF) setFlipped([...flipped, i]); }} className="relative w-full" style={{ aspectRatio: "3/4", perspective: 1000 }}>
                       <motion.div animate={{ rotateY: isF ? 180 : 0 }} transition={{ duration: 0.8, ease: "easeInOut" }} className="relative w-full h-full" style={{ transformStyle: "preserve-3d" }}>
-                        <div className="absolute inset-0 rounded-[20px] flex flex-col items-center justify-center p-4 grain" style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                        <div className="absolute inset-0 rounded-[20px] flex flex-col items-center justify-center p-4 grain" style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" }}>
                           <Lily size={22} opacity={0.5} />
                           <p className="display italic text-base mt-3" style={{ color: "rgba(234,230,240,0.7)" }}>a promise</p>
                           <p className="text-[10px] mt-1" style={{ color: "rgba(234,230,240,0.3)" }}>tap to open</p>
@@ -1226,7 +1252,7 @@ export default function App() {
           <Scene>
             <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 1.4 }}
               className="w-full max-w-2xl p-8 sm:p-12 rounded-[32px] relative grain"
-              style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", border: "1px solid rgba(232,195,158,0.2)" }}>
+              style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(232,195,158,0.2)" }}>
               <div className="absolute top-7 right-7"><Lily size={34} opacity={0.5} /></div>
               <ChapterLabel num="xiv" title="a letter" />
               <h2 className="display font-light text-center mb-10" style={{ fontSize: "clamp(2.5rem,8vw,4rem)" }}>To {NAME},</h2>
