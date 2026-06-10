@@ -26,10 +26,10 @@ const balloonNotes = [
   "You're my favourite notification.",
   "Peace, for me, is wherever you're rambling about your day.",
   "Could you BE any more amazing?",
-  "I love you more than you love your pasta and coffee. And that's saying something.",
+  "I love you more than you love sleeping in. And that's saying something.",
   "You feel like the good kind of plot twist.",
   "Somehow you make silence feel like a conversation.",
-  "I hope we get slow mornings, burnt toast (made by yours truly), and all of it.",
+  "I hope we get slow mornings, burnt toast, and all of it.",
   "You're the kind of person people build entire websites about. Clearly.",
   "I'd pick you in every timeline. Every single one.",
 ];
@@ -43,14 +43,14 @@ const moods = [
 ];
 
 const episodeCards = [
-  { title: "The One Where I Realized", text: "Somewhere between your third call in a row and you laughing at your own joke, it hit me: oh no. It's her. It was always going to be her." },
+  { title: "The One Where I Realized", text: "Somewhere between your third voice note in a row and you laughing at your own joke, it hit me: oh no. It's her. It was always going to be her." },
   { title: "The One Where Life Felt Softer", text: "You showed up and suddenly my days had a soundtrack. A warm one. Slightly chaotic. Mostly you talking." },
   { title: "The One Where You Stayed In My Head", text: "I see a dog, I think of you. I eat something good, I think of you. At this point my brain is basically your fan account." },
   { title: "The One I Never Want To End", text: "If life is kind, it gives me decades more of this. If it's very kind — slow mornings too." },
 ];
 
 const letters = [
-  { title: "Open when you miss me", text: "Close your eyes. I'm right there — in the pause between your thoughts, in the cold side of the pillow. I never really leave; I just get quieter for a while. Missing me is allowed. I'm missing you right back, probably harder, definitely right now." },
+  { title: "Open when you miss me", text: "Close your eyes. I'm right there — in the pause between your thoughts, in the warm side of the pillow. I never really leave; I just get quieter for a while. Missing me is allowed. I'm missing you right back, probably harder, definitely right now." },
   { title: "Open when you're overthinking", text: "Your brain is being loud again, isn't it? Here's the truth: none of it is as big as it feels at 1am. Whatever you said, whatever you replayed for the fourth time — it's okay. You're allowed to put the thought down. I'll hold it for a while. I have big pockets." },
   { title: "Open when you can't sleep", text: "Hi. It's late. Your eyes are heavy but your brain has decided to host a conference. Borrow my calm for tonight — imagine my hand on your back, slow circles, no agenda. The day is over. You did enough. You are enough. Sleep, my love." },
   { title: "Open when you need reassurance", text: "You are not too much. You are not too little. You are not a rough draft I'm editing. You are not at risk of being left. I'm not going anywhere — not when it's hard, not when you're quiet, not when you're convinced you're unlovable. Especially not then. That's exactly when I dig in." },
@@ -60,7 +60,7 @@ const letters = [
 const lateNightThoughts = [
   "I wonder if you know how often you cross my mind. It's basically a commute at this point.",
   "You made life feel less lonely without even trying.",
-  "You feel familiar to my soul. Like I've known you across a few lifetimes.",
+  "You feel familiar to my soul. Like I've known you across a few lifetimes and several questionable haircuts.",
   "Sometimes I catch myself smiling at nothing. It's never nothing. It's you.",
   "I hope someone told you today how rare you are. If not — consider it done.",
   "Loving you doesn't feel like a decision. It feels like remembering something I always knew.",
@@ -70,23 +70,23 @@ const lateNightThoughts = [
 // Cancer constellation — Aashi's zodiac. 5 real stars + 3 memory stars.
 const stars = [
   { x: 30, y: 80, lead: true, name: "Acubens", text: "You make me want to be gentler — with the world, with myself, with everything.", connects: [1] },
-  { x: 42, y: 64, lead: true, name: "Altarf", text: "Being loved by you, baby, is the rarest thing I own.", connects: [7] },
+  { x: 42, y: 64, lead: true, name: "Altarf", text: "Being loved by you, Aashi, is the rarest thing I own.", connects: [7] },
   { x: 50, y: 46, lead: true, name: "Asellus Australis", text: "The first time you laughed at something I said — that was it. Game over.", connects: [3, 4] },
   { x: 72, y: 24, lead: true, name: "Asellus Borealis", text: "Some people feel like home. You feel like home with the lights left on for me.", connects: [] },
-  { x: 24, y: 20, lead: true, name: "Tegmine", text: "In every version of this life, I'd find you. I might be late sometimes (as usual). But I'd find you.", connects: [] },
+  { x: 24, y: 20, lead: true, name: "Tegmine", text: "In every version of this life, I'd find you. I might be late sometimes. But I'd find you.", connects: [] },
   { x: 36, y: 34, name: "", text: "I could listen to you talk for hours. I have. I plan to keep doing it.", connects: [] },
   { x: 62, y: 34, name: "", text: "There's something about the way you exist that makes everything else make sense.", connects: [] },
   { x: 46, y: 55, name: "", text: "You're the reason I believe in slow, sure, stubborn love.", connects: [2] },
 ];
 
 const tinyThings = [
-  "The way you say 'Tu du du Tu du du' when you're doing something xD",
-  "How you become a kid in small small things, absolutely loveeeeee it.",
-  "Your late-night energy and 'no sleep still 100% energy days'. Where does it come from. Science needs to know.",
-  "How you think about me and include me in your daily schedule.",
-  "How your name and notification became my favourite part without asking my permission.",
-  "How your eyes roll up when you like something you are eating.",
-  "Your HAIR FLIPS! Stunnin HAIR FLIPS YAAAAAR!",
+  "The way you say 'hmm' when you're thinking — like a tiny committee is deliberating in there.",
+  "How you go quiet when something actually matters to you.",
+  "Your dramatic retelling of events that were, objectively, not that dramatic.",
+  "The burst-texting when you're excited. Seventeen messages. No punctuation. Pure joy.",
+  "Your late-night energy. Where does it come from. Science needs to know.",
+  "How you make a grocery run sound like an epic saga with three plot twists.",
+  "How your name became my favourite word without asking my permission.",
 ];
 
 const promises = [
@@ -169,6 +169,52 @@ function Lily({ size = 40, opacity = 0.5, color = "#E8C39E", sw = 0.7 }) {
         <circle cx="50" cy="50" r="1.6" fill={color} opacity="0.7" />
       </g>
     </svg>
+  );
+}
+
+/* ============================ SPLIT-TEXT HEADING (awwwards-style reveal) ============================ */
+// Each word slides up from behind an invisible mask, staggered.
+function SplitHeading({ children, className = "", style = {}, delay = 0 }) {
+  const words = String(children).trim().split(/\s+/);
+  return (
+    <h2 className={className} style={style} aria-label={String(children)}>
+      {words.map((word, i) => (
+        <span key={i} style={{ display: "inline-block", overflow: "hidden", verticalAlign: "bottom" }}>
+          <motion.span
+            initial={{ y: "110%" }}
+            whileInView={{ y: "0%" }}
+            viewport={{ once: true, amount: 0.6 }}
+            transition={{ duration: 0.9, delay: delay + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+            style={{ display: "inline-block" }}
+          >
+            {word}
+          </motion.span>
+          {i < words.length - 1 ? "\u00A0" : ""}
+        </span>
+      ))}
+    </h2>
+  );
+}
+
+/* ============================ MARQUEE (infinite scrolling strip) ============================ */
+function Marquee({ items, reverse = false, speed = 28 }) {
+  const content = items.join("  ✶  ") + "  ✶  ";
+  return (
+    <div className="w-full overflow-hidden pointer-events-none select-none" style={{ opacity: 0.35 }}>
+      <div
+        className="flex whitespace-nowrap"
+        style={{
+          animation: `marquee ${speed}s linear infinite${reverse ? " reverse" : ""}`,
+          width: "max-content",
+        }}
+      >
+        {[0, 1].map((k) => (
+          <span key={k} className="display italic" style={{ fontSize: "clamp(1.4rem, 4vw, 2.4rem)", color: "#E8C39E", paddingRight: "2rem" }}>
+            {content}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -414,7 +460,12 @@ function TiltPhoto({ src, caption, deviceTilt }) {
             transition: "box-shadow 0.4s ease",
           }}
         >
-          <img src={src} alt="us" style={{ width: "100%", display: "block", filter: "saturate(1.05) contrast(1.02)" }} />
+          <motion.img
+            src={src} alt="us"
+            animate={{ scale: [1, 1.06, 1] }}
+            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+            style={{ width: "100%", display: "block", filter: "saturate(1.05) contrast(1.02)" }}
+          />
           <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at center, transparent 55%, rgba(10,14,39,0.45) 100%)" }} />
           <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(180deg, transparent 60%, rgba(10,14,39,0.5) 100%)" }} />
           {/* Light sheen that shifts with tilt */}
@@ -718,9 +769,9 @@ function ConstellationScene({ onSelect, onComplete }) {
   return (
     <div className="relative w-full max-w-2xl" style={{ zIndex: 2 }}>
       <ChapterLabel num="ix" title="your stars" />
-      <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)", color: "#EAE6F0" }}>
+      <SplitHeading className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)", color: "#EAE6F0" }}>
         In every universe,
-      </h2>
+      </SplitHeading>
       <p className="text-center text-base mb-1" style={{ color: "rgba(234,230,240,0.6)" }}>I think I'd still find you.</p>
       <p className="text-center text-xs italic mb-8 h-4" style={{ color: "#E8C39E", opacity: 0.7 }}>{progress}</p>
 
@@ -955,6 +1006,21 @@ export default function App() {
       {/* hidden youtube player */}
       <div id="yt-player" style={{ position: "fixed", bottom: 0, left: 0, width: 1, height: 1, opacity: 0.01, pointerEvents: "none" }} />
 
+      {/* journey progress — thin gold line across the top */}
+      {entered && (
+        <motion.div
+          className="fixed top-0 left-0 right-0 pointer-events-none"
+          style={{
+            height: 2,
+            zIndex: 60,
+            transformOrigin: "left",
+            scaleX: scrollYProgress,
+            background: "linear-gradient(to right, rgba(232,195,158,0.9), rgba(224,168,184,0.7))",
+            boxShadow: "0 0 12px rgba(232,195,158,0.5)",
+          }}
+        />
+      )}
+
       {/* top controls — inline-positioned, safe-area aware, above everything except modals */}
       <button
         onClick={() => setMusicOpen(true)}
@@ -1070,10 +1136,20 @@ export default function App() {
           {/* 1 · Balloons */}
           <Scene>
             <ChapterLabel num="i" title="too big for texts" />
-            <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Some feelings are too big for texts.</h2>
+            <SplitHeading className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Some feelings are too big for texts.</SplitHeading>
             <p className="text-center text-sm mb-10" style={{ color: "rgba(234,230,240,0.5)" }}>so I put them in balloons. tap them.</p>
             <div className="relative w-full max-w-3xl" style={{ height: "min(55vh, 460px)" }}>
               {balloonNotes.map((note, i) => <Balloon key={i} note={note} i={i} onPop={(n) => setSelectedNote(n)} />)}
+            </div>
+            {/* scroll hint — agency-style */}
+            <div className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none">
+              <span className="eyebrow text-[9px]" style={{ color: "rgba(168,197,240,0.5)" }}>scroll</span>
+              <motion.div
+                animate={{ scaleY: [0, 1, 0], originY: ["0%", "0%", "100%"] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                className="w-px h-8"
+                style={{ background: "linear-gradient(to bottom, rgba(232,195,158,0.7), transparent)" }}
+              />
             </div>
           </Scene>
 
@@ -1081,7 +1157,7 @@ export default function App() {
           <Scene>
             <div className="w-full max-w-5xl">
               <ChapterLabel num="ii" title="however you feel" />
-              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>What do you need right now?</h2>
+              <SplitHeading className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>What do you need right now?</SplitHeading>
               <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>there's something here for every version of you.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {moods.map((m, i) => (
@@ -1105,7 +1181,7 @@ export default function App() {
           <Scene>
             <div className="w-full max-w-5xl">
               <ChapterLabel num="iv" title="the one where" />
-              <h2 className="display text-center font-light leading-tight mb-10" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>The One Where…</h2>
+              <SplitHeading className="display text-center font-light leading-tight mb-10" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>The One Where…</SplitHeading>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {episodeCards.map((c, i) => (
                   <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
@@ -1124,7 +1200,7 @@ export default function App() {
           <Scene>
             <div className="w-full max-w-5xl">
               <ChapterLabel num="v" title="for whenever" />
-              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Open when…</h2>
+              <SplitHeading className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Open when…</SplitHeading>
               <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>letters for the moments I can't be there fast enough.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {letters.map((l, i) => (
@@ -1144,7 +1220,7 @@ export default function App() {
           <Scene>
             <div className="w-full">
               <ChapterLabel num="vi" title="late night" />
-              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Late night thoughts.</h2>
+              <SplitHeading className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Late night thoughts.</SplitHeading>
               <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>the things I think when the world goes quiet.</p>
               <div className="overflow-x-auto no-scrollbar px-4" style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
                 <div className="flex gap-4 pb-4 mx-auto" style={{ width: "max-content" }}>
@@ -1161,8 +1237,11 @@ export default function App() {
           {/* 7 · Photo: lights */}
           <Scene><div className="w-full max-w-md"><ChapterLabel num={photoScenes[1].chapter} title={photoScenes[1].label} /><TiltPhoto src={photoScenes[1].src} caption={photoScenes[1].caption} deviceTilt={deviceTilt} /></div></Scene>
 
-          {/* 8 · "it'd be you" */}
+          {/* 8 · "it'd be you" — marquee strips frame the moment */}
           <Scene>
+            <div className="absolute top-8 left-0 right-0">
+              <Marquee items={["loved", "adored", "chosen", "always", "you"]} speed={32} />
+            </div>
             <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 2, ease: "easeOut" }} className="text-center">
               <p className="text-sm mb-6 italic" style={{ color: "rgba(234,230,240,0.4)" }}>if i could only say one thing,</p>
               <h2 className="display font-light leading-[0.95]" style={{ fontSize: "clamp(4rem,16vw,11rem)" }}>it'd be</h2>
@@ -1170,6 +1249,9 @@ export default function App() {
               <motion.div initial={{ width: 0 }} whileInView={{ width: "60%" }} viewport={{ once: true }} transition={{ duration: 2, delay: 0.5 }}
                 className="h-px mx-auto mt-12" style={{ background: "linear-gradient(to right, transparent, rgba(232,195,158,0.4), transparent)" }} />
             </motion.div>
+            <div className="absolute bottom-8 left-0 right-0">
+              <Marquee items={["aashi", "aashi", "aashi"]} reverse speed={26} />
+            </div>
           </Scene>
 
           {/* 9 · Constellation */}
@@ -1207,7 +1289,7 @@ export default function App() {
           <Scene>
             <div className="w-full max-w-5xl">
               <ChapterLabel num="xiii" title="my promises" />
-              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>A jar of promises.</h2>
+              <SplitHeading className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>A jar of promises.</SplitHeading>
               <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>tap one whenever you need reminding. they don't expire.</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {promises.map((p, i) => {
@@ -1466,6 +1548,10 @@ function StyleTag() {
       button { touch-action: manipulation; }
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      @keyframes marquee {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+      }
       .grain { position: relative; }
       .grain::after {
         content:''; position:absolute; inset:0; pointer-events:none; opacity:0.4; border-radius:inherit;
