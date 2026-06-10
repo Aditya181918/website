@@ -188,9 +188,124 @@ function ChapterLabel({ num, title }) {
   );
 }
 
+/* ============================ FALLING PETALS (surprise) ============================ */
+// A single petal shape (one lily petal)
+function Petal({ delay, x, duration, size, drift }) {
+  return (
+    <motion.div
+      initial={{ y: "-8vh", x: 0, opacity: 0, rotate: 0 }}
+      animate={{
+        y: "110vh",
+        x: [0, drift, -drift * 0.6, drift * 0.4],
+        opacity: [0, 0.7, 0.7, 0],
+        rotate: [0, 120, 260, 380],
+      }}
+      transition={{ duration, delay, ease: "linear" }}
+      className="fixed pointer-events-none"
+      style={{ left: `${x}%`, top: 0, zIndex: 45 }}
+    >
+      <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
+        <path d="M 20 4 Q 12 18 20 36 Q 28 18 20 4" fill="rgba(232,195,158,0.5)" stroke="rgba(255,229,176,0.6)" strokeWidth="0.5" />
+      </svg>
+    </motion.div>
+  );
+}
+
+function FallingPetals({ count = 8 }) {
+  const petals = [...Array(count)].map((_, i) => ({
+    delay: i * 1.2 + Math.random(),
+    x: 5 + (i * 89) % 90,
+    duration: 9 + Math.random() * 5,
+    size: 16 + (i % 3) * 6,
+    drift: 30 + Math.random() * 50,
+  }));
+  return <>{petals.map((p, i) => <Petal key={i} {...p} />)}</>;
+}
+
+/* ============================ HOLD SECRET (final photo surprise) ============================ */
+function HoldSecret({ children }) {
+  const [holding, setHolding] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const intervalRef = useRef(null);
+  const HOLD = 3000, TICK = 40;
+
+  const start = () => {
+    if (revealed) return;
+    setHolding(true);
+    const t0 = Date.now();
+    intervalRef.current = setInterval(() => {
+      const pct = Math.min((Date.now() - t0) / HOLD, 1);
+      setProgress(pct);
+      if (pct >= 1) {
+        clearInterval(intervalRef.current);
+        if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
+        setRevealed(true);
+        setHolding(false);
+      }
+    }, TICK);
+  };
+  const end = () => {
+    clearInterval(intervalRef.current);
+    if (!revealed) { setHolding(false); setProgress(0); }
+  };
+  useEffect(() => () => clearInterval(intervalRef.current), []);
+
+  return (
+    <div className="relative"
+      onMouseDown={start} onMouseUp={end} onMouseLeave={end}
+      onTouchStart={start} onTouchEnd={end} onTouchCancel={end}
+      style={{ touchAction: "manipulation" }}
+    >
+      {children}
+
+      {/* glow builds while holding */}
+      <AnimatePresence>
+        {holding && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: progress * 0.8 }} exit={{ opacity: 0 }}
+            className="absolute inset-0 pointer-events-none rounded-[20px]"
+            style={{ background: "radial-gradient(circle at center, rgba(232,195,158,0.3) 0%, transparent 70%)", filter: "blur(10px)" }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* the hidden message */}
+      <AnimatePresence>
+        {revealed && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, filter: "blur(8px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0 flex items-center justify-center rounded-[20px] p-8 text-center"
+            style={{ background: "rgba(10,14,39,0.88)", backdropFilter: "blur(8px)", zIndex: 10 }}
+            onClick={() => setRevealed(false)}
+          >
+            <div>
+              <div className="flex justify-center mb-4"><Lily size={28} opacity={0.7} /></div>
+              <p className="display italic text-xl sm:text-2xl leading-relaxed" style={{ color: "#EAE6F0" }}>
+                You held on. That's all I'll ever ask of us — that we hold on.
+              </p>
+              <p className="text-[11px] mt-5 italic" style={{ color: "rgba(234,230,240,0.4)" }}>tap to return to the photo</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* subtle hint */}
+      {!revealed && (
+        <p className="text-center text-[10px] mt-3 eyebrow" style={{ color: "rgba(168,197,240,0.3)" }}>
+          {holding ? "keep holding…" : "press & hold the photo"}
+        </p>
+      )}
+    </div>
+  );
+}
+
 /* ============================ AMBIENT (parallax) ============================ */
 
 function Ambient({ scrollProgress }) {
+  const lite = typeof window !== "undefined" && window.innerWidth < 640;
   // Different layers drift at different rates for parallax depth
   const bloomY = useTransform(scrollProgress, [0, 1], ["0%", "-30%"]);
   const starY = useTransform(scrollProgress, [0, 1], ["0%", "-60%"]);
@@ -223,7 +338,7 @@ function Ambient({ scrollProgress }) {
 
       {/* Star layer (faster parallax = feels closer) */}
       <motion.div className="absolute inset-0" style={{ y: starY }}>
-        {[...Array(50)].map((_, i) => {
+        {[...Array(lite ? 26 : 50)].map((_, i) => {
           const x = (i * 37) % 100, y = (i * 61) % 100, s = 1 + (i * 7) % 3;
           return (
             <motion.div
@@ -282,10 +397,10 @@ function TiltPhoto({ src, caption, deviceTilt }) {
         onMouseMove={onMove}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => { setHover(false); onLeave(); }}
-        initial={{ opacity: 0, y: 40, scale: 0.96 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: true, amount: 0.4 }}
-        transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ opacity: 0, y: 60, scale: 0.82, filter: "blur(14px)" }}
+        whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+        viewport={{ once: true, amount: 0.35 }}
+        transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
         style={{ rotateX: rx, rotateY: ry, transformStyle: "preserve-3d" }}
         className="relative mx-auto"
       >
@@ -598,6 +713,19 @@ function ConstellationScene({ onSelect }) {
 
   return (
     <div className="relative w-full max-w-2xl" style={{ zIndex: 2 }}>
+      {/* SURPRISE: when all stars found, the whole sky briefly warms */}
+      <AnimatePresence>
+        {found.length === stars.length && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.6, 0.35, 0] }}
+            transition={{ duration: 6, times: [0, 0.25, 0.6, 1] }}
+            className="fixed inset-0 pointer-events-none"
+            style={{ zIndex: 5, background: "radial-gradient(circle at center, rgba(232,195,158,0.25) 0%, rgba(224,168,184,0.12) 40%, transparent 75%)" }}
+          />
+        )}
+      </AnimatePresence>
+
       <ChapterLabel num="ix" title="your stars" />
       <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)", color: "#EAE6F0" }}>
         In every universe,
@@ -684,7 +812,15 @@ function Scene({ children, className = "" }) {
       className={`snap-scene flex flex-col items-center justify-center px-5 sm:px-6 ${className}`}
       style={{ scrollSnapAlign: "start", minHeight: "100dvh", position: "relative" }}
     >
-      {children}
+      <motion.div
+        initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
+        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        viewport={{ once: true, amount: 0.25 }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full flex flex-col items-center justify-center"
+      >
+        {children}
+      </motion.div>
     </section>
   );
 }
@@ -694,6 +830,29 @@ function Scene({ children, className = "" }) {
 export default function App() {
   const [entered, setEntered] = useState(false);
   const [zooming, setZooming] = useState(false);
+  // ── surprise states ──
+  const [lilyTaps, setLilyTaps] = useState(0);
+  const [lilySecretOpen, setLilySecretOpen] = useState(false);
+  const [petalsActive, setPetalsActive] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Falling petals: once per visit, at a random moment 20-60s after entering
+  useEffect(() => {
+    if (!entered) return;
+    const delay = 20000 + Math.random() * 40000;
+    const t = setTimeout(() => {
+      setPetalsActive(true);
+      setTimeout(() => setPetalsActive(false), 14000);
+    }, delay);
+    return () => clearTimeout(t);
+  }, [entered]);
   const [selectedMemory, setSelectedMemory] = useState(null);
   const [selectedMood, setSelectedMood] = useState(null);
   const [selectedLetter, setSelectedLetter] = useState(null);
@@ -818,10 +977,21 @@ export default function App() {
             <motion.div
               initial={{ opacity: 0, scale: 0.85, rotate: -8 }} animate={{ opacity: 1, scale: 1, rotate: 0 }}
               transition={{ duration: 3, delay: 0.3 }}
-              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              className="absolute inset-0 flex items-center justify-center"
             >
-              <motion.div animate={{ rotate: [0, 4, 0, -4, 0] }} transition={{ duration: 34, repeat: Infinity, ease: "easeInOut" }}>
-                <Lily size={520} opacity={0.06} color="#A8C5F0" sw={0.4} />
+              {/* SECRET: tap the lily 3 times */}
+              <motion.div
+                animate={lilyTaps > 0 && lilyTaps < 3 ? { scale: [1, 1.06, 1], rotate: [0, 4, 0, -4, 0] } : { rotate: [0, 4, 0, -4, 0] }}
+                transition={{ rotate: { duration: 34, repeat: Infinity, ease: "easeInOut" }, scale: { duration: 0.4 } }}
+                onClick={() => {
+                  const n = lilyTaps + 1;
+                  setLilyTaps(n);
+                  if (navigator.vibrate) navigator.vibrate(10);
+                  if (n >= 3) setLilySecretOpen(true);
+                }}
+                style={{ cursor: "pointer", pointerEvents: "auto" }}
+              >
+                <Lily size={520} opacity={lilyTaps > 0 ? 0.06 + lilyTaps * 0.03 : 0.06} color="#A8C5F0" sw={0.4} />
               </motion.div>
             </motion.div>
 
@@ -1016,11 +1186,43 @@ export default function App() {
                   );
                 })}
               </div>
-              {flipped.length > 0 && <p className="text-center text-xs mt-8 italic" style={{ color: "rgba(234,230,240,0.4)" }}>{flipped.length === promises.length ? "every promise opened. every one is yours." : `${flipped.length} of ${promises.length} opened.`}</p>}
+              {flipped.length > 0 && flipped.length < promises.length && (
+                <p className="text-center text-xs mt-8 italic" style={{ color: "rgba(234,230,240,0.4)" }}>{flipped.length} of {promises.length} opened.</p>
+              )}
+              {/* SURPRISE: finale when every promise is opened */}
+              <AnimatePresence>
+                {flipped.length === promises.length && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative text-center mt-8">
+                    {/* gold particle burst */}
+                    {[...Array(16)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                        animate={{
+                          x: Math.cos((i / 16) * Math.PI * 2) * (60 + (i % 4) * 30),
+                          y: Math.sin((i / 16) * Math.PI * 2) * (60 + (i % 4) * 30) - 30,
+                          opacity: 0, scale: 0,
+                        }}
+                        transition={{ duration: 1.8, ease: "easeOut", delay: i * 0.04 }}
+                        className="absolute left-1/2 top-0 rounded-full"
+                        style={{ width: 5 + (i % 3) * 2, height: 5 + (i % 3) * 2, background: "radial-gradient(circle,#fff,#ffe5b0)", boxShadow: "0 0 10px rgba(232,195,158,0.9)" }}
+                      />
+                    ))}
+                    <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 1.4 }}
+                      className="display italic text-lg sm:text-xl" style={{ color: "#E8C39E" }}>
+                      every promise opened. every single one is yours, {NAME}.
+                    </motion.p>
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} transition={{ delay: 1.8, duration: 1.4 }}
+                      className="text-xs mt-2 italic" style={{ color: "rgba(234,230,240,0.5)" }}>
+                      and I intend to keep them all.
+                    </motion.p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </Scene>
 
-          {/* 14 · Final letter */}
+          {/* 14 · Final letter — words appear one by one, like it's being written for her */}
           <Scene>
             <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 1.4 }}
               className="w-full max-w-2xl p-8 sm:p-12 rounded-[32px] relative grain"
@@ -1029,12 +1231,34 @@ export default function App() {
               <ChapterLabel num="xiv" title="a letter" />
               <h2 className="display font-light text-center mb-10" style={{ fontSize: "clamp(2.5rem,8vw,4rem)" }}>To {NAME},</h2>
               <div className="space-y-6 text-base sm:text-lg leading-relaxed" style={{ color: "rgba(234,230,240,0.8)" }}>
-                <p>Loving you has changed the way I experience life.</p>
-                <p>Somehow, the world became softer after you entered it.</p>
-                <p>You make ordinary days feel meaningful. You make silence feel comforting. You make happiness feel easy.</p>
-                <p>I hope you always remember how deeply appreciated, admired, and loved you are, {NAME}.</p>
-                <p>Thank you for existing in my life.</p>
-                <p className="display text-2xl sm:text-3xl mt-10" style={{ color: "#E8C39E" }}>Always you.</p>
+                {[
+                  "Loving you has changed the way I experience life.",
+                  "Somehow, the world became softer after you entered it.",
+                  "You make ordinary days feel meaningful. You make silence feel comforting. You make happiness feel easy.",
+                  `I hope you always remember how deeply appreciated, admired, and loved you are, ${NAME}.`,
+                  "Thank you for existing in my life.",
+                ].map((para, pi) => (
+                  <p key={pi}>
+                    {para.split(" ").map((word, wi) => (
+                      <motion.span
+                        key={wi}
+                        initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
+                        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                        viewport={{ once: true, amount: 0.6 }}
+                        transition={{ duration: 0.5, delay: pi * 0.5 + wi * 0.05, ease: "easeOut" }}
+                        style={{ display: "inline-block", marginRight: "0.28em" }}
+                      >
+                        {word}
+                      </motion.span>
+                    ))}
+                  </p>
+                ))}
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                  transition={{ duration: 1.6, delay: 3.2 }}
+                  className="display text-2xl sm:text-3xl mt-10" style={{ color: "#E8C39E" }}>
+                  Always you.
+                </motion.p>
               </div>
             </motion.div>
           </Scene>
@@ -1043,7 +1267,9 @@ export default function App() {
           <Scene>
             <div className="w-full max-w-md">
               <ChapterLabel num={photoScenes[4].chapter} title={photoScenes[4].label} />
-              <TiltPhoto src={photoScenes[4].src} caption={photoScenes[4].caption} deviceTilt={deviceTilt} />
+              <HoldSecret>
+                <TiltPhoto src={photoScenes[4].src} caption={photoScenes[4].caption} deviceTilt={deviceTilt} />
+              </HoldSecret>
               <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 0.5, y: 0 }} viewport={{ once: true }} transition={{ duration: 2, delay: 0.8 }}
                 className="text-center text-xs mt-10 eyebrow" style={{ color: "#A8C5F0" }}>the end · and also, the beginning</motion.p>
             </div>
@@ -1075,6 +1301,23 @@ export default function App() {
       <AnimatePresence>{selectedLetter && <LetterModal letter={selectedLetter} close={() => setSelectedLetter(null)} />}</AnimatePresence>
       <AnimatePresence>{selectedMemory && <MemoryModal memory={selectedMemory} close={() => setSelectedMemory(null)} />}</AnimatePresence>
       <AnimatePresence>{hugOpen && <HugExperience close={() => setHugOpen(false)} />}</AnimatePresence>
+
+      {/* SURPRISE: falling petals (once per visit, random moment) */}
+      <AnimatePresence>{petalsActive && <FallingPetals count={isMobile ? 6 : 10} />}</AnimatePresence>
+
+      {/* SURPRISE: lily secret (3 taps on the entry lily) */}
+      <AnimatePresence>
+        {lilySecretOpen && (
+          <Modal close={() => setLilySecretOpen(false)}>
+            <div className="flex justify-center mb-5"><Lily size={36} opacity={0.8} /></div>
+            <p className="eyebrow text-[10px] mb-4 text-center" style={{ color: "rgba(168,197,240,0.5)" }}>you found the secret</p>
+            <p className="display text-2xl sm:text-3xl leading-snug text-center" style={{ color: "#EAE6F0" }}>
+              You're the kind of person who taps the flower three times. That curiosity, that playfulness — it's one of the thousand reasons it's you, {NAME}. It was always going to be you.
+            </p>
+            <p className="text-xs mt-7 italic text-center" style={{ color: "rgba(234,230,240,0.4)" }}>this note exists nowhere else on the site. it's only yours.</p>
+          </Modal>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
