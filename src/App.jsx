@@ -22,82 +22,82 @@ const NAME = "Aashi";
 /* ============================ CONTENT ============================ */
 
 const balloonNotes = [
-  "You make ordinary moments feel important.",
-  "You somehow make life softer.",
-  "You are deeply loved, more than you know.",
-  "You feel like peace after chaos.",
+  "You make ordinary Tuesdays feel like plot points.",
+  "You're my favourite notification.",
+  "Peace, for me, is wherever you're rambling about your day.",
   "Could you BE any more amazing?",
-  "You are my favourite part of every day.",
-  "The world feels lighter with you in it.",
-  "You are my favourite plot twist.",
-  "You make silence feel comforting.",
-  "I hope life gives us slow mornings together.",
+  "I love you more than you love your pasta and coffee. And that's saying something.",
+  "You feel like the good kind of plot twist.",
+  "Somehow you make silence feel like a conversation.",
+  "I hope we get slow mornings, burnt toast (made by yours truly), and all of it.",
+  "You're the kind of person people build entire websites about. Clearly.",
+  "I'd pick you in every timeline. Every single one.",
 ];
 
 const moods = [
-  { title: "Need reassurance?", text: "You are deeply loved. Even on the days your mind tells you otherwise.", accent: "#A8C5F0" },
-  { title: "Missing me?", text: "I'm probably missing you too. More than I admit sometimes.", accent: "#C4B4FF" },
-  { title: "Need a smile?", text: "You're cute even when you're being dramatic.", accent: "#E8C39E" },
-  { title: "Overthinking?", text: "Your heart is safe with me. You don't have to carry every thought alone.", accent: "#B4DCDC" },
-  { title: "Need love?", text: "If I could, I'd wrap you in the safest hug right now.", accent: "#E0A8B8" },
+  { title: "Need reassurance?", text: "You are loved. Aggressively. Permanently. By me. There's nothing you could do about it, even if you tried.", accent: "#A8C5F0" },
+  { title: "Missing me?", text: "Good news: I'm probably missing you harder. It's not a competition, but I'm winning.", accent: "#C4B4FF" },
+  { title: "Need a smile?", text: "You're cute even when you're being dramatic. Especially when you're being dramatic.", accent: "#E8C39E" },
+  { title: "Overthinking?", text: "Hey. Put the thought down. Step away from the thought. We can overthink together later — it's a two-person job.", accent: "#B4DCDC" },
+  { title: "Need love?", text: "Consider this a hug in website form. The real one is coming. It's collecting interest.", accent: "#E0A8B8" },
 ];
 
 const episodeCards = [
-  { title: "The One Where I Realized", text: "Somewhere between our conversations and your smile, I realized you had quietly become very important to me." },
-  { title: "The One Where Life Felt Softer", text: "You brought a warmth into my life that I didn't even know I needed." },
-  { title: "The One Where You Stayed In My Head", text: "You became the person random things remind me of throughout the day." },
-  { title: "The One I Never Want To End", text: "If life is kind, I hope it gives me more time with you. Lots more." },
+  { title: "The One Where I Realized", text: "Somewhere between your third call in a row and you laughing at your own joke, it hit me: oh no. It's her. It was always going to be her." },
+  { title: "The One Where Life Felt Softer", text: "You showed up and suddenly my days had a soundtrack. A warm one. Slightly chaotic. Mostly you talking." },
+  { title: "The One Where You Stayed In My Head", text: "I see a dog, I think of you. I eat something good, I think of you. At this point my brain is basically your fan account." },
+  { title: "The One I Never Want To End", text: "If life is kind, it gives me decades more of this. If it's very kind — slow mornings too." },
 ];
 
 const letters = [
-  { title: "Open when you miss me", text: "Close your eyes. I'm right there. In the pause between your thoughts. I never actually leave — I just become quieter for a while. Missing me means I'm with you in a different way. Don't fight it. Sit with it. I'm sitting with it too." },
-  { title: "Open when you're overthinking", text: "Your brain is being loud again, isn't it? None of it is as big as it feels right now. Whatever you said, whatever you didn't say, whatever you're replaying — it's okay. I promise. You are allowed to put the thought down. I've got you." },
-  { title: "Open when you can't sleep", text: "Hi. It's late. Your eyes are heavy but your mind won't slow down. Here — borrow my calm for tonight. Imagine my hand resting on your back. The day is over. You did enough. You are enough. Sleep, my love." },
-  { title: "Open when you need reassurance", text: "You are not too much. You are not too little. You are not a project. You are not at risk of being left. I'm not going anywhere — not when it's hard, not when you're quiet, not when you're convinced you're unlovable. Especially not then." },
-  { title: "Open when life feels heavy", text: "Put it down. Whatever it is. Just for a few minutes. The weight you're carrying is real, but it's not yours alone. I'm here. We'll figure it out together. Either way, you are not alone in this. Not for one second." },
+  { title: "Open when you miss me", text: "Close your eyes. I'm right there — in the pause between your thoughts, in the cold side of the pillow. I never really leave; I just get quieter for a while. Missing me is allowed. I'm missing you right back, probably harder, definitely right now." },
+  { title: "Open when you're overthinking", text: "Your brain is being loud again, isn't it? Here's the truth: none of it is as big as it feels at 1am. Whatever you said, whatever you replayed for the fourth time — it's okay. You're allowed to put the thought down. I'll hold it for a while. I have big pockets." },
+  { title: "Open when you can't sleep", text: "Hi. It's late. Your eyes are heavy but your brain has decided to host a conference. Borrow my calm for tonight — imagine my hand on your back, slow circles, no agenda. The day is over. You did enough. You are enough. Sleep, my love." },
+  { title: "Open when you need reassurance", text: "You are not too much. You are not too little. You are not a rough draft I'm editing. You are not at risk of being left. I'm not going anywhere — not when it's hard, not when you're quiet, not when you're convinced you're unlovable. Especially not then. That's exactly when I dig in." },
+  { title: "Open when life feels heavy", text: "Put it down. Whatever it is. Just for a few minutes — the world can hold itself together without you supervising. The weight you're carrying is real, but it was never meant to be carried alone. I'm here. Hand me the heavy end." },
 ];
 
 const lateNightThoughts = [
-  "I wonder if you know how often you cross my mind.",
-  "You made life feel less lonely somehow.",
-  "You feel strangely familiar to my soul.",
-  "Sometimes I catch myself smiling for no reason. It's always you.",
-  "I hope someone has told you today how rare you are.",
-  "Loving you doesn't feel like a decision. It feels like remembering.",
-  "You are the softest part of my day.",
+  "I wonder if you know how often you cross my mind. It's basically a commute at this point.",
+  "You made life feel less lonely without even trying.",
+  "You feel familiar to my soul. Like I've known you across a few lifetimes.",
+  "Sometimes I catch myself smiling at nothing. It's never nothing. It's you.",
+  "I hope someone told you today how rare you are. If not — consider it done.",
+  "Loving you doesn't feel like a decision. It feels like remembering something I always knew.",
+  "You are the softest part of my day. Every day. No contest.",
 ];
 
 // Cancer constellation — Aashi's zodiac. 5 real stars + 3 memory stars.
 const stars = [
-  { x: 30, y: 80, lead: true, name: "Acubens", text: "You make me want to be gentler with everything.", connects: [1] },
-  { x: 42, y: 64, lead: true, name: "Altarf", text: "Being loved by you, Aashi, feels like one of life's rarest things.", connects: [7] },
-  { x: 50, y: 46, lead: true, name: "Asellus Australis", text: "The first time you laughed at something I said — I knew.", connects: [3, 4] },
-  { x: 72, y: 24, lead: true, name: "Asellus Borealis", text: "Some people feel like home. You feel like mine.", connects: [] },
-  { x: 24, y: 20, lead: true, name: "Tegmine", text: "In every version of this life, I'd still pick you.", connects: [] },
-  { x: 36, y: 34, name: "", text: "I could listen to you talk for hours and still want more.", connects: [] },
-  { x: 62, y: 34, name: "", text: "There's something beautiful about the way you exist.", connects: [] },
-  { x: 46, y: 55, name: "", text: "You are the reason I believe in slow, real love.", connects: [2] },
+  { x: 30, y: 80, lead: true, name: "Acubens", text: "You make me want to be gentler — with the world, with myself, with everything.", connects: [1] },
+  { x: 42, y: 64, lead: true, name: "Altarf", text: "Being loved by you, baby, is the rarest thing I own.", connects: [7] },
+  { x: 50, y: 46, lead: true, name: "Asellus Australis", text: "The first time you laughed at something I said — that was it. Game over.", connects: [3, 4] },
+  { x: 72, y: 24, lead: true, name: "Asellus Borealis", text: "Some people feel like home. You feel like home with the lights left on for me.", connects: [] },
+  { x: 24, y: 20, lead: true, name: "Tegmine", text: "In every version of this life, I'd find you. I might be late sometimes (as usual). But I'd find you.", connects: [] },
+  { x: 36, y: 34, name: "", text: "I could listen to you talk for hours. I have. I plan to keep doing it.", connects: [] },
+  { x: 62, y: 34, name: "", text: "There's something about the way you exist that makes everything else make sense.", connects: [] },
+  { x: 46, y: 55, name: "", text: "You're the reason I believe in slow, sure, stubborn love.", connects: [2] },
 ];
 
 const tinyThings = [
-  "The way you say 'hmm' while thinking.",
-  "How you go quiet when something matters to you.",
-  "Your random expressions over the smallest things.",
-  "The way you text in bursts when you're excited.",
-  "Your late-night energy that I secretly love.",
-  "How you make even ordinary things sound like a story.",
-  "How your name has started to feel like a soft place.",
+  "The way you say 'Tu du du Tu du du' when you're doing something xD",
+  "How you become a kid in small small things, absolutely loveeeeee it.",
+  "Your late-night energy and 'no sleep still 100% energy days'. Where does it come from. Science needs to know.",
+  "How you think about me and include me in your daily schedule.",
+  "How your name and notification became my favourite part without asking my permission.",
+  "How your eyes roll up when you like something you are eating.",
+  "Your HAIR FLIPS! Stunnin HAIR FLIPS YAAAAAR!",
 ];
 
 const promises = [
-  "I promise to always answer when you call. Even when I shouldn't be on my phone.",
-  "I promise to never let a fight end without one of us reaching out first.",
-  "I promise to keep noticing the small things — the new earrings, the haircut, the mood you're hiding.",
-  "I promise to never make you feel like a burden, especially on the days you feel like one.",
-  "I promise to be honest with you, even when the easy thing is to stay quiet.",
-  "I promise to choose you again on the hard days. Not just the good ones.",
-  "I promise to remember what matters to you, and care about it even when you forget.",
-  "I promise to grow with you. Not away from you.",
+  "I promise to always answer when you call. Yes, even mid-meeting. Especially mid-meeting.",
+  "I promise no fight ends in silence. One of us reaches out. It's usually me. I've made peace with this.",
+  "I promise to notice the small things — the new earrings, the haircut, the mood you think you're hiding.",
+  "I promise you'll never feel like a burden. Not on your worst day. Not ever.",
+  "I promise honesty, even when a comfortable lie would be easier.",
+  "I promise to choose you on the hard days. The boring days. The 2am days. All of them.",
+  "I promise to remember what matters to you — including the things you forget you told me.",
+  "I promise to grow with you, not away from you. Like two plants sharing a pot. But romantic.",
 ];
 
 const songs = [
@@ -113,10 +113,10 @@ const songs = [
 
 // Photo scenes — each woven between chapters
 const photoScenes = [
-  { src: "/photo-plane.jpeg", caption: "of all the places I've been, you're the one I call home.", chapter: "iii", label: "somewhere in the clouds" },
+  { src: "/photo-plane.jpeg", caption: "of all the places I've been, my favourite is next to you.", chapter: "iii", label: "somewhere in the clouds" },
   { src: "/photo-lights.jpeg", caption: "the nights got softer once they had you in them.", chapter: "vii", label: "that evening" },
-  { src: "/photo-flowers.jpeg", caption: "you, and everything in bloom around you.", chapter: "x", label: "a perfect saturday" },
-  { src: "/photo-masks.jpeg", caption: "even the ordinary mornings feel like something with you.", chapter: "xii", label: "a perfect thursday" },
+  { src: "/photo-flowers.jpeg", caption: "you, casually outshining an entire wall of flowers.", chapter: "x", label: "a perfect saturday" },
+  { src: "/photo-masks.jpeg", caption: "even our ridiculous looks like love to me.", chapter: "xii", label: "a perfect thursday" },
   { src: "/photo-hug.jpeg", caption: "and when I hold you, the whole world goes quiet.", chapter: "xv", label: "us" },
 ];
 
@@ -588,11 +588,11 @@ function HugExperience({ close }) {
   const [closing, setClosing] = useState(false);
   const [aftermath, setAftermath] = useState(false);
   const lines = [
-    "Hey.",
-    "I know some days feel heavier than others.",
-    "But you never have to go through them alone.",
-    "Stay here for a few seconds. Let me hold the world still for you.",
-    `I've got you, ${NAME}.`,
+    "Hey. It's me.",
+    "I know some days sit heavier than others.",
+    "You don't have to carry them alone. That was never the deal.",
+    "Stay right here for a few seconds. Let me hold the world still for you.",
+    `I've got you, ${NAME}. I've always got you.`,
   ];
 
   useEffect(() => {
@@ -682,7 +682,7 @@ function HugExperience({ close }) {
 
 /* ============================ CONSTELLATION SCENE ============================ */
 
-function ConstellationScene({ onSelect }) {
+function ConstellationScene({ onSelect, onComplete }) {
   const [found, setFound] = useState([]);
   const [shoot, setShoot] = useState(0);
   // 3D depth field: the whole constellation tilts slowly + responds to pointer
@@ -703,7 +703,11 @@ function ConstellationScene({ onSelect }) {
 
   const tap = (s, i) => {
     onSelect(s);
-    if (!found.includes(i)) setFound([...found, i]);
+    if (!found.includes(i)) {
+      const next = [...found, i];
+      setFound(next);
+      if (next.length === stars.length && onComplete) onComplete();
+    }
   };
 
   let progress = "tap the stars to find me.";
@@ -713,19 +717,6 @@ function ConstellationScene({ onSelect }) {
 
   return (
     <div className="relative w-full max-w-2xl" style={{ zIndex: 2 }}>
-      {/* SURPRISE: when all stars found, the whole sky briefly warms */}
-      <AnimatePresence>
-        {found.length === stars.length && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.6, 0.35, 0] }}
-            transition={{ duration: 6, times: [0, 0.25, 0.6, 1] }}
-            className="fixed inset-0 pointer-events-none"
-            style={{ zIndex: 5, background: "radial-gradient(circle at center, rgba(232,195,158,0.25) 0%, rgba(224,168,184,0.12) 40%, transparent 75%)" }}
-          />
-        )}
-      </AnimatePresence>
-
       <ChapterLabel num="ix" title="your stars" />
       <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)", color: "#EAE6F0" }}>
         In every universe,
@@ -813,8 +804,8 @@ function Scene({ children, className = "" }) {
       style={{ scrollSnapAlign: "start", minHeight: "100dvh", position: "relative" }}
     >
       <motion.div
-        initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
-        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.25 }}
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         className="w-full flex flex-col items-center justify-center"
@@ -834,7 +825,14 @@ export default function App() {
   const [lilyTaps, setLilyTaps] = useState(0);
   const [lilySecretOpen, setLilySecretOpen] = useState(false);
   const [petalsActive, setPetalsActive] = useState(false);
+  const [skyGlow, setSkyGlow] = useState(false);
+  const [promiseBurst, setPromiseBurst] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  const triggerSkyGlow = () => {
+    setSkyGlow(true);
+    setTimeout(() => setSkyGlow(false), 6500);
+  };
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
@@ -869,6 +867,15 @@ export default function App() {
   const { scrollYProgress } = useScroll({ container: scrollRef });
   const deviceTilt = useDeviceTilt(tiltEnabled);
   const greeting = useRef(getGreeting()).current;
+
+  // Promise jar completion → unmissable full-screen celebration
+  useEffect(() => {
+    if (flipped.length === promises.length && promises.length > 0) {
+      setPromiseBurst(true);
+      const t = setTimeout(() => setPromiseBurst(false), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [flipped]);
 
   const playerRef = useRef(null);
   const apiReadyRef = useRef(false);
@@ -1039,7 +1046,7 @@ export default function App() {
               </motion.h1>
               <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.6, delay: 1.4 }}
                 className="mt-10 max-w-sm leading-relaxed text-[15px] sm:text-base" style={{ color: "rgba(234,230,240,0.55)" }}>
-                I couldn't fit everything I feel for you into messages, {NAME}. So I made this instead.
+                I couldn't fit everything I feel for you into messages, {NAME}. So I built it a home instead.
               </motion.p>
               <motion.button initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.4, delay: 1.9 }}
                 whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} onClick={handleEnter}
@@ -1064,7 +1071,7 @@ export default function App() {
           <Scene>
             <ChapterLabel num="i" title="too big for texts" />
             <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Some feelings are too big for texts.</h2>
-            <p className="text-center text-sm mb-10" style={{ color: "rgba(234,230,240,0.5)" }}>tap the balloons.</p>
+            <p className="text-center text-sm mb-10" style={{ color: "rgba(234,230,240,0.5)" }}>so I put them in balloons. tap them.</p>
             <div className="relative w-full max-w-3xl" style={{ height: "min(55vh, 460px)" }}>
               {balloonNotes.map((note, i) => <Balloon key={i} note={note} i={i} onPop={(n) => setSelectedNote(n)} />)}
             </div>
@@ -1075,7 +1082,7 @@ export default function App() {
             <div className="w-full max-w-5xl">
               <ChapterLabel num="ii" title="however you feel" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>What do you need right now?</h2>
-              <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>there's something here for every mood.</p>
+              <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>there's something here for every version of you.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {moods.map((m, i) => (
                   <motion.button key={i} whileHover={{ y: -8, scale: 1.03 }} whileTap={{ scale: 0.98 }}
@@ -1118,7 +1125,7 @@ export default function App() {
             <div className="w-full max-w-5xl">
               <ChapterLabel num="v" title="for whenever" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Open when…</h2>
-              <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>letters for the moments you need them.</p>
+              <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>letters for the moments I can't be there fast enough.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {letters.map((l, i) => (
                   <motion.button key={i} whileHover={{ y: -8, scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setSelectedLetter(l)}
@@ -1138,7 +1145,7 @@ export default function App() {
             <div className="w-full">
               <ChapterLabel num="vi" title="late night" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Late night thoughts.</h2>
-              <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>the things I think when the world is quiet.</p>
+              <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>the things I think when the world goes quiet.</p>
               <div className="overflow-x-auto no-scrollbar px-4" style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
                 <div className="flex gap-4 pb-4 mx-auto" style={{ width: "max-content" }}>
                   {lateNightThoughts.map((t, i) => (
@@ -1166,7 +1173,7 @@ export default function App() {
           </Scene>
 
           {/* 9 · Constellation */}
-          <Scene><ConstellationScene onSelect={setSelectedMemory} /></Scene>
+          <Scene><ConstellationScene onSelect={setSelectedMemory} onComplete={triggerSkyGlow} /></Scene>
 
           {/* 10 · Photo: flowers */}
           <Scene><div className="w-full max-w-md"><ChapterLabel num={photoScenes[2].chapter} title={photoScenes[2].label} /><TiltPhoto src={photoScenes[2].src} caption={photoScenes[2].caption} deviceTilt={deviceTilt} /></div></Scene>
@@ -1178,7 +1185,7 @@ export default function App() {
                 <div className="hidden lg:block mb-6"><Lily size={50} opacity={0.4} /></div>
                 <ChapterLabel num="xi" title="the small things" />
                 <h2 className="display font-light leading-tight mb-4" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Tiny things I love about you.</h2>
-                <p className="italic" style={{ color: "rgba(234,230,240,0.55)" }}>the little things no one else would notice.</p>
+                <p className="italic" style={{ color: "rgba(234,230,240,0.55)" }}>the little things no one else would clock. I clock everything.</p>
               </div>
               <div className="lg:col-span-7 space-y-4">
                 {tinyThings.map((t, i) => (
@@ -1201,7 +1208,7 @@ export default function App() {
             <div className="w-full max-w-5xl">
               <ChapterLabel num="xiii" title="my promises" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>A jar of promises.</h2>
-              <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>tap one whenever you need reminding.</p>
+              <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>tap one whenever you need reminding. they don't expire.</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {promises.map((p, i) => {
                   const isF = flipped.includes(i);
@@ -1267,11 +1274,11 @@ export default function App() {
               <h2 className="display font-light text-center mb-10" style={{ fontSize: "clamp(2.5rem,8vw,4rem)" }}>To {NAME},</h2>
               <div className="space-y-6 text-base sm:text-lg leading-relaxed" style={{ color: "rgba(234,230,240,0.8)" }}>
                 {[
-                  "Loving you has changed the way I experience life.",
-                  "Somehow, the world became softer after you entered it.",
-                  "You make ordinary days feel meaningful. You make silence feel comforting. You make happiness feel easy.",
+                  "Loving you has quietly rearranged my whole life. In the best way. Without filing any paperwork.",
+                  "The world got softer after you walked into it. I checked. It's measurable.",
+                  "You make ordinary days feel meaningful, silence feel comfortable, and happiness feel easy. That's three superpowers. Show-off.",
                   `I hope you always remember how deeply appreciated, admired, and loved you are, ${NAME}.`,
-                  "Thank you for existing in my life.",
+                  "Thank you for existing. And for choosing to do it near me.",
                 ].map((para, pi) => (
                   <p key={pi}>
                     {para.split(" ").map((word, wi) => (
@@ -1352,6 +1359,55 @@ export default function App() {
 
       {/* SURPRISE: falling petals (once per visit, random moment) */}
       <AnimatePresence>{petalsActive && <FallingPetals count={isMobile ? 6 : 10} />}</AnimatePresence>
+
+      {/* SURPRISE: sky warms when every star is found — root level, nothing can trap it */}
+      <AnimatePresence>
+        {skyGlow && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.7, 0.4, 0] }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 6, times: [0, 0.25, 0.6, 1] }}
+            className="fixed inset-0 pointer-events-none"
+            style={{ zIndex: 55, background: "radial-gradient(circle at center, rgba(232,195,158,0.35) 0%, rgba(224,168,184,0.18) 40%, transparent 75%)" }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* SURPRISE: full-screen gold burst when every promise is opened */}
+      <AnimatePresence>
+        {promiseBurst && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 pointer-events-none flex items-center justify-center"
+            style={{ zIndex: 55 }}
+          >
+            <div className="absolute inset-0" style={{ background: "radial-gradient(circle at center, rgba(232,195,158,0.2) 0%, transparent 65%)" }} />
+            {[...Array(isMobile ? 18 : 28)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                animate={{
+                  x: Math.cos((i / (isMobile ? 18 : 28)) * Math.PI * 2) * (110 + (i % 5) * 55),
+                  y: Math.sin((i / (isMobile ? 18 : 28)) * Math.PI * 2) * (110 + (i % 5) * 55),
+                  opacity: 0, scale: 0,
+                }}
+                transition={{ duration: 2.2, ease: "easeOut", delay: i * 0.03 }}
+                className="absolute rounded-full"
+                style={{ width: 6 + (i % 3) * 3, height: 6 + (i % 3) * 3, background: "radial-gradient(circle,#fff,#ffe5b0)", boxShadow: "0 0 14px rgba(232,195,158,0.9)" }}
+              />
+            ))}
+            <motion.p
+              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5, duration: 1.2 }}
+              className="display italic text-2xl sm:text-4xl text-center px-8 relative"
+              style={{ color: "#EAE6F0", textShadow: "0 0 40px rgba(232,195,158,0.6)" }}
+            >
+              every single one is yours, {NAME}.
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* SURPRISE: lily secret (3 taps on the entry lily) */}
       <AnimatePresence>
