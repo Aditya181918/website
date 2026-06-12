@@ -1137,6 +1137,232 @@ function ConstellationScene({ onSelect, onComplete }) {
   );
 }
 
+/* ============================ FIREFLY JAR — a jar of promises ============================ */
+// A glowing glass jar full of fireflies. Each firefly is a promise.
+// Tap the jar (or a firefly) → the next firefly floats up, out, and blooms
+// into its promise. The jar empties as she opens them; when all are out,
+// they drift above the jar as a small constellation of released promises.
+
+const PROMISE_GLOWS = ["#E8C39E", "#A8C5F0", "#E0A8B8", "#C4B4FF", "#FFE5B0", "#B4DCDC", "#E8C39E", "#E0A8B8"];
+
+function FireflyJar({ promises, onAllOpened }) {
+  const [opened, setOpened] = useState([]);     // indices opened
+  const [active, setActive] = useState(null);   // promise currently blooming
+  const allDone = opened.length === promises.length;
+
+  // stable firefly motion params per promise
+  const flies = useRef(
+    promises.map((_, i) => ({
+      cx: 18 + (i * 9.7) % 64,        // % within jar body
+      cy: 30 + (i * 13.3) % 55,
+      phase: (i * 1.3) % (Math.PI * 2),
+      amp: 4 + (i % 3) * 2.5,
+      spd: 0.6 + (i % 4) * 0.18,
+      glow: PROMISE_GLOWS[i % PROMISE_GLOWS.length],
+    }))
+  ).current;
+
+  const openNext = () => {
+    const next = promises.findIndex((_, i) => !opened.includes(i));
+    if (next === -1) return;
+    setActive(next);
+  };
+
+  const confirmOpened = () => {
+    if (active === null) return;
+    if (!opened.includes(active)) {
+      const nextOpened = [...opened, active];
+      setOpened(nextOpened);
+      if (nextOpened.length === promises.length && onAllOpened) onAllOpened();
+    }
+    setActive(null);
+  };
+
+  return (
+    <div className="relative w-full flex flex-col items-center">
+      {/* released fireflies float above once all opened */}
+      <div className="relative w-full flex justify-center" style={{ height: allDone ? 90 : 0, transition: "height 1.2s ease" }}>
+        <AnimatePresence>
+          {allDone && flies.map((f, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0.4, 1, 0.4],
+                x: Math.cos((i / flies.length) * Math.PI * 2) * 120,
+                y: Math.sin((i / flies.length) * Math.PI * 2) * 32,
+              }}
+              transition={{
+                opacity: { duration: 2.5 + (i % 3), repeat: Infinity, ease: "easeInOut" },
+                x: { duration: 2, ease: "easeOut" },
+                y: { duration: 2, ease: "easeOut" },
+              }}
+              className="absolute rounded-full"
+              style={{
+                top: 40, width: 9, height: 9,
+                background: `radial-gradient(circle, #fff, ${f.glow})`,
+                boxShadow: `0 0 16px ${f.glow}, 0 0 6px #fff`,
+              }}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* THE JAR */}
+      <motion.button
+        onClick={openNext}
+        disabled={allDone}
+        whileTap={!allDone ? { scale: 0.97 } : {}}
+        className="relative"
+        style={{ width: "min(74vw, 280px)", height: "min(88vw, 340px)", cursor: allDone ? "default" : "pointer" }}
+        aria-label="open a promise"
+      >
+        {/* ambient glow under the jar */}
+        <motion.div
+          animate={{ opacity: allDone ? [0.15, 0.3, 0.15] : [0.3, 0.55, 0.3] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute left-1/2 -translate-x-1/2 rounded-full pointer-events-none"
+          style={{
+            bottom: "6%", width: "80%", height: "40%",
+            background: "radial-gradient(ellipse, rgba(232,195,158,0.5) 0%, transparent 70%)",
+            filter: "blur(24px)",
+          }}
+        />
+
+        <svg viewBox="0 0 200 260" className="absolute inset-0 w-full h-full" style={{ overflow: "visible" }}>
+          <defs>
+            <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.16)" />
+              <stop offset="45%" stopColor="rgba(255,255,255,0.05)" />
+              <stop offset="100%" stopColor="rgba(168,197,240,0.10)" />
+            </linearGradient>
+            <linearGradient id="corkGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#caa57a" />
+              <stop offset="100%" stopColor="#a07f54" />
+            </linearGradient>
+            <clipPath id="jarClip">
+              <path d="M55 70 Q55 64 62 62 L138 62 Q145 64 145 70 L150 230 Q150 248 132 248 L68 248 Q50 248 50 230 Z" />
+            </clipPath>
+          </defs>
+
+          {/* cork */}
+          <rect x="74" y="40" width="52" height="26" rx="6" fill="url(#corkGrad)" />
+          <rect x="70" y="56" width="60" height="12" rx="4" fill="#b8946a" />
+
+          {/* glass body */}
+          <path
+            d="M55 70 Q55 64 62 62 L138 62 Q145 64 145 70 L150 230 Q150 248 132 248 L68 248 Q50 248 50 230 Z"
+            fill="url(#glassGrad)" stroke="rgba(232,195,158,0.45)" strokeWidth="1.5"
+          />
+          {/* glass highlight */}
+          <path d="M66 74 L62 232 Q62 240 70 240" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="3" strokeLinecap="round" opacity="0.5" />
+          <path d="M134 76 L138 226" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="2" strokeLinecap="round" />
+
+          {/* fireflies inside (only those not yet opened) */}
+          <g clipPath="url(#jarClip)">
+            {flies.map((f, i) => {
+              if (opened.includes(i) || active === i) return null;
+              const x = 50 + (f.cx / 100) * 100;
+              const y = 70 + (f.cy / 100) * 170;
+              return <Firefly key={i} x={x} y={y} f={f} />;
+            })}
+          </g>
+        </svg>
+
+        {/* count hint */}
+        {!allDone && (
+          <p className="absolute left-0 right-0 text-[11px] eyebrow" style={{ bottom: -28, color: "rgba(234,230,240,0.4)" }}>
+            {opened.length === 0 ? "tap the jar" : `${opened.length} of ${promises.length} freed`}
+          </p>
+        )}
+      </motion.button>
+
+      {/* blooming promise */}
+      <AnimatePresence>
+        {active !== null && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center px-6"
+            style={{ zIndex: 100, background: "rgba(5,8,22,0.7)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={confirmOpened}
+          >
+            {/* the firefly that rises */}
+            <motion.div
+              initial={{ y: 120, scale: 0.4, opacity: 0 }}
+              animate={{ y: -10, scale: 1, opacity: 1 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute rounded-full"
+              style={{
+                width: 14, height: 14, top: "32%",
+                background: `radial-gradient(circle, #fff, ${flies[active].glow})`,
+                boxShadow: `0 0 30px ${flies[active].glow}, 0 0 12px #fff`,
+              }}
+            />
+            <motion.div
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ delay: 0.5, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              className="relative max-w-md w-full p-9 rounded-[26px] grain text-center"
+              style={{
+                background: `linear-gradient(150deg, ${flies[active].glow}22, rgba(20,20,54,0.95))`,
+                border: `1px solid ${flies[active].glow}44`,
+                boxShadow: `0 30px 90px rgba(0,0,0,0.6), 0 0 40px ${flies[active].glow}22`,
+              }}
+            >
+              <div
+                className="mx-auto mb-5 rounded-full"
+                style={{ width: 12, height: 12, background: `radial-gradient(circle,#fff,${flies[active].glow})`, boxShadow: `0 0 20px ${flies[active].glow}` }}
+              />
+              <p className="eyebrow text-[10px] mb-4" style={{ color: "rgba(234,230,240,0.45)" }}>a promise</p>
+              <p className="hand leading-snug" style={{ fontSize: "clamp(1.6rem, 5.5vw, 2.3rem)", color: "#FBF4E9" }}>
+                {promises[active]}
+              </p>
+              <p className="text-[11px] mt-6 italic" style={{ color: "rgba(234,230,240,0.4)" }}>tap anywhere to keep it</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* finale line */}
+      <AnimatePresence>
+        {allDone && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 1.4 }} className="text-center mt-10">
+            <p className="display italic text-lg sm:text-xl" style={{ color: "#E8C39E" }}>
+              every promise, set free. every single one is yours, {NAME}.
+            </p>
+            <p className="text-xs mt-2 italic" style={{ color: "rgba(234,230,240,0.5)" }}>and I intend to keep them all.</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// a single drifting firefly inside the jar (SVG)
+function Firefly({ x, y, f }) {
+  return (
+    <g transform={`translate(${x} ${y})`}>
+      <motion.g
+        animate={{
+          x: [0, f.amp * 2, -f.amp, 0],
+          y: [0, -f.amp, f.amp * 1.5, 0],
+        }}
+        transition={{ duration: 6 / f.spd, repeat: Infinity, ease: "easeInOut", delay: f.phase }}
+      >
+        <motion.circle
+          animate={{ opacity: [0.4, 1, 0.4], r: [2.4, 3.4, 2.4] }}
+          transition={{ duration: 1.6 + f.spd, repeat: Infinity, ease: "easeInOut", delay: f.phase }}
+          cx={0} cy={0} r={3}
+          fill="#fff"
+          style={{ filter: `drop-shadow(0 0 5px ${f.glow}) drop-shadow(0 0 9px ${f.glow})` }}
+        />
+      </motion.g>
+    </g>
+  );
+}
+
 /* ============================ SCENE WRAPPER ============================ */
 
 function Scene({ children, className = "", tall = false }) {
@@ -1196,7 +1422,6 @@ export default function App() {
   const [selectedMood, setSelectedMood] = useState(null);
   const [selectedLetter, setSelectedLetter] = useState(null);
   const [selectedNote, setSelectedNote] = useState(null);
-  const [flipped, setFlipped] = useState([]);
   const [hugOpen, setHugOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
   const [currentSong, setCurrentSong] = useState(null);
@@ -1214,14 +1439,13 @@ export default function App() {
   const deviceTilt = useDeviceTilt(tiltEnabled);
   const greeting = useRef(getGreeting()).current;
 
-  // Promise jar completion → unmissable full-screen celebration
+  // Promise jar completion → auto-clear the full-screen celebration after a few seconds
   useEffect(() => {
-    if (flipped.length === promises.length && promises.length > 0) {
-      setPromiseBurst(true);
+    if (promiseBurst) {
       const t = setTimeout(() => setPromiseBurst(false), 5000);
       return () => clearTimeout(t);
     }
-  }, [flipped]);
+  }, [promiseBurst]);
 
   const playerRef = useRef(null);
   const apiReadyRef = useRef(false);
@@ -1538,64 +1762,13 @@ export default function App() {
             </div>
           </Scene>
 
-                    {/* 9 · Promise Jar */}
+          {/* 9 · Promise Jar — fireflies */}
           <Scene>
-            <div className="w-full max-w-5xl">
+            <div className="w-full max-w-lg flex flex-col items-center">
               <ChapterLabel num="viii" title="my promises" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>A jar of promises.</h2>
-              <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>tap one whenever you need reminding. they don't expire.</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {promises.map((p, i) => {
-                  const isF = flipped.includes(i);
-                  return (
-                    <button key={i} onClick={() => { if (!isF) setFlipped([...flipped, i]); }} className="relative w-full" style={{ aspectRatio: "3/4", perspective: 1000 }}>
-                      <motion.div animate={{ rotateY: isF ? 180 : 0 }} transition={{ duration: 0.8, ease: "easeInOut" }} className="relative w-full h-full" style={{ transformStyle: "preserve-3d" }}>
-                        <div className="absolute inset-0 rounded-[20px] flex flex-col items-center justify-center p-4 grain" style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                          <Lily size={22} opacity={0.5} />
-                          <p className="display italic text-base mt-3" style={{ color: "rgba(234,230,240,0.7)" }}>a promise</p>
-                          <p className="text-[10px] mt-1" style={{ color: "rgba(234,230,240,0.3)" }}>tap to open</p>
-                        </div>
-                        <div className="absolute inset-0 rounded-[20px] flex items-center justify-center p-4 grain" style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", transform: "rotateY(180deg)", background: "linear-gradient(145deg, rgba(232,195,158,0.2), rgba(255,255,255,0.05))", border: "1px solid rgba(232,195,158,0.25)" }}>
-                          <p className="text-xs sm:text-sm leading-relaxed text-left" style={{ color: "#EAE6F0" }}>{p}</p>
-                        </div>
-                      </motion.div>
-                    </button>
-                  );
-                })}
-              </div>
-              {flipped.length > 0 && flipped.length < promises.length && (
-                <p className="text-center text-xs mt-8 italic" style={{ color: "rgba(234,230,240,0.4)" }}>{flipped.length} of {promises.length} opened.</p>
-              )}
-              {/* SURPRISE: finale when every promise is opened */}
-              <AnimatePresence>
-                {flipped.length === promises.length && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative text-center mt-8">
-                    {/* gold particle burst */}
-                    {[...Array(16)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-                        animate={{
-                          x: Math.cos((i / 16) * Math.PI * 2) * (60 + (i % 4) * 30),
-                          y: Math.sin((i / 16) * Math.PI * 2) * (60 + (i % 4) * 30) - 30,
-                          opacity: 0, scale: 0,
-                        }}
-                        transition={{ duration: 1.8, ease: "easeOut", delay: i * 0.04 }}
-                        className="absolute left-1/2 top-0 rounded-full"
-                        style={{ width: 5 + (i % 3) * 2, height: 5 + (i % 3) * 2, background: "radial-gradient(circle,#fff,#ffe5b0)", boxShadow: "0 0 10px rgba(232,195,158,0.9)" }}
-                      />
-                    ))}
-                    <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 1.4 }}
-                      className="display italic text-lg sm:text-xl" style={{ color: "#E8C39E" }}>
-                      every promise opened. every single one is yours, {NAME}.
-                    </motion.p>
-                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} transition={{ delay: 1.8, duration: 1.4 }}
-                      className="text-xs mt-2 italic" style={{ color: "rgba(234,230,240,0.5)" }}>
-                      and I intend to keep them all.
-                    </motion.p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <p className="text-center text-sm mb-12 italic" style={{ color: "rgba(234,230,240,0.5)" }}>each little light is one. open them, one by one.</p>
+              <FireflyJar promises={promises} onAllOpened={() => setPromiseBurst(true)} />
             </div>
           </Scene>
 
@@ -1794,7 +1967,8 @@ function Balloon({ note, i, onPop }) {
 function StyleTag() {
   return (
     <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@300;400;500&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@300;400;500&family=Caveat:wght@400;500;600&display=swap');
+      .hand { font-family: 'Caveat', cursive; }
       .display { font-family: 'Fraunces', serif; }
       .body-font { font-family: 'Inter', sans-serif; }
       .eyebrow { font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.32em; font-weight: 400; }
