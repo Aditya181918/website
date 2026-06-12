@@ -16,6 +16,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import { Music2, X, Hand, Volume2, VolumeX } from "lucide-react";
+import * as THREE from "three";
 
 const NAME = "Aashi";
 
@@ -316,6 +317,235 @@ function HoldSecret({ children }) {
 }
 
 /* ============================ AMBIENT (parallax) ============================ */
+
+/* ============================ COSMOS — Three.js living background ============================ */
+// A continuous dream-cosmos the camera drifts through as she scrolls.
+// Layered: deep starfield, drifting dust, soft nebula clouds, floating light motes.
+// Reads a scroll-progress ref (0..1) to push the camera forward through the world.
+
+function Cosmos({ progressRef, isMobile }) {
+  const mountRef = useRef(null);
+  const rafRef = useRef(0);
+  const stateRef = useRef(null);
+
+  useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount) return;
+
+    const W = () => mount.clientWidth;
+    const H = () => mount.clientHeight;
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x0a0e27, 0.0009);
+
+    const camera = new THREE.PerspectiveCamera(62, W() / H(), 0.1, 2200);
+    camera.position.set(0, 0, 600);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+    renderer.setSize(W(), H());
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 2 : 2.5));
+    mount.appendChild(renderer.domElement);
+
+    // ── palette ──
+    const GOLD = new THREE.Color(0xe8c39e);
+    const ROSE = new THREE.Color(0xe0a8b8);
+    const MOON = new THREE.Color(0xa8c5f0);
+    const WHITE = new THREE.Color(0xffffff);
+    const LAV = new THREE.Color(0xc4b4ff);
+
+    // ── helper: circular sprite texture for soft points ──
+    const makeDisc = () => {
+      const c = document.createElement("canvas");
+      c.width = c.height = 64;
+      const g = c.getContext("2d");
+      const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, "rgba(255,255,255,1)");
+      grad.addColorStop(0.25, "rgba(255,255,255,0.9)");
+      grad.addColorStop(0.5, "rgba(255,255,255,0.35)");
+      grad.addColorStop(1, "rgba(255,255,255,0)");
+      g.fillStyle = grad;
+      g.fillRect(0, 0, 64, 64);
+      const t = new THREE.CanvasTexture(c);
+      return t;
+    };
+    const disc = makeDisc();
+
+    const groups = [];
+
+    // ── deep starfield (the vast backdrop) ──
+    const starCount = isMobile ? 2600 : 5200;
+    {
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(starCount * 3);
+      const col = new Float32Array(starCount * 3);
+      const sizes = new Float32Array(starCount);
+      for (let i = 0; i < starCount; i++) {
+        // spread through a long tunnel of space along -z
+        const r = 200 + Math.random() * 900;
+        const theta = Math.random() * Math.PI * 2;
+        const y = (Math.random() - 0.5) * 1400;
+        pos[i * 3] = Math.cos(theta) * r;
+        pos[i * 3 + 1] = y;
+        pos[i * 3 + 2] = -Math.random() * 2000 + 300;
+        // mostly cool white-blue, occasional warm
+        const pick = Math.random();
+        const c = pick > 0.86 ? GOLD : pick > 0.72 ? ROSE : pick > 0.5 ? MOON : WHITE;
+        col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+        sizes[i] = 1 + Math.random() * 3.5;
+      }
+      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+      geo.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
+      const mat = new THREE.PointsMaterial({
+        size: 3.2, map: disc, vertexColors: true, transparent: true,
+        opacity: 0.9, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
+      });
+      const pts = new THREE.Points(geo, mat);
+      scene.add(pts);
+      groups.push({ obj: pts, kind: "stars" });
+    }
+
+    // ── drifting dust motes (closer, parallax) ──
+    const dustCount = isMobile ? 700 : 1400;
+    {
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(dustCount * 3);
+      for (let i = 0; i < dustCount; i++) {
+        pos[i * 3] = (Math.random() - 0.5) * 1200;
+        pos[i * 3 + 1] = (Math.random() - 0.5) * 1000;
+        pos[i * 3 + 2] = -Math.random() * 1600 + 400;
+      }
+      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({
+        size: 5, map: disc, color: GOLD, transparent: true,
+        opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true,
+      });
+      const pts = new THREE.Points(geo, mat);
+      scene.add(pts);
+      groups.push({ obj: pts, kind: "dust" });
+    }
+
+    // ── soft nebula clouds (big glowing sprites) ──
+    const nebula = [];
+    {
+      const cloudColors = [GOLD, ROSE, MOON, LAV];
+      const n = isMobile ? 7 : 12;
+      for (let i = 0; i < n; i++) {
+        const c = cloudColors[i % cloudColors.length];
+        const mat = new THREE.SpriteMaterial({
+          map: disc, color: c, transparent: true, opacity: 0.10,
+          depthWrite: false, blending: THREE.AdditiveBlending,
+        });
+        const s = new THREE.Sprite(mat);
+        s.position.set((Math.random() - 0.5) * 1000, (Math.random() - 0.5) * 800, -Math.random() * 1800);
+        const scl = 300 + Math.random() * 500;
+        s.scale.set(scl, scl, 1);
+        scene.add(s);
+        nebula.push(s);
+      }
+    }
+
+    // ── floating light motes (the "alive" feeling — slow bobbing orbs) ──
+    const motes = [];
+    {
+      const n = isMobile ? 14 : 26;
+      for (let i = 0; i < n; i++) {
+        const c = Math.random() > 0.5 ? GOLD : MOON;
+        const mat = new THREE.SpriteMaterial({
+          map: disc, color: c, transparent: true, opacity: 0.7,
+          depthWrite: false, blending: THREE.AdditiveBlending,
+        });
+        const s = new THREE.Sprite(mat);
+        s.position.set((Math.random() - 0.5) * 700, (Math.random() - 0.5) * 500, -Math.random() * 1400 + 200);
+        const scl = 6 + Math.random() * 16;
+        s.scale.set(scl, scl, 1);
+        s.userData = { baseY: s.position.y, phase: Math.random() * Math.PI * 2, amp: 10 + Math.random() * 30, spd: 0.3 + Math.random() * 0.6 };
+        scene.add(s);
+        motes.push(s);
+      }
+    }
+
+    stateRef.current = { scene, camera, renderer, groups, nebula, motes };
+
+    // ── pointer parallax (subtle) ──
+    const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+    const onPointer = (e) => {
+      const cx = (e.touches ? e.touches[0].clientX : e.clientX) || 0;
+      const cy = (e.touches ? e.touches[0].clientY : e.clientY) || 0;
+      pointer.tx = (cx / W() - 0.5) * 2;
+      pointer.ty = (cy / H() - 0.5) * 2;
+    };
+    window.addEventListener("pointermove", onPointer);
+    window.addEventListener("touchmove", onPointer, { passive: true });
+
+    // ── resize ──
+    const onResize = () => {
+      camera.aspect = W() / H();
+      camera.updateProjectionMatrix();
+      renderer.setSize(W(), H());
+    };
+    window.addEventListener("resize", onResize);
+
+    // ── animation loop ──
+    const clock = new THREE.Clock();
+    let curZ = 600;
+    const animate = () => {
+      const t = clock.getElapsedTime();
+      const p = progressRef.current || 0; // 0..1 scroll progress
+
+      // camera flies forward through the world as she scrolls
+      const targetZ = 600 - p * 1700;
+      curZ += (targetZ - curZ) * 0.05; // smooth easing
+      camera.position.z = curZ;
+
+      // pointer parallax eased
+      pointer.x += (pointer.tx - pointer.x) * 0.04;
+      pointer.y += (pointer.ty - pointer.y) * 0.04;
+      camera.position.x = pointer.x * 40;
+      camera.position.y = -pointer.y * 28;
+      camera.lookAt(0, 0, curZ - 400);
+
+      // gentle rotation of star/dust fields for life
+      groups.forEach((g) => {
+        if (g.kind === "stars") g.obj.rotation.z = t * 0.005;
+        if (g.kind === "dust") { g.obj.rotation.z = -t * 0.01; }
+      });
+
+      // nebula slow drift + pulse
+      nebula.forEach((s, i) => {
+        s.material.opacity = 0.07 + Math.sin(t * 0.2 + i) * 0.03;
+        s.position.x += Math.sin(t * 0.05 + i) * 0.05;
+      });
+
+      // motes bob
+      motes.forEach((s) => {
+        const u = s.userData;
+        s.position.y = u.baseY + Math.sin(t * u.spd + u.phase) * u.amp;
+        s.material.opacity = 0.5 + Math.sin(t * u.spd * 1.5 + u.phase) * 0.25;
+      });
+
+      renderer.render(scene, camera);
+      rafRef.current = requestAnimationFrame(animate);
+    };
+    animate();
+
+    // ── cleanup ──
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("touchmove", onPointer);
+      window.removeEventListener("resize", onResize);
+      renderer.dispose();
+      disc.dispose();
+      groups.forEach((g) => { g.obj.geometry.dispose(); g.obj.material.dispose(); });
+      nebula.forEach((s) => s.material.dispose());
+      motes.forEach((s) => s.material.dispose());
+      if (renderer.domElement && renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
+    };
+  }, [isMobile, progressRef]);
+
+  return <div ref={mountRef} className="fixed inset-0" style={{ zIndex: 0, pointerEvents: "none" }} />;
+}
 
 function Ambient({ scrollProgress }) {
   const lite = typeof window !== "undefined" && window.innerWidth < 640;
@@ -976,6 +1206,11 @@ export default function App() {
 
   const scrollRef = useRef(null);
   const { scrollYProgress } = useScroll({ container: scrollRef });
+  const cosmosProgress = useRef(0);
+  useEffect(() => {
+    const unsub = scrollYProgress.on("change", (v) => { cosmosProgress.current = v; });
+    return () => unsub();
+  }, [scrollYProgress]);
   const deviceTilt = useDeviceTilt(tiltEnabled);
   const greeting = useRef(getGreeting()).current;
 
@@ -1059,9 +1294,9 @@ export default function App() {
   };
 
   return (
-    <div className="body-font" style={{ color: "#EAE6F0", background: "#0A0E27", minHeight: "100dvh" }}>
+    <div className="body-font" style={{ color: "#EAE6F0", background: "transparent", minHeight: "100dvh" }}>
       <StyleTag />
-      <Ambient scrollProgress={scrollYProgress} />
+      <Cosmos progressRef={cosmosProgress} isMobile={isMobile} />
 
       {/* hidden youtube player */}
       <div id="yt-player" style={{ position: "fixed", bottom: 0, left: 0, width: 1, height: 1, opacity: 0.01, pointerEvents: "none" }} />
