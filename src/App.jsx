@@ -111,13 +111,23 @@ const songs = [
   { name: "Ishq Hai", code: "BcSejVIxB0E" },
 ];
 
-// Photo scenes — each woven between chapters
-const photoScenes = [
-  { src: "/photo-plane.jpeg", caption: "of all the places I've been, my favourite is next to you.", chapter: "iii", label: "somewhere in the clouds" },
-  { src: "/photo-lights.jpeg", caption: "the nights got softer once they had you in them.", chapter: "vii", label: "that evening" },
-  { src: "/photo-flowers.jpeg", caption: "you, casually outshining an entire wall of flowers.", chapter: "x", label: "a perfect saturday" },
-  { src: "/photo-masks.jpeg", caption: "even our ridiculous looks like love to me.", chapter: "xii", label: "a perfect thursday" },
-  { src: "/photo-hug.jpeg", caption: "and when I hold you, the whole world goes quiet.", chapter: "xv", label: "us" },
+// ── TIMELINE ──────────────────────────────────────────────────────────
+// Your story as a growing album. To add a new visit later, copy the first
+// object, change date/place/title, and list the new photos (drop the image
+// files in /public first). The "to be continued" marker renders automatically.
+const timeline = [
+  {
+    date: "may 2026",
+    place: "mumbai",
+    title: "the visit that started this album",
+    moments: [
+      { src: "/photo-plane.jpeg", caption: "of all the places I've been, my favourite is next to you." },
+      { src: "/photo-lights.jpeg", caption: "the nights got softer once they had you in them." },
+      { src: "/photo-flowers.jpeg", caption: "you, casually outshining an entire wall of flowers." },
+      { src: "/photo-masks.jpeg", caption: "even our ridiculous looks like love to me." },
+      { src: "/photo-hug.jpeg", caption: "and when I hold you, the whole world goes quiet.", secret: true },
+    ],
+  },
 ];
 
 /* ============================ HELPERS ============================ */
@@ -169,52 +179,6 @@ function Lily({ size = 40, opacity = 0.5, color = "#E8C39E", sw = 0.7 }) {
         <circle cx="50" cy="50" r="1.6" fill={color} opacity="0.7" />
       </g>
     </svg>
-  );
-}
-
-/* ============================ SPLIT-TEXT HEADING (awwwards-style reveal) ============================ */
-// Each word slides up from behind an invisible mask, staggered.
-function SplitHeading({ children, className = "", style = {}, delay = 0 }) {
-  const words = String(children).trim().split(/\s+/);
-  return (
-    <h2 className={className} style={style} aria-label={String(children)}>
-      {words.map((word, i) => (
-        <span key={i} style={{ display: "inline-block", overflow: "hidden", verticalAlign: "bottom" }}>
-          <motion.span
-            initial={{ y: "110%" }}
-            whileInView={{ y: "0%" }}
-            viewport={{ once: true, amount: 0.6 }}
-            transition={{ duration: 0.9, delay: delay + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-            style={{ display: "inline-block" }}
-          >
-            {word}
-          </motion.span>
-          {i < words.length - 1 ? "\u00A0" : ""}
-        </span>
-      ))}
-    </h2>
-  );
-}
-
-/* ============================ MARQUEE (infinite scrolling strip) ============================ */
-function Marquee({ items, reverse = false, speed = 28 }) {
-  const content = items.join("  ✶  ") + "  ✶  ";
-  return (
-    <div className="w-full overflow-hidden pointer-events-none select-none" style={{ opacity: 0.35 }}>
-      <div
-        className="flex whitespace-nowrap"
-        style={{
-          animation: `marquee ${speed}s linear infinite${reverse ? " reverse" : ""}`,
-          width: "max-content",
-        }}
-      >
-        {[0, 1].map((k) => (
-          <span key={k} className="display italic" style={{ fontSize: "clamp(1.4rem, 4vw, 2.4rem)", color: "#E8C39E", paddingRight: "2rem" }}>
-            {content}
-          </span>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -460,12 +424,7 @@ function TiltPhoto({ src, caption, deviceTilt }) {
             transition: "box-shadow 0.4s ease",
           }}
         >
-          <motion.img
-            src={src} alt="us"
-            animate={{ scale: [1, 1.06, 1] }}
-            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-            style={{ width: "100%", display: "block", filter: "saturate(1.05) contrast(1.02)" }}
-          />
+          <img src={src} alt="us" style={{ width: "100%", display: "block", filter: "saturate(1.05) contrast(1.02)" }} />
           <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at center, transparent 55%, rgba(10,14,39,0.45) 100%)" }} />
           <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(180deg, transparent 60%, rgba(10,14,39,0.5) 100%)" }} />
           {/* Light sheen that shifts with tilt */}
@@ -731,6 +690,108 @@ function HugExperience({ close }) {
   );
 }
 
+/* ============================ TIMELINE — the growing album ============================ */
+
+function TimelineView({ deviceTilt }) {
+  return (
+    <div className="relative">
+      {/* the golden thread */}
+      <motion.div
+        initial={{ scaleY: 0 }}
+        whileInView={{ scaleY: 1 }}
+        viewport={{ once: true, amount: 0.05 }}
+        transition={{ duration: 2.5, ease: "easeOut" }}
+        className="absolute left-[14px] top-0 bottom-0 w-px"
+        style={{
+          transformOrigin: "top",
+          background: "linear-gradient(to bottom, rgba(232,195,158,0.7), rgba(232,195,158,0.35) 70%, transparent)",
+          boxShadow: "0 0 8px rgba(232,195,158,0.4)",
+        }}
+      />
+
+      {timeline.map((visit, vi) => (
+        <div key={vi} className="relative">
+          {/* visit node — glowing dot + date */}
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2 }}
+            className="flex items-center gap-4 mb-3"
+          >
+            <motion.div
+              animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.25, 1] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              className="rounded-full flex-shrink-0"
+              style={{
+                width: 13, height: 13, marginLeft: 8,
+                background: "radial-gradient(circle, #fff, #ffe5b0 55%, #e8c39e)",
+                boxShadow: "0 0 18px rgba(232,195,158,0.9)",
+              }}
+            />
+            <div>
+              <p className="eyebrow text-[10px]" style={{ color: "#E8C39E" }}>{visit.date} · {visit.place}</p>
+            </div>
+          </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.4, delay: 0.3 }}
+            className="display italic text-lg sm:text-xl mb-10 pl-10" style={{ color: "rgba(234,230,240,0.75)" }}
+          >
+            {visit.title}
+          </motion.p>
+
+          {/* moments hanging off the thread */}
+          <div className="space-y-14 pl-10 pb-14">
+            {visit.moments.map((m, mi) => {
+              const card = (
+                <div style={{ transform: `rotate(${mi % 2 === 0 ? -1.5 : 1.5}deg)` }}>
+                  <TiltPhoto src={m.src} caption={m.caption} deviceTilt={deviceTilt} />
+                </div>
+              );
+              return (
+                <div key={mi} className="relative">
+                  {/* small dot on the thread for each moment */}
+                  <div
+                    className="absolute rounded-full"
+                    style={{
+                      left: -29, top: 28, width: 7, height: 7,
+                      background: "rgba(232,195,158,0.7)",
+                      boxShadow: "0 0 8px rgba(232,195,158,0.5)",
+                    }}
+                  />
+                  {m.secret ? <HoldSecret>{card}</HoldSecret> : card}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {/* to be continued — the waiting spot for the next visit */}
+      <motion.div
+        initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.6 }}
+        className="flex items-center gap-4 pb-2"
+      >
+        <motion.div
+          animate={{ opacity: [0.3, 0.8, 0.3], scale: [1, 1.18, 1] }}
+          transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+          className="rounded-full flex-shrink-0"
+          style={{
+            width: 13, height: 13, marginLeft: 8,
+            border: "1.5px solid rgba(232,195,158,0.8)",
+            background: "transparent",
+            boxShadow: "0 0 12px rgba(232,195,158,0.4)",
+          }}
+        />
+        <div>
+          <p className="display italic text-lg sm:text-xl" style={{ color: "#E8C39E" }}>to be continued…</p>
+          <p className="text-xs italic mt-1" style={{ color: "rgba(234,230,240,0.45)" }}>the next chapter is waiting for us.</p>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 /* ============================ CONSTELLATION SCENE ============================ */
 
 function ConstellationScene({ onSelect, onComplete }) {
@@ -768,10 +829,10 @@ function ConstellationScene({ onSelect, onComplete }) {
 
   return (
     <div className="relative w-full max-w-2xl" style={{ zIndex: 2 }}>
-      <ChapterLabel num="ix" title="your stars" />
-      <SplitHeading className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)", color: "#EAE6F0" }}>
+      <ChapterLabel num="vi" title="your stars" />
+      <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)", color: "#EAE6F0" }}>
         In every universe,
-      </SplitHeading>
+      </h2>
       <p className="text-center text-base mb-1" style={{ color: "rgba(234,230,240,0.6)" }}>I think I'd still find you.</p>
       <p className="text-center text-xs italic mb-8 h-4" style={{ color: "#E8C39E", opacity: 0.7 }}>{progress}</p>
 
@@ -1006,20 +1067,6 @@ export default function App() {
       {/* hidden youtube player */}
       <div id="yt-player" style={{ position: "fixed", bottom: 0, left: 0, width: 1, height: 1, opacity: 0.01, pointerEvents: "none" }} />
 
-      {/* journey progress — thin gold line across the top */}
-      {entered && (
-        <motion.div
-          className="fixed top-0 left-0 right-0 pointer-events-none"
-          style={{
-            height: 2,
-            zIndex: 60,
-            transformOrigin: "left",
-            scaleX: scrollYProgress,
-            background: "linear-gradient(to right, rgba(232,195,158,0.9), rgba(224,168,184,0.7))",
-            boxShadow: "0 0 12px rgba(232,195,158,0.5)",
-          }}
-        />
-      )}
 
       {/* top controls — inline-positioned, safe-area aware, above everything except modals */}
       <button
@@ -1136,20 +1183,10 @@ export default function App() {
           {/* 1 · Balloons */}
           <Scene>
             <ChapterLabel num="i" title="too big for texts" />
-            <SplitHeading className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Some feelings are too big for texts.</SplitHeading>
+            <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Some feelings are too big for texts.</h2>
             <p className="text-center text-sm mb-10" style={{ color: "rgba(234,230,240,0.5)" }}>so I put them in balloons. tap them.</p>
             <div className="relative w-full max-w-3xl" style={{ height: "min(55vh, 460px)" }}>
               {balloonNotes.map((note, i) => <Balloon key={i} note={note} i={i} onPop={(n) => setSelectedNote(n)} />)}
-            </div>
-            {/* scroll hint — agency-style */}
-            <div className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none">
-              <span className="eyebrow text-[9px]" style={{ color: "rgba(168,197,240,0.5)" }}>scroll</span>
-              <motion.div
-                animate={{ scaleY: [0, 1, 0], originY: ["0%", "0%", "100%"] }}
-                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                className="w-px h-8"
-                style={{ background: "linear-gradient(to bottom, rgba(232,195,158,0.7), transparent)" }}
-              />
             </div>
           </Scene>
 
@@ -1157,7 +1194,7 @@ export default function App() {
           <Scene>
             <div className="w-full max-w-5xl">
               <ChapterLabel num="ii" title="however you feel" />
-              <SplitHeading className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>What do you need right now?</SplitHeading>
+              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>What do you need right now?</h2>
               <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>there's something here for every version of you.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {moods.map((m, i) => (
@@ -1174,14 +1211,11 @@ export default function App() {
             </div>
           </Scene>
 
-          {/* 3 · Photo: plane */}
-          <Scene><div className="w-full max-w-md"><ChapterLabel num={photoScenes[0].chapter} title={photoScenes[0].label} /><TiltPhoto src={photoScenes[0].src} caption={photoScenes[0].caption} deviceTilt={deviceTilt} /></div></Scene>
-
-          {/* 4 · Friends */}
+                    {/* 3 · Friends */}
           <Scene>
             <div className="w-full max-w-5xl">
-              <ChapterLabel num="iv" title="the one where" />
-              <SplitHeading className="display text-center font-light leading-tight mb-10" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>The One Where…</SplitHeading>
+              <ChapterLabel num="iii" title="the one where" />
+              <h2 className="display text-center font-light leading-tight mb-10" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>The One Where…</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {episodeCards.map((c, i) => (
                   <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
@@ -1196,11 +1230,11 @@ export default function App() {
             </div>
           </Scene>
 
-          {/* 5 · Open When */}
+          {/* 4 · Open When */}
           <Scene>
             <div className="w-full max-w-5xl">
-              <ChapterLabel num="v" title="for whenever" />
-              <SplitHeading className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Open when…</SplitHeading>
+              <ChapterLabel num="iv" title="for whenever" />
+              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Open when…</h2>
               <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>letters for the moments I can't be there fast enough.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {letters.map((l, i) => (
@@ -1216,11 +1250,11 @@ export default function App() {
             </div>
           </Scene>
 
-          {/* 6 · Late Night Thoughts */}
+          {/* 5 · Late Night Thoughts */}
           <Scene>
             <div className="w-full">
-              <ChapterLabel num="vi" title="late night" />
-              <SplitHeading className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Late night thoughts.</SplitHeading>
+              <ChapterLabel num="v" title="late night" />
+              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Late night thoughts.</h2>
               <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>the things I think when the world goes quiet.</p>
               <div className="overflow-x-auto no-scrollbar px-4" style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
                 <div className="flex gap-4 pb-4 mx-auto" style={{ width: "max-content" }}>
@@ -1234,14 +1268,8 @@ export default function App() {
             </div>
           </Scene>
 
-          {/* 7 · Photo: lights */}
-          <Scene><div className="w-full max-w-md"><ChapterLabel num={photoScenes[1].chapter} title={photoScenes[1].label} /><TiltPhoto src={photoScenes[1].src} caption={photoScenes[1].caption} deviceTilt={deviceTilt} /></div></Scene>
-
-          {/* 8 · "it'd be you" — marquee strips frame the moment */}
+                    {/* 6 · "it'd be you" */}
           <Scene>
-            <div className="absolute top-8 left-0 right-0">
-              <Marquee items={["loved", "adored", "chosen", "always", "you"]} speed={32} />
-            </div>
             <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 2, ease: "easeOut" }} className="text-center">
               <p className="text-sm mb-6 italic" style={{ color: "rgba(234,230,240,0.4)" }}>if i could only say one thing,</p>
               <h2 className="display font-light leading-[0.95]" style={{ fontSize: "clamp(4rem,16vw,11rem)" }}>it'd be</h2>
@@ -1249,23 +1277,17 @@ export default function App() {
               <motion.div initial={{ width: 0 }} whileInView={{ width: "60%" }} viewport={{ once: true }} transition={{ duration: 2, delay: 0.5 }}
                 className="h-px mx-auto mt-12" style={{ background: "linear-gradient(to right, transparent, rgba(232,195,158,0.4), transparent)" }} />
             </motion.div>
-            <div className="absolute bottom-8 left-0 right-0">
-              <Marquee items={["aashi", "aashi", "aashi"]} reverse speed={26} />
-            </div>
           </Scene>
 
-          {/* 9 · Constellation */}
+          {/* 7 · Constellation */}
           <Scene><ConstellationScene onSelect={setSelectedMemory} onComplete={triggerSkyGlow} /></Scene>
 
-          {/* 10 · Photo: flowers */}
-          <Scene><div className="w-full max-w-md"><ChapterLabel num={photoScenes[2].chapter} title={photoScenes[2].label} /><TiltPhoto src={photoScenes[2].src} caption={photoScenes[2].caption} deviceTilt={deviceTilt} /></div></Scene>
-
-          {/* 11 · Tiny Things */}
+                    {/* 8 · Tiny Things */}
           <Scene>
             <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               <div className="lg:col-span-5 lg:sticky lg:top-24 text-center lg:text-left">
                 <div className="hidden lg:block mb-6"><Lily size={50} opacity={0.4} /></div>
-                <ChapterLabel num="xi" title="the small things" />
+                <ChapterLabel num="vii" title="the small things" />
                 <h2 className="display font-light leading-tight mb-4" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Tiny things I love about you.</h2>
                 <p className="italic" style={{ color: "rgba(234,230,240,0.55)" }}>the little things no one else would clock. I clock everything.</p>
               </div>
@@ -1282,14 +1304,11 @@ export default function App() {
             </div>
           </Scene>
 
-          {/* 12 · Photo: masks */}
-          <Scene><div className="w-full max-w-md"><ChapterLabel num={photoScenes[3].chapter} title={photoScenes[3].label} /><TiltPhoto src={photoScenes[3].src} caption={photoScenes[3].caption} deviceTilt={deviceTilt} /></div></Scene>
-
-          {/* 13 · Promise Jar */}
+                    {/* 9 · Promise Jar */}
           <Scene>
             <div className="w-full max-w-5xl">
-              <ChapterLabel num="xiii" title="my promises" />
-              <SplitHeading className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>A jar of promises.</SplitHeading>
+              <ChapterLabel num="viii" title="my promises" />
+              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>A jar of promises.</h2>
               <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>tap one whenever you need reminding. they don't expire.</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {promises.map((p, i) => {
@@ -1346,13 +1365,13 @@ export default function App() {
             </div>
           </Scene>
 
-          {/* 14 · Final letter — words appear one by one, like it's being written for her */}
+          {/* 10 · Final letter — words appear one by one, like it's being written for her */}
           <Scene>
             <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 1.4 }}
               className="w-full max-w-2xl p-8 sm:p-12 rounded-[32px] relative grain"
               style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(232,195,158,0.2)" }}>
               <div className="absolute top-7 right-7"><Lily size={34} opacity={0.5} /></div>
-              <ChapterLabel num="xiv" title="a letter" />
+              <ChapterLabel num="ix" title="a letter" />
               <h2 className="display font-light text-center mb-10" style={{ fontSize: "clamp(2.5rem,8vw,4rem)" }}>To {NAME},</h2>
               <div className="space-y-6 text-base sm:text-lg leading-relaxed" style={{ color: "rgba(234,230,240,0.8)" }}>
                 {[
@@ -1387,15 +1406,17 @@ export default function App() {
             </motion.div>
           </Scene>
 
-          {/* 15 · Photo: hug (closing) */}
+          {/* 11 · TIMELINE — our story, so far (the growing album) */}
           <Scene>
-            <div className="w-full max-w-md">
-              <ChapterLabel num={photoScenes[4].chapter} title={photoScenes[4].label} />
-              <HoldSecret>
-                <TiltPhoto src={photoScenes[4].src} caption={photoScenes[4].caption} deviceTilt={deviceTilt} />
-              </HoldSecret>
+            <div className="w-full max-w-lg">
+              <ChapterLabel num="x" title="our story, so far" />
+              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Every time we meet,</h2>
+              <p className="text-center text-sm mb-14 italic" style={{ color: "rgba(234,230,240,0.5)" }}>this page grows a little longer.</p>
+
+              <TimelineView deviceTilt={deviceTilt} />
+
               <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 0.5, y: 0 }} viewport={{ once: true }} transition={{ duration: 2, delay: 0.8 }}
-                className="text-center text-xs mt-10 eyebrow" style={{ color: "#A8C5F0" }}>the end · and also, the beginning</motion.p>
+                className="text-center text-xs mt-14 eyebrow" style={{ color: "#A8C5F0" }}>the end · and also, the beginning</motion.p>
 
               {/* HINTS: cryptic clues to the hidden things */}
               <motion.div
@@ -1407,6 +1428,7 @@ export default function App() {
                 <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>the flower at the door remembers being touched three times.</p>
                 <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>the sky does something for those who find every star.</p>
                 <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>open every promise. all eight.</p>
+                <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>the last photo holds on if you do.</p>
                 <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>and sometimes, if you stay long enough, it rains petals.</p>
               </motion.div>
             </div>
@@ -1548,10 +1570,6 @@ function StyleTag() {
       button { touch-action: manipulation; }
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      @keyframes marquee {
-        from { transform: translateX(0); }
-        to { transform: translateX(-50%); }
-      }
       .grain { position: relative; }
       .grain::after {
         content:''; position:absolute; inset:0; pointer-events:none; opacity:0.4; border-radius:inherit;
