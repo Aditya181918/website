@@ -19,6 +19,10 @@ import { Music2, X, Hand, Volume2, VolumeX } from "lucide-react";
 
 const NAME = "Aashi";
 
+// Shared ref to the scroll-snap container, so whileInView viewport detection
+// uses the correct scroll root (fixes blank scenes inside the snap container).
+const scrollRootRef = { current: null };
+
 /* ============================ CONTENT ============================ */
 
 const balloonNotes = [
@@ -186,8 +190,7 @@ function ChapterLabel({ num, title }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 14 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1.2, ease: "easeOut" }}
       className="flex items-center gap-3 justify-center mb-7"
     >
@@ -374,7 +377,7 @@ function Ambient({ scrollProgress }) {
 
 /* ============================ 3D TILT PHOTO ============================ */
 
-function TiltPhoto({ src, caption, deviceTilt }) {
+function TiltPhoto({ src, caption, deviceTilt, instant = false }) {
   const ref = useRef(null);
   const [hover, setHover] = useState(false);
   // Cursor-driven rotation (desktop)
@@ -407,10 +410,9 @@ function TiltPhoto({ src, caption, deviceTilt }) {
         onMouseMove={onMove}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => { setHover(false); onLeave(); }}
-        initial={{ opacity: 0, y: 80, scale: 0.75, filter: "blur(20px)" }}
-        whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ opacity: 0, y: 60, scale: 0.85, filter: "blur(16px)" }}
+        animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+        transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
         style={{ rotateX: rx, rotateY: ry, transformStyle: "preserve-3d" }}
         className="relative mx-auto"
       >
@@ -698,8 +700,7 @@ function TimelineView({ deviceTilt }) {
       {/* the golden thread */}
       <motion.div
         initial={{ scaleY: 0 }}
-        whileInView={{ scaleY: 1 }}
-        viewport={{ once: true, amount: 0.05 }}
+        animate={{ scaleY: 1 }}
         transition={{ duration: 2.5, ease: "easeOut" }}
         className="absolute left-[14px] top-0 bottom-0 w-px"
         style={{
@@ -714,8 +715,7 @@ function TimelineView({ deviceTilt }) {
           {/* visit node — glowing dot + date */}
           <motion.div
             initial={{ opacity: 0, x: -10 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1.2 }}
             className="flex items-center gap-4 mb-3"
           >
@@ -734,7 +734,7 @@ function TimelineView({ deviceTilt }) {
             </div>
           </motion.div>
           <motion.p
-            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.4, delay: 0.3 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.4, delay: 0.3 }}
             className="display italic text-lg sm:text-xl mb-10 pl-10" style={{ color: "rgba(234,230,240,0.75)" }}
           >
             {visit.title}
@@ -745,7 +745,7 @@ function TimelineView({ deviceTilt }) {
             {visit.moments.map((m, mi) => {
               const card = (
                 <div style={{ transform: `rotate(${mi % 2 === 0 ? -1.5 : 1.5}deg)` }}>
-                  <TiltPhoto src={m.src} caption={m.caption} deviceTilt={deviceTilt} />
+                  <TiltPhoto src={m.src} caption={m.caption} deviceTilt={deviceTilt} instant />
                 </div>
               );
               return (
@@ -769,7 +769,7 @@ function TimelineView({ deviceTilt }) {
 
       {/* to be continued — the waiting spot for the next visit */}
       <motion.div
-        initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1.6 }}
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.6 }}
         className="flex items-center gap-4 pb-2"
       >
         <motion.div
@@ -909,16 +909,15 @@ function ConstellationScene({ onSelect, onComplete }) {
 
 /* ============================ SCENE WRAPPER ============================ */
 
-function Scene({ children, className = "" }) {
+function Scene({ children, className = "", tall = false }) {
   return (
     <section
-      className={`snap-scene flex flex-col items-center justify-center px-5 sm:px-6 ${className}`}
+      className={`snap-scene flex flex-col items-center ${tall ? "justify-start py-24" : "justify-center"} px-5 sm:px-6 ${className}`}
       style={{ scrollSnapAlign: "start", minHeight: "100dvh", position: "relative" }}
     >
       <motion.div
         initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.25 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         className="w-full flex flex-col items-center justify-center"
       >
@@ -1175,10 +1174,10 @@ export default function App() {
       {/* THE JOURNEY */}
       {entered && (
         <motion.div
-          ref={scrollRef}
+          ref={(el) => { scrollRef.current = el; scrollRootRef.current = el; }}
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5 }}
           className="snap-container no-scrollbar"
-          style={{ height: "100dvh", overflowY: "scroll", scrollSnapType: "y mandatory", scrollBehavior: "smooth", position: "relative", zIndex: 1 }}
+          style={{ height: "100dvh", overflowY: "scroll", scrollSnapType: "y proximity", scrollBehavior: "smooth", position: "relative", zIndex: 1 }}
         >
           {/* 1 · Balloons */}
           <Scene>
@@ -1218,7 +1217,7 @@ export default function App() {
               <h2 className="display text-center font-light leading-tight mb-10" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>The One Where…</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {episodeCards.map((c, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
                     whileHover={{ y: -6 }} className="p-7 sm:p-9 rounded-[26px] relative overflow-hidden grain"
                     style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 8px 32px rgba(232,195,158,0.06)" }}>
                     <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(232,195,158,0.15) 0%, transparent 70%)", filter: "blur(20px)" }} />
@@ -1270,11 +1269,11 @@ export default function App() {
 
                     {/* 6 · "it'd be you" */}
           <Scene>
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 2, ease: "easeOut" }} className="text-center">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 2, ease: "easeOut" }} className="text-center">
               <p className="text-sm mb-6 italic" style={{ color: "rgba(234,230,240,0.4)" }}>if i could only say one thing,</p>
               <h2 className="display font-light leading-[0.95]" style={{ fontSize: "clamp(4rem,16vw,11rem)" }}>it'd be</h2>
               <h2 className="display italic font-light leading-[0.9] mt-2" style={{ fontSize: "clamp(5rem,20vw,14rem)", color: "#E8C39E" }}>you.</h2>
-              <motion.div initial={{ width: 0 }} whileInView={{ width: "60%" }} viewport={{ once: true }} transition={{ duration: 2, delay: 0.5 }}
+              <motion.div initial={{ width: 0 }} animate={{ width: "60%" }} transition={{ duration: 2, delay: 0.5 }}
                 className="h-px mx-auto mt-12" style={{ background: "linear-gradient(to right, transparent, rgba(232,195,158,0.4), transparent)" }} />
             </motion.div>
           </Scene>
@@ -1293,7 +1292,7 @@ export default function App() {
               </div>
               <div className="lg:col-span-7 space-y-4">
                 {tinyThings.map((t, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}
+                  <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}
                     className="rounded-2xl p-5 sm:p-6 flex items-start gap-4 grain"
                     style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)", marginLeft: (i % 2) * 16 }}>
                     <div className="mt-1 flex-shrink-0"><Lily size={16} opacity={0.6} /></div>
@@ -1367,7 +1366,7 @@ export default function App() {
 
           {/* 10 · Final letter — words appear one by one, like it's being written for her */}
           <Scene>
-            <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 1.4 }}
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.4 }}
               className="w-full max-w-2xl p-8 sm:p-12 rounded-[32px] relative grain"
               style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(232,195,158,0.2)" }}>
               <div className="absolute top-7 right-7"><Lily size={34} opacity={0.5} /></div>
@@ -1386,8 +1385,7 @@ export default function App() {
                       <motion.span
                         key={wi}
                         initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
-                        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                        viewport={{ once: true, amount: 0.6 }}
+                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                         transition={{ duration: 0.5, delay: pi * 0.5 + wi * 0.05, ease: "easeOut" }}
                         style={{ display: "inline-block", marginRight: "0.28em" }}
                       >
@@ -1397,7 +1395,7 @@ export default function App() {
                   </p>
                 ))}
                 <motion.p
-                  initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 1.6, delay: 3.2 }}
                   className="display text-2xl sm:text-3xl mt-10" style={{ color: "#E8C39E" }}>
                   Always you.
@@ -1407,7 +1405,7 @@ export default function App() {
           </Scene>
 
           {/* 11 · TIMELINE — our story, so far (the growing album) */}
-          <Scene>
+          <Scene tall>
             <div className="w-full max-w-lg">
               <ChapterLabel num="x" title="our story, so far" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Every time we meet,</h2>
@@ -1415,12 +1413,12 @@ export default function App() {
 
               <TimelineView deviceTilt={deviceTilt} />
 
-              <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 0.5, y: 0 }} viewport={{ once: true }} transition={{ duration: 2, delay: 0.8 }}
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 0.5, y: 0 }} transition={{ duration: 2, delay: 0.8 }}
                 className="text-center text-xs mt-14 eyebrow" style={{ color: "#A8C5F0" }}>the end · and also, the beginning</motion.p>
 
               {/* HINTS: cryptic clues to the hidden things */}
               <motion.div
-                initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                 transition={{ duration: 2.5, delay: 2 }}
                 className="mt-12 text-center space-y-2"
               >
