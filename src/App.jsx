@@ -1,4 +1,4 @@
-// App.jsx — "For Aashi"
+// App.jsx — "For Baby Boo"
 // Chapter-based cinematic experience. React + Tailwind + Framer Motion.
 //
 // ── HOW TO ADD YOUR PHOTOS ───────────────────────────────────────────────
@@ -18,7 +18,7 @@ import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "fra
 import { Music2, X, Hand, Volume2, VolumeX } from "lucide-react";
 import * as THREE from "three";
 
-const NAME = "Aashi";
+const NAME = "Baby Boo";
 
 // Shared ref to the scroll-snap container, so whileInView viewport detection
 // uses the correct scroll root (fixes blank scenes inside the snap container).
@@ -72,10 +72,10 @@ const lateNightThoughts = [
   "You are the softest part of my day. Every day. No contest.",
 ];
 
-// Cancer constellation — Aashi's zodiac. 5 real stars + 3 memory stars.
+// Cancer constellation — her zodiac. 5 real stars + 3 memory stars.
 const stars = [
   { x: 30, y: 80, lead: true, name: "Acubens", text: "You make me want to be gentler — with the world, with myself, with everything.", connects: [1] },
-  { x: 42, y: 64, lead: true, name: "Altarf", text: "Being loved by you, Aashi, is the rarest thing I own.", connects: [7] },
+  { x: 42, y: 64, lead: true, name: "Altarf", text: "Being loved by you, Baby Boo, is the rarest thing I own.", connects: [7] },
   { x: 50, y: 46, lead: true, name: "Asellus Australis", text: "The first time you laughed at something I said — that was it. Game over.", connects: [3, 4] },
   { x: 72, y: 24, lead: true, name: "Asellus Borealis", text: "Some people feel like home. You feel like home with the lights left on for me.", connects: [] },
   { x: 24, y: 20, lead: true, name: "Tegmine", text: "In every version of this life, I'd find you. I might be late sometimes. But I'd find you.", connects: [] },
@@ -826,94 +826,194 @@ function HugButton({ onTriggered }) {
 }
 
 function HugExperience({ close }) {
-  const [step, setStep] = useState(0);
+  // Phases: "greet" (a few warm lines) → "breathe" (guided breathing embrace, stays until she leaves)
+  const [phase, setPhase] = useState("greet");
+  const [greetStep, setGreetStep] = useState(0);
+  const [breathState, setBreathState] = useState("in"); // in | hold | out
+  const [cycles, setCycles] = useState(0);
   const [closing, setClosing] = useState(false);
-  const [aftermath, setAftermath] = useState(false);
-  const lines = [
-    "Hey. It's me.",
-    "I know some days sit heavier than others.",
-    "You don't have to carry them alone. That was never the deal.",
-    "Stay right here for a few seconds. Let me hold the world still for you.",
-    `I've got you, ${NAME}. I've always got you.`,
+
+  // time-aware opening line
+  const openingLine = useRef((() => {
+    const h = new Date().getHours();
+    if (h >= 0 && h < 5) return `you should be asleep, ${NAME}. but come here first.`;
+    if (h < 12) return `good morning, ${NAME}. come here for a second.`;
+    if (h < 18) return `hey, ${NAME}. come here.`;
+    return `long day? come here, ${NAME}.`;
+  })()).current;
+
+  const greetLines = [
+    openingLine,
+    "you don't have to hold it all by yourself.",
+    "let's just breathe for a moment. follow me.",
   ];
 
+  // ── greeting phase: advance through lines, then begin breathing ──
   useEffect(() => {
-    if (closing) return;
-    if (step < lines.length - 1) {
-      const dur = step === 3 ? 5000 : 3500;
-      const t = setTimeout(() => setStep(step + 1), dur);
+    if (phase !== "greet" || closing) return;
+    if (greetStep < greetLines.length - 1) {
+      const t = setTimeout(() => setGreetStep((s) => s + 1), 3400);
       return () => clearTimeout(t);
     } else {
-      const t = setTimeout(() => {
-        setClosing(true);
-        setTimeout(() => {
-          setAftermath(true);
-          setTimeout(close, 4500);
-        }, 1500);
-      }, 4000);
+      const t = setTimeout(() => setPhase("breathe"), 3200);
       return () => clearTimeout(t);
     }
-  }, [step, closing, lines.length, close]);
+  }, [phase, greetStep, closing, greetLines.length]);
+
+  // ── breathing engine: in (4s) → hold (4s) → out (6s), looping ──
+  const BREATH = { in: 4000, hold: 4000, out: 6000 };
+  useEffect(() => {
+    if (phase !== "breathe" || closing) return;
+    // haptic cue at the start of each state
+    if (navigator.vibrate) {
+      if (breathState === "in") navigator.vibrate(40);
+      else if (breathState === "out") navigator.vibrate([20, 30, 20]);
+    }
+    const dur = BREATH[breathState];
+    const t = setTimeout(() => {
+      setBreathState((s) => {
+        if (s === "in") return "hold";
+        if (s === "hold") return "out";
+        // completed a full cycle
+        setCycles((c) => c + 1);
+        return "in";
+      });
+    }, dur);
+    return () => clearTimeout(t);
+  }, [phase, breathState, closing]);
+
+  const doClose = () => {
+    setClosing(true);
+    if (navigator.vibrate) navigator.vibrate(30);
+    setTimeout(close, 1400);
+  };
+
+  // embrace scale: arms drawing inward on inhale/hold, easing out on exhale
+  const embraceScale = breathState === "out" ? 1.15 : 1;
+  const breathWord = breathState === "in" ? "breathe in…" : breathState === "hold" ? "hold…" : "and let go…";
+  const breathDur = (BREATH[breathState] / 1000);
 
   return (
     <motion.div
-      className="fixed inset-0 flex items-center justify-center px-6"
-      style={{ zIndex: 110, background: "radial-gradient(circle at center, rgba(35,30,50,0.96) 0%, rgba(10,14,39,0.98) 60%, rgba(5,8,22,1) 100%)", backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)" }}
-      initial={{ opacity: 0 }} animate={{ opacity: closing && aftermath ? 0.6 : 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.2 }}
+      className="fixed inset-0 flex items-center justify-center px-6 overflow-hidden"
+      style={{ zIndex: 110, background: "radial-gradient(circle at center, rgba(35,30,50,0.97) 0%, rgba(10,14,39,0.98) 60%, rgba(5,8,22,1) 100%)", backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)" }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.4 }}
     >
+      {/* THE EMBRACE — warmth that wraps inward from the screen edges like arms */}
       <motion.div
-        animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(circle at center, rgba(232,195,158,0.16) 0%, transparent 55%)" }}
+        animate={{
+          opacity: phase === "breathe" ? (breathState === "out" ? 0.35 : 0.7) : 0.4,
+        }}
+        transition={{ duration: phase === "breathe" ? breathDur : 2, ease: "easeInOut" }}
+        style={{
+          background: "radial-gradient(circle at center, transparent 30%, rgba(232,195,158,0.18) 75%, rgba(232,195,158,0.35) 100%)",
+        }}
       />
-      {[...Array(18)].map((_, i) => (
+      {/* central warm glow that grows on inhale, recedes on exhale (the held breath) */}
+      <motion.div
+        className="absolute pointer-events-none rounded-full"
+        animate={{
+          scale: phase === "breathe" ? (breathState === "out" ? 0.7 : breathState === "hold" ? 1.18 : 1.18) : 1,
+          opacity: phase === "breathe" ? (breathState === "out" ? 0.25 : 0.5) : 0.4,
+        }}
+        transition={{ duration: phase === "breathe" ? breathDur : 3, ease: breathState === "in" ? "easeIn" : breathState === "out" ? "easeOut" : "linear" }}
+        style={{
+          width: "60vmin", height: "60vmin",
+          background: "radial-gradient(circle, rgba(232,195,158,0.45) 0%, rgba(224,168,184,0.18) 45%, transparent 70%)",
+          filter: "blur(40px)",
+        }}
+      />
+
+      {/* soft floating embers drifting inward */}
+      {[...Array(14)].map((_, i) => (
         <motion.div
           key={i}
-          initial={{ opacity: 0, x: `${(i * 37) % 100}%`, y: "100%" }}
-          animate={{ opacity: [0, 0.7, 0], y: "-10%" }}
-          transition={{ duration: 8 + (i % 5) * 1.5, repeat: Infinity, delay: i * 0.4, ease: "linear" }}
+          initial={{ opacity: 0 }}
+          animate={{
+            opacity: [0, 0.6, 0],
+            x: [`${(Math.cos((i / 14) * Math.PI * 2)) * 50}vw`, "0vw"],
+            y: [`${(Math.sin((i / 14) * Math.PI * 2)) * 50}vh`, "0vh"],
+          }}
+          transition={{ duration: 7 + (i % 4) * 1.5, repeat: Infinity, delay: i * 0.5, ease: "easeInOut" }}
           className="absolute rounded-full pointer-events-none"
-          style={{ width: 2 + (i % 3), height: 2 + (i % 3), left: `${(i * 53) % 100}%`, background: "rgba(232,195,158,0.6)", boxShadow: "0 0 12px rgba(232,195,158,0.6)" }}
+          style={{ width: 3 + (i % 3), height: 3 + (i % 3), background: "rgba(232,195,158,0.7)", boxShadow: "0 0 12px rgba(232,195,158,0.7)" }}
         />
       ))}
+
+      {/* close — always available; she leaves when she's ready */}
       {!closing && (
-        <button onClick={() => { setClosing(true); setTimeout(close, 800); }} className="absolute top-6 right-6 text-white/30 hover:text-white/70 z-10" aria-label="close">
-          <X size={20} />
+        <button onClick={doClose} className="absolute top-6 right-6 text-white/40 hover:text-white/80 z-20" aria-label="close" style={{ top: "calc(1.5rem + env(safe-area-inset-top,0px))" }}>
+          <X size={22} />
         </button>
       )}
-      {!closing && (
-        <div className="relative z-10 max-w-2xl text-center">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -10, filter: "blur(8px)" }}
-              transition={{ duration: 1.4, ease: "easeOut" }}
-            >
-              <motion.p
-                animate={{ scale: [1, 1.015, 1, 1.015, 1] }}
-                transition={{ duration: 1.2, times: [0, 0.15, 0.3, 0.45, 1], repeat: Infinity, repeatDelay: 1.2, ease: "easeInOut" }}
-                className="display text-3xl sm:text-5xl md:text-6xl leading-relaxed px-4"
-                style={{ color: "#EAE6F0", textShadow: "0 0 40px rgba(232,195,158,0.3)" }}
-              >
-                {lines[step]}
-              </motion.p>
-            </motion.div>
-          </AnimatePresence>
-          <div className="mt-16 flex items-center justify-center gap-2">
-            {lines.map((_, i) => (
-              <motion.div key={i} animate={{ opacity: i <= step ? 0.6 : 0.15, scale: i === step ? 1.3 : 1 }} transition={{ duration: 0.6 }}
-                className="w-1.5 h-1.5 rounded-full" style={{ background: "#E8C39E" }} />
-            ))}
-          </div>
-        </div>
-      )}
+
+      {/* GREETING PHASE */}
+      <AnimatePresence mode="wait">
+        {phase === "greet" && !closing && (
+          <motion.div key={`greet-${greetStep}`} className="relative z-10 max-w-2xl text-center"
+            initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -12, filter: "blur(8px)" }}
+            transition={{ duration: 1.4, ease: "easeOut" }}
+          >
+            <p className="display leading-relaxed px-4" style={{ fontSize: "clamp(2rem,6vw,3.6rem)", color: "#EAE6F0", textShadow: "0 0 40px rgba(232,195,158,0.3)" }}>
+              {greetLines[greetStep]}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* BREATHING PHASE */}
       <AnimatePresence>
-        {aftermath && (
-          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 0.7, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 1.5 }}
-            className="absolute bottom-12 left-0 right-0 text-center display text-xl sm:text-2xl italic px-6" style={{ color: "rgba(232,195,158,0.8)" }}>
+        {phase === "breathe" && !closing && (
+          <motion.div className="relative z-10 text-center flex flex-col items-center"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.6 }}>
+            {/* breathing ring she follows */}
+            <motion.div
+              className="rounded-full flex items-center justify-center mb-10"
+              animate={{
+                scale: breathState === "out" ? 0.78 : 1.12,
+                boxShadow: breathState === "out"
+                  ? "0 0 30px rgba(232,195,158,0.3), inset 0 0 30px rgba(232,195,158,0.15)"
+                  : "0 0 70px rgba(232,195,158,0.6), inset 0 0 50px rgba(232,195,158,0.25)",
+              }}
+              transition={{ duration: breathDur, ease: breathState === "in" ? "easeIn" : breathState === "out" ? "easeOut" : "linear" }}
+              style={{
+                width: "min(46vw, 200px)", height: "min(46vw, 200px)",
+                border: "1.5px solid rgba(232,195,158,0.5)",
+                background: "radial-gradient(circle, rgba(232,195,158,0.12), transparent 70%)",
+              }}
+            >
+              <AnimatePresence mode="wait">
+                <motion.span key={breathState}
+                  initial={{ opacity: 0 }} animate={{ opacity: 0.9 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}
+                  className="display italic" style={{ fontSize: "clamp(1.1rem,4vw,1.6rem)", color: "#EAE6F0" }}>
+                  {breathWord}
+                </motion.span>
+              </AnimatePresence>
+            </motion.div>
+
+            <p className="display leading-snug px-6 max-w-xl" style={{ fontSize: "clamp(1.4rem,4.5vw,2.4rem)", color: "#EAE6F0", textShadow: "0 0 30px rgba(232,195,158,0.3)" }}>
+              {cycles < 1 && "I'm right here. breathe with me."}
+              {cycles >= 1 && cycles < 3 && "there you go. the world can wait."}
+              {cycles >= 3 && cycles < 5 && `nothing to fix right now. just this. just us.`}
+              {cycles >= 5 && `I've got you, ${NAME}. I've always got you.`}
+            </p>
+
+            <button onClick={doClose} className="mt-12 px-8 py-3 rounded-full" style={{ border: "1px solid rgba(232,195,158,0.3)", color: "rgba(234,230,240,0.7)", background: "rgba(255,255,255,0.04)" }}>
+              <span className="text-sm">I'm okay now</span>
+            </button>
+            <p className="text-xs mt-5 italic" style={{ color: "rgba(234,230,240,0.4)" }}>stay as long as you need.</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* CLOSING */}
+      <AnimatePresence>
+        {closing && (
+          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 0.8, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}
+            className="absolute bottom-16 left-0 right-0 text-center display text-xl sm:text-2xl italic px-6" style={{ color: "rgba(232,195,158,0.85)" }}>
             come back whenever you need this.
           </motion.p>
         )}
@@ -921,7 +1021,6 @@ function HugExperience({ close }) {
     </motion.div>
   );
 }
-
 /* ============================ TIMELINE — the growing album ============================ */
 
 function TimelineView({ deviceTilt }) {
@@ -1101,9 +1200,10 @@ function ConstellationScene({ onSelect, onComplete }) {
             // Stars at different z-depths for parallax-in-3D
             const z = s.lead ? 30 : 10;
             return (
-              <motion.button key={i} onClick={() => tap(s, i)}
+              <motion.button key={i}
+                onPointerUp={(e) => { e.stopPropagation(); tap(s, i); }}
                 className="absolute flex items-center justify-center"
-                style={{ left: `${s.x}%`, top: `${s.y}%`, width: 48, height: 48, transform: `translate(-50%,-50%) translateZ(${z}px)` }}
+                style={{ left: `${s.x}%`, top: `${s.y}%`, width: 64, height: 64, transform: `translate(-50%,-50%) translateZ(${z}px)`, touchAction: "manipulation" }}
                 whileHover={{ scale: 1.35 }} whileTap={{ scale: 0.9 }} aria-label={`memory ${i + 1}`}>
                 <motion.div
                   animate={{ opacity: isF ? [0.5, 0.9, 0.5] : [0.15, 0.4, 0.15], scale: isF ? [1, 1.3, 1] : [1, 1.1, 1] }}
@@ -1363,13 +1463,235 @@ function Firefly({ x, y, f }) {
   );
 }
 
+/* ============================ COUNTDOWN — until we meet ============================ */
+// Live ticking countdown to the next time they're together.
+const MEET_DATE = new Date("2026-07-04T00:00:00+05:30"); // 4 July 2026, IST
+
+function useCountdown(target) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const diff = Math.max(0, target.getTime() - now);
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+  return { days, hours, mins, secs, done: diff === 0 };
+}
+
+function CountdownScene() {
+  const { days, hours, mins, secs, done } = useCountdown(MEET_DATE);
+  const units = [
+    { v: days, l: "days" },
+    { v: hours, l: "hours" },
+    { v: mins, l: "minutes" },
+    { v: secs, l: "seconds" },
+  ];
+  return (
+    <div className="w-full max-w-2xl flex flex-col items-center">
+      <ChapterLabel num="x" title="counting down" />
+      {done ? (
+        <>
+          <h2 className="display text-center font-light leading-tight mb-4" style={{ fontSize: "clamp(2.2rem,8vw,4rem)", color: "#E8C39E" }}>
+            It's today.
+          </h2>
+          <p className="text-center text-base italic" style={{ color: "rgba(234,230,240,0.7)" }}>
+            Come here. I've been waiting.
+          </p>
+        </>
+      ) : (
+        <>
+          <h2 className="display text-center font-light leading-tight mb-2" style={{ fontSize: "clamp(1.8rem,6vw,3rem)" }}>
+            Until I get to hold you again
+          </h2>
+          <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>4th july · counting every second.</p>
+
+          <div className="flex items-start justify-center gap-3 sm:gap-6">
+            {units.map((u, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <div
+                  className="rounded-2xl grain flex items-center justify-center"
+                  style={{
+                    minWidth: "clamp(58px, 18vw, 96px)",
+                    padding: "clamp(12px,3vw,22px) clamp(6px,2vw,14px)",
+                    background: "rgba(255,255,255,0.05)",
+                    backdropFilter: "blur(20px)",
+                    WebkitBackdropFilter: "blur(20px)",
+                    border: "1px solid rgba(232,195,158,0.2)",
+                    boxShadow: "0 8px 32px rgba(232,195,158,0.08)",
+                  }}
+                >
+                  <AnimatePresence mode="popLayout">
+                    <motion.span
+                      key={u.v}
+                      initial={{ y: -14, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: 14, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      className="display tabular-nums"
+                      style={{ fontSize: "clamp(1.8rem,7vw,3.4rem)", color: "#EAE6F0", lineHeight: 1 }}
+                    >
+                      {String(u.v).padStart(2, "0")}
+                    </motion.span>
+                  </AnimatePresence>
+                </div>
+                <span className="eyebrow text-[9px] mt-3" style={{ color: "rgba(232,195,158,0.6)" }}>{u.l}</span>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-sm mt-12 italic max-w-sm" style={{ color: "rgba(234,230,240,0.6)" }}>
+            every number that ticks down is one second closer to you in my arms.
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ============================ PULL THE STARS ============================ */
+// An interactive field of soft stars. Press/drag and nearby stars are drawn
+// toward your finger, gathering into a glow; release and they drift back home.
+// Wordless, tactile — the cosmos becomes hers to touch.
+
+function PullStars() {
+  const canvasRef = useRef(null);
+  const pointerRef = useRef({ x: 0, y: 0, active: false });
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let W, H, raf;
+
+    const resize = () => {
+      W = canvas.clientWidth; H = canvas.clientHeight;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+
+    const COUNT = Math.min(140, Math.floor((W * H) / 2600));
+    const palette = ["232,195,158", "168,197,240", "224,168,184", "255,255,255"];
+    const stars = [...Array(COUNT)].map(() => {
+      const hx = Math.random() * W, hy = Math.random() * H;
+      return {
+        hx, hy, x: hx, y: hy, vx: 0, vy: 0,
+        r: 0.8 + Math.random() * 2.2,
+        c: palette[Math.floor(Math.random() * palette.length)],
+        tw: Math.random() * Math.PI * 2,
+        tws: 0.5 + Math.random() * 1.5,
+      };
+    });
+
+    const getXY = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: cx - rect.left, y: cy - rect.top };
+    };
+    const down = (e) => { const p = getXY(e); pointerRef.current = { x: p.x, y: p.y, active: true }; };
+    const move = (e) => { if (!pointerRef.current.active) return; const p = getXY(e); pointerRef.current.x = p.x; pointerRef.current.y = p.y; };
+    const up = () => { pointerRef.current.active = false; };
+
+    canvas.addEventListener("pointerdown", down);
+    canvas.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    canvas.addEventListener("touchstart", down, { passive: true });
+    canvas.addEventListener("touchmove", move, { passive: true });
+    window.addEventListener("touchend", up);
+
+    let t = 0;
+    const loop = () => {
+      t += 0.016;
+      ctx.clearRect(0, 0, W, H);
+      const ptr = pointerRef.current;
+
+      // draw faint connecting lines between gathered stars near the pointer
+      if (ptr.active) {
+        ctx.strokeStyle = "rgba(232,195,158,0.10)";
+        ctx.lineWidth = 0.6;
+        const near = stars.filter((s) => Math.hypot(s.x - ptr.x, s.y - ptr.y) < 90);
+        for (let i = 0; i < near.length; i++) {
+          for (let j = i + 1; j < near.length; j++) {
+            const d = Math.hypot(near[i].x - near[j].x, near[i].y - near[j].y);
+            if (d < 46) { ctx.beginPath(); ctx.moveTo(near[i].x, near[i].y); ctx.lineTo(near[j].x, near[j].y); ctx.stroke(); }
+          }
+        }
+      }
+
+      stars.forEach((s) => {
+        if (ptr.active) {
+          const dx = ptr.x - s.x, dy = ptr.y - s.y;
+          const dist = Math.hypot(dx, dy) || 1;
+          if (dist < 200) {
+            const pull = (1 - dist / 200) * 0.9;
+            s.vx += (dx / dist) * pull;
+            s.vy += (dy / dist) * pull;
+          }
+        } else {
+          // drift home
+          s.vx += (s.hx - s.x) * 0.012;
+          s.vy += (s.hy - s.y) * 0.012;
+        }
+        s.vx *= 0.86; s.vy *= 0.86;
+        s.x += s.vx; s.y += s.vy;
+
+        const tw = 0.55 + Math.sin(t * s.tws + s.tw) * 0.35;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${s.c},${tw})`;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = `rgba(${s.c},0.7)`;
+        ctx.fill();
+      });
+      ctx.shadowBlur = 0;
+
+      // soft glow at the pointer when active
+      if (ptr.active) {
+        const g = ctx.createRadialGradient(ptr.x, ptr.y, 0, ptr.x, ptr.y, 70);
+        g.addColorStop(0, "rgba(232,195,158,0.18)");
+        g.addColorStop(1, "rgba(232,195,158,0)");
+        ctx.fillStyle = g;
+        ctx.fillRect(ptr.x - 70, ptr.y - 70, 140, 140);
+      }
+
+      raf = requestAnimationFrame(loop);
+    };
+    loop();
+
+    window.addEventListener("resize", resize);
+    return () => {
+      cancelAnimationFrame(raf);
+      canvas.removeEventListener("pointerdown", down);
+      canvas.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      canvas.removeEventListener("touchstart", down);
+      canvas.removeEventListener("touchmove", move);
+      window.removeEventListener("touchend", up);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="w-full rounded-[24px]"
+      style={{ height: "min(52vh, 420px)", display: "block", touchAction: "none", cursor: "grab" }}
+    />
+  );
+}
+
 /* ============================ SCENE WRAPPER ============================ */
 
 function Scene({ children, className = "", tall = false }) {
   return (
     <section
-      className={`snap-scene flex flex-col items-center ${tall ? "justify-start py-24" : "justify-center"} px-5 sm:px-6 ${className}`}
-      style={{ scrollSnapAlign: "start", minHeight: "100dvh", position: "relative" }}
+      className={`snap-scene flex flex-col items-center ${tall ? "justify-start" : "justify-center"} px-5 sm:px-6 ${className}`}
+      style={{ scrollSnapAlign: "start", minHeight: "100dvh", boxSizing: "border-box", paddingTop: tall ? "7rem" : "5rem", paddingBottom: tall ? "7rem" : "5rem", position: "relative" }}
     >
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -1812,10 +2134,24 @@ export default function App() {
             </motion.div>
           </Scene>
 
-          {/* 11 · TIMELINE — our story, so far (the growing album) */}
+          {/* 11 · COUNTDOWN — until we meet */}
+          <Scene><CountdownScene /></Scene>
+
+          {/* 12 · PULL THE STARS — tactile play */}
+          <Scene>
+            <div className="w-full max-w-2xl flex flex-col items-center">
+              <ChapterLabel num="xi" title="reach out" />
+              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Hold out your hand.</h2>
+              <p className="text-center text-sm mb-8 italic" style={{ color: "rgba(234,230,240,0.5)" }}>press and drag — the stars come to you. they always do.</p>
+              <PullStars />
+              <p className="text-center text-xs mt-6 italic" style={{ color: "rgba(234,230,240,0.4)" }}>even the sky leans toward you, Baby Boo.</p>
+            </div>
+          </Scene>
+
+          {/* 13 · TIMELINE — our story, so far (the growing album) */}
           <Scene tall>
             <div className="w-full max-w-lg">
-              <ChapterLabel num="x" title="our story, so far" />
+              <ChapterLabel num="xii" title="our story, so far" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Every time we meet,</h2>
               <p className="text-center text-sm mb-14 italic" style={{ color: "rgba(234,230,240,0.5)" }}>this page grows a little longer.</p>
 
