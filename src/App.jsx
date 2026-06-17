@@ -1158,7 +1158,7 @@ function ConstellationScene({ onSelect, onComplete }) {
 
   return (
     <div className="relative w-full max-w-2xl" style={{ zIndex: 2 }}>
-      <ChapterLabel num="vi" title="your stars" />
+      <ChapterLabel num="vii" title="your stars" />
       <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)", color: "#EAE6F0" }}>
         In every universe,
       </h2>
@@ -1491,7 +1491,7 @@ function CountdownScene() {
   ];
   return (
     <div className="w-full max-w-2xl flex flex-col items-center">
-      <ChapterLabel num="x" title="counting down" />
+      <ChapterLabel num="xi" title="counting down" />
       {done ? (
         <>
           <h2 className="display text-center font-light leading-tight mb-4" style={{ fontSize: "clamp(2.2rem,8vw,4rem)", color: "#E8C39E" }}>
@@ -1682,6 +1682,140 @@ function PullStars() {
       className="w-full rounded-[24px]"
       style={{ height: "min(52vh, 420px)", display: "block", touchAction: "none", cursor: "grab" }}
     />
+  );
+}
+
+/* ============================ COFFEE — a glass, just for you ============================ */
+// A tall iced coffee. Tap it: ice settles, condensation beads, a message rises.
+
+function CoffeeScene() {
+  const [poured, setPoured] = useState(false);
+
+  // ice cubes inside the glass — gentle bob/rotate
+  const ice = [
+    { x: 86, y: 96, s: 22, rot: -12, d: 0 },
+    { x: 108, y: 110, s: 18, rot: 18, d: 0.6 },
+    { x: 94, y: 126, s: 20, rot: 6, d: 1.1 },
+  ];
+
+  return (
+    <div className="w-full max-w-xl flex flex-col items-center">
+      <ChapterLabel num="vi" title="a slow morning" />
+      <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>I made you a cold coffee.</h2>
+      <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>
+        {poured ? "just the way you like it. no sugar." : "tap the glass."}
+      </p>
+
+      <button onClick={() => setPoured(true)} className="relative" style={{ cursor: poured ? "default" : "pointer", touchAction: "manipulation" }} aria-label="pour the coffee" disabled={poured}>
+        {/* cool glow under glass */}
+        <motion.div
+          animate={{ opacity: [0.25, 0.45, 0.25], scale: [1, 1.06, 1] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute left-1/2 -translate-x-1/2 rounded-full pointer-events-none"
+          style={{ bottom: -8, width: 150, height: 50, background: "radial-gradient(ellipse, rgba(168,197,240,0.45) 0%, transparent 70%)", filter: "blur(18px)" }}
+        />
+
+        {/* rising bubbles (cold fizz) instead of steam */}
+        <div className="absolute left-0 right-0" style={{ top: 0, bottom: 0, pointerEvents: "none" }}>
+          {[0, 1, 2, 3].map((i) => (
+            <motion.div
+              key={i}
+              animate={{ y: [60, 6], opacity: [0, 0.6, 0], scale: [0.6, 1] }}
+              transition={{ duration: 3.5 + i * 0.6, repeat: Infinity, delay: i * 0.9, ease: "easeOut" }}
+              className="absolute rounded-full"
+              style={{ width: 4 + (i % 2) * 2, height: 4 + (i % 2) * 2, left: `${42 + i * 5}%`, top: "40%", background: "rgba(255,255,255,0.5)", boxShadow: "0 0 4px rgba(255,255,255,0.4)" }}
+            />
+          ))}
+        </div>
+
+        {/* the glass (SVG) */}
+        <svg viewBox="0 0 200 220" style={{ width: "min(52vw, 210px)", height: "auto", display: "block" }}>
+          <defs>
+            <linearGradient id="glassBody" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.05)" />
+              <stop offset="20%" stopColor="rgba(255,255,255,0.18)" />
+              <stop offset="50%" stopColor="rgba(255,255,255,0.06)" />
+              <stop offset="100%" stopColor="rgba(168,197,240,0.10)" />
+            </linearGradient>
+            <linearGradient id="coldBrew" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#5a3a22" />
+              <stop offset="100%" stopColor="#2e1a10" />
+            </linearGradient>
+            <clipPath id="glassInner">
+              <path d="M66 64 L134 64 L128 188 Q127 196 119 196 L81 196 Q73 196 72 188 Z" />
+            </clipPath>
+          </defs>
+
+          {/* coaster */}
+          <ellipse cx="100" cy="204" rx="62" ry="8" fill="rgba(168,197,240,0.10)" stroke="rgba(168,197,240,0.25)" strokeWidth="1" />
+
+          {/* coffee fill (clipped to glass) */}
+          <g clipPath="url(#glassInner)">
+            <motion.rect
+              x="60" width="80"
+              initial={{ y: 120, height: 76 }}
+              animate={{ y: poured ? 84 : 120, height: poured ? 112 : 76 }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+              fill="url(#coldBrew)"
+            />
+            {/* coffee surface line */}
+            <motion.rect x="60" width="80" height="3" fill="rgba(232,195,158,0.4)"
+              initial={{ y: 120 }} animate={{ y: poured ? 84 : 120 }} transition={{ duration: 1.2, ease: "easeOut" }} />
+
+            {/* ICE CUBES — float and bob */}
+            {ice.map((c, i) => (
+              <motion.g key={i}
+                animate={{ y: [0, -4, 0, 3, 0], rotate: [c.rot, c.rot + 6, c.rot - 4, c.rot] }}
+                transition={{ duration: 5 + i, repeat: Infinity, ease: "easeInOut", delay: c.d }}
+                style={{ transformOrigin: `${c.x}px ${c.y}px` }}
+              >
+                <rect x={c.x - c.s / 2} y={c.y - c.s / 2} width={c.s} height={c.s} rx="4"
+                  fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.45)" strokeWidth="1" />
+                <rect x={c.x - c.s / 2 + 3} y={c.y - c.s / 2 + 3} width={c.s / 3} height={c.s / 3} rx="2" fill="rgba(255,255,255,0.4)" />
+              </motion.g>
+            ))}
+          </g>
+
+          {/* glass body outline */}
+          <path d="M66 64 L134 64 L128 188 Q127 196 119 196 L81 196 Q73 196 72 188 Z" fill="url(#glassBody)" stroke="rgba(232,195,158,0.45)" strokeWidth="1.5" />
+          {/* rim */}
+          <ellipse cx="100" cy="64" rx="34" ry="6" fill="none" stroke="rgba(232,195,158,0.5)" strokeWidth="1.5" />
+          {/* glass highlights */}
+          <path d="M78 70 L73 184" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="3" strokeLinecap="round" opacity="0.5" />
+          <path d="M124 72 L120 180" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="2" strokeLinecap="round" />
+
+          {/* condensation droplets on the glass (appear after pour) */}
+          {poured && [
+            { x: 80, y: 110 }, { x: 122, y: 130 }, { x: 76, y: 150 }, { x: 126, y: 100 }, { x: 100, y: 168 },
+          ].map((d, i) => (
+            <motion.circle key={i} cx={d.x} cy={d.y} r={1.6 + (i % 2)}
+              initial={{ opacity: 0 }} animate={{ opacity: [0, 0.7, 0.5], y: [0, 6] }}
+              transition={{ duration: 2.5, delay: 0.6 + i * 0.25, ease: "easeOut" }}
+              fill="rgba(255,255,255,0.5)" />
+          ))}
+
+          {/* straw */}
+          <rect x="112" y="40" width="6" height="150" rx="3" transform="rotate(8 115 110)" fill="rgba(224,168,184,0.5)" stroke="rgba(224,168,184,0.7)" strokeWidth="0.5" />
+        </svg>
+      </button>
+
+      {/* the message that rises */}
+      <AnimatePresence>
+        {poured && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ delay: 0.5, duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+            className="text-center mt-10 max-w-md"
+          >
+            <p className="leading-relaxed" style={{ fontSize: "clamp(1.05rem,3.8vw,1.3rem)", color: "#EAE6F0" }}>
+              no sugar, obviously. you're sweet enough — and before you say "I'm not sweet," that grumpy little face you just made? that's the sweet part. drink up baby boo.
+            </p>
+            <div className="flex justify-center mt-6"><Lily size={24} opacity={0.5} /></div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -2106,12 +2240,15 @@ export default function App() {
             </div>
           </Scene>
 
-                    {/* 6 · "it'd be you" */}
+          {/* 6 · Coffee — a slow morning */}
+          <Scene><CoffeeScene /></Scene>
+
+                    {/* 7 · "it'd be you" */}
           <Scene>
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 2, ease: "easeOut" }} className="text-center">
               <p className="text-sm mb-6 italic" style={{ color: "rgba(234,230,240,0.4)" }}>if i could only say one thing,</p>
               <h2 className="display font-light leading-[0.95]" style={{ fontSize: "clamp(4rem,16vw,11rem)" }}>it'd be</h2>
-              <h2 className="display italic font-light leading-[0.9] mt-2 grad-gold" style={{ fontSize: "clamp(5rem,20vw,14rem)" }}>you.</h2>
+              <h2 className="display italic font-light mt-2 grad-gold" style={{ fontSize: "clamp(5rem,20vw,14rem)", lineHeight: 1.15, paddingBottom: "0.12em" }}>you.</h2>
               <motion.div initial={{ width: 0 }} animate={{ width: "60%" }} transition={{ duration: 2, delay: 0.5 }}
                 className="h-px mx-auto mt-12" style={{ background: "linear-gradient(to right, transparent, rgba(232,195,158,0.4), transparent)" }} />
             </motion.div>
@@ -2125,7 +2262,7 @@ export default function App() {
             <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               <div className="lg:col-span-5 lg:sticky lg:top-24 text-center lg:text-left">
                 <div className="hidden lg:block mb-6"><Lily size={50} opacity={0.4} /></div>
-                <ChapterLabel num="vii" title="the small things" />
+                <ChapterLabel num="viii" title="the small things" />
                 <h2 className="display font-light leading-tight mb-4" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Tiny things I love about you.</h2>
                 <p className="italic" style={{ color: "rgba(234,230,240,0.55)" }}>the little things no one else would clock. I clock everything.</p>
               </div>
@@ -2145,7 +2282,7 @@ export default function App() {
           {/* 9 · Promise Jar — fireflies */}
           <Scene>
             <div className="w-full max-w-lg flex flex-col items-center">
-              <ChapterLabel num="viii" title="my promises" />
+              <ChapterLabel num="ix" title="my promises" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>A jar of promises.</h2>
               <p className="text-center text-sm mb-12 italic" style={{ color: "rgba(234,230,240,0.5)" }}>each little light is one. open them, one by one.</p>
               <FireflyJar promises={promises} onAllOpened={() => setPromiseBurst(true)} />
@@ -2158,7 +2295,7 @@ export default function App() {
               className="w-full max-w-2xl p-8 sm:p-12 rounded-[32px] relative grain"
               style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(232,195,158,0.2)" }}>
               <div className="absolute top-7 right-7"><Lily size={34} opacity={0.5} /></div>
-              <ChapterLabel num="ix" title="a letter" />
+              <ChapterLabel num="x" title="a letter" />
               <h2 className="display font-light text-center mb-10" style={{ fontSize: "clamp(2.5rem,8vw,4rem)" }}>To {NAME},</h2>
               <div className="space-y-6 text-base sm:text-lg leading-relaxed" style={{ color: "rgba(234,230,240,0.8)" }}>
                 {[
@@ -2198,7 +2335,7 @@ export default function App() {
           {/* 12 · PULL THE STARS — tactile play */}
           <Scene>
             <div className="w-full max-w-2xl flex flex-col items-center">
-              <ChapterLabel num="xi" title="reach out" />
+              <ChapterLabel num="xii" title="reach out" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Hold out your hand.</h2>
               <p className="text-center text-sm mb-8 italic" style={{ color: "rgba(234,230,240,0.5)" }}>press and drag — the stars come to you. they always do.</p>
               <PullStars />
@@ -2209,7 +2346,7 @@ export default function App() {
           {/* 13 · TIMELINE — our story, so far (the growing album) */}
           <Scene tall>
             <div className="w-full max-w-lg">
-              <ChapterLabel num="xii" title="our story, so far" />
+              <ChapterLabel num="xiii" title="our story, so far" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Every time we meet,</h2>
               <p className="text-center text-sm mb-14 italic" style={{ color: "rgba(234,230,240,0.5)" }}>this page grows a little longer.</p>
 
@@ -2368,6 +2505,7 @@ function StyleTag() {
         background: linear-gradient(120deg, #f3d9bd 0%, #E8C39E 40%, #E0A8B8 100%);
         -webkit-background-clip: text; background-clip: text;
         -webkit-text-fill-color: transparent; color: transparent;
+        padding-bottom: 0.08em;
       }
       .body-font { font-family: 'Inter', sans-serif; }
       .eyebrow { font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.32em; font-weight: 400; }
