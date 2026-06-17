@@ -1694,9 +1694,9 @@ function Scene({ children, className = "", tall = false }) {
       style={{ scrollSnapAlign: "start", minHeight: "100dvh", boxSizing: "border-box", paddingTop: tall ? "7rem" : "5rem", paddingBottom: tall ? "7rem" : "5rem", position: "relative" }}
     >
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
         className="w-full flex flex-col items-center justify-center"
       >
         {children}
@@ -1708,7 +1708,14 @@ function Scene({ children, className = "", tall = false }) {
 /* ============================ MAIN APP ============================ */
 
 export default function App() {
+  const [loading, setLoading] = useState(true);
   const [entered, setEntered] = useState(false);
+
+  // intro veil — give the cosmos a beat to initialize, then reveal
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 2200);
+    return () => clearTimeout(t);
+  }, []);
   const [zooming, setZooming] = useState(false);
   // ── surprise states ──
   const [lilyTaps, setLilyTaps] = useState(0);
@@ -1839,10 +1846,61 @@ export default function App() {
     if (muted) { p.unMute(); p.setVolume(55); setMuted(false); } else { p.mute(); setMuted(true); }
   };
 
+  // browser tab: title + favicon (a small gold lily)
+  useEffect(() => {
+    document.title = "for you ✦";
+    const svg = encodeURIComponent(
+      `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230A0E27'/><g stroke='%23E8C39E' stroke-width='3' fill='none' stroke-linecap='round'><path d='M50 50 Q45 28 50 12 Q55 28 50 50'/><path d='M50 50 Q67 34 82 28 Q71 46 50 50'/><path d='M50 50 Q71 56 80 72 Q60 66 50 50'/><path d='M50 50 Q55 72 50 88 Q45 72 50 50'/><path d='M50 50 Q29 66 20 72 Q29 56 50 50'/><path d='M50 50 Q29 46 18 28 Q33 34 50 50'/></g></svg>`
+    );
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
+    link.href = `data:image/svg+xml,${svg}`;
+  }, []);
+
   return (
     <div className="body-font" style={{ color: "#EAE6F0", background: "transparent", minHeight: "100dvh" }}>
       <StyleTag />
       <Cosmos progressRef={cosmosProgress} isMobile={isMobile} />
+
+      {/* site-wide grain + vignette — ties the whole world into one mood */}
+      <div className="site-grain" aria-hidden="true" />
+      <div className="site-vignette" aria-hidden="true" />
+
+      {/* LOADING VEIL — a calm intro before the world appears */}
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center"
+            style={{ zIndex: 200, background: "#05060E" }}
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.6, ease: "easeInOut" }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.6, ease: "easeOut" }}
+              className="flex flex-col items-center"
+            >
+              <motion.div
+                animate={{ rotate: [0, 6, 0, -6, 0], opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Lily size={64} opacity={0.9} />
+              </motion.div>
+              <motion.p
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 0.8, y: 0 }}
+                transition={{ delay: 0.6, duration: 1.4 }}
+                className="display italic mt-6"
+                style={{ fontSize: "clamp(1.1rem,4vw,1.5rem)", color: "#E8C39E" }}
+              >
+                for you
+              </motion.p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* hidden youtube player */}
       <div id="yt-player" style={{ position: "fixed", bottom: 0, left: 0, width: 1, height: 1, opacity: 0.01, pointerEvents: "none" }} />
@@ -2053,7 +2111,7 @@ export default function App() {
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 2, ease: "easeOut" }} className="text-center">
               <p className="text-sm mb-6 italic" style={{ color: "rgba(234,230,240,0.4)" }}>if i could only say one thing,</p>
               <h2 className="display font-light leading-[0.95]" style={{ fontSize: "clamp(4rem,16vw,11rem)" }}>it'd be</h2>
-              <h2 className="display italic font-light leading-[0.9] mt-2" style={{ fontSize: "clamp(5rem,20vw,14rem)", color: "#E8C39E" }}>you.</h2>
+              <h2 className="display italic font-light leading-[0.9] mt-2 grad-gold" style={{ fontSize: "clamp(5rem,20vw,14rem)" }}>you.</h2>
               <motion.div initial={{ width: 0 }} animate={{ width: "60%" }} transition={{ duration: 2, delay: 0.5 }}
                 className="h-px mx-auto mt-12" style={{ background: "linear-gradient(to right, transparent, rgba(232,195,158,0.4), transparent)" }} />
             </motion.div>
@@ -2306,6 +2364,11 @@ function StyleTag() {
       @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@300;400;500&family=Caveat:wght@400;500;600&display=swap');
       .hand { font-family: 'Caveat', cursive; }
       .display { font-family: 'Fraunces', serif; }
+      .grad-gold {
+        background: linear-gradient(120deg, #f3d9bd 0%, #E8C39E 40%, #E0A8B8 100%);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; color: transparent;
+      }
       .body-font { font-family: 'Inter', sans-serif; }
       .eyebrow { font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.32em; font-weight: 400; }
       html, body { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; background:#0A0E27; }
@@ -2318,6 +2381,17 @@ function StyleTag() {
         content:''; position:absolute; inset:0; pointer-events:none; opacity:0.4; border-radius:inherit;
         background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
         mix-blend-mode:overlay;
+      }
+      /* site-wide film grain — subtle, over everything */
+      .site-grain {
+        position: fixed; inset: 0; pointer-events: none; z-index: 90; opacity: 0.05;
+        background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='nn'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23nn)'/%3E%3C/svg%3E");
+        mix-blend-mode: overlay;
+      }
+      /* site-wide vignette — darkens edges, focuses the center */
+      .site-vignette {
+        position: fixed; inset: 0; pointer-events: none; z-index: 89;
+        background: radial-gradient(ellipse at center, transparent 45%, rgba(5,6,14,0.35) 80%, rgba(5,6,14,0.6) 100%);
       }
       @media (prefers-reduced-motion: reduce) {
         * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
