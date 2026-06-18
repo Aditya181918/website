@@ -1843,7 +1843,29 @@ function Scene({ children, className = "", tall = false }) {
 
 export default function App() {
   const [loading, setLoading] = useState(true);
+  const [unlocked, setUnlocked] = useState(false);
+  const [pwInput, setPwInput] = useState("");
+  const [pwError, setPwError] = useState(false);
   const [entered, setEntered] = useState(false);
+
+  const PASSWORD = "babyboo";
+
+  // remember unlock across visits
+  useEffect(() => {
+    try { if (localStorage.getItem("bb_unlocked") === "1") setUnlocked(true); } catch (e) {}
+  }, []);
+
+  const tryUnlock = () => {
+    if (pwInput.trim().toLowerCase() === PASSWORD) {
+      try { localStorage.setItem("bb_unlocked", "1"); } catch (e) {}
+      if (navigator.vibrate) navigator.vibrate(30);
+      setUnlocked(true);
+    } else {
+      setPwError(true);
+      if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
+      setTimeout(() => setPwError(false), 600);
+    }
+  };
 
   // intro veil — give the cosmos a beat to initialize, then reveal
   useEffect(() => {
@@ -2036,6 +2058,35 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* PASSWORD GATE — plain */}
+      {!loading && !unlocked && (
+        <div
+          className="fixed inset-0 flex flex-col items-center justify-center px-6"
+          style={{ zIndex: 150, background: "#0A0E27" }}
+        >
+          <p style={{ color: "#EAE6F0", marginBottom: 16, fontSize: "1rem" }}>Enter password</p>
+          <input
+            type="password"
+            value={pwInput}
+            onChange={(e) => setPwInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") tryUnlock(); }}
+            autoFocus
+            style={{
+              padding: "10px 14px", fontSize: "1rem", borderRadius: 6,
+              border: pwError ? "1px solid #e06b6b" : "1px solid #555",
+              background: "#11152e", color: "#EAE6F0", outline: "none", width: 240, textAlign: "center",
+            }}
+          />
+          <button
+            onClick={tryUnlock}
+            style={{ marginTop: 14, padding: "10px 24px", fontSize: "1rem", borderRadius: 6, border: "none", background: "#E8C39E", color: "#0A0E27", cursor: "pointer" }}
+          >
+            Enter
+          </button>
+          {pwError && <p style={{ color: "#e06b6b", marginTop: 12, fontSize: "0.85rem" }}>Incorrect password</p>}
+        </div>
+      )}
+
       {/* hidden youtube player */}
       <div id="yt-player" style={{ position: "fixed", bottom: 0, left: 0, width: 1, height: 1, opacity: 0.01, pointerEvents: "none" }} />
 
@@ -2083,7 +2134,7 @@ export default function App() {
 
       {/* ENTRY (pre-journey) */}
       <AnimatePresence>
-        {!entered && (
+        {unlocked && !entered && (
           <motion.section
             className="fixed inset-0 flex items-center justify-center px-6"
             style={{ zIndex: 20 }}
