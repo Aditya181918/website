@@ -130,6 +130,7 @@ const timeline = [
       { src: "/photo-lights.jpeg", caption: "the nights got softer once they had you in them." },
       { src: "/photo-flowers.jpeg", caption: "you, casually outshining an entire wall of flowers." },
       { src: "/photo-masks.jpeg", caption: "even our ridiculous looks like love to me." },
+      { src: "/photo-happy.jpeg", caption: "asked and answered." },
       { src: "/photo-hug.jpeg", caption: "and when I hold you, the whole world goes quiet.", secret: true },
     ],
   },
@@ -1465,7 +1466,7 @@ function Firefly({ x, y, f }) {
 
 /* ============================ COUNTDOWN — until we meet ============================ */
 // Live ticking countdown to the next time they're together.
-const MEET_DATE = new Date("2026-07-01T00:00:00+05:30"); // 1 July 2026, IST
+const MEET_DATE = new Date("2026-09-01T00:00:00+05:30"); // 1 September 2026, IST
 
 function useCountdown(target) {
   const [now, setNow] = useState(() => Date.now());
@@ -1506,7 +1507,7 @@ function CountdownScene() {
           <h2 className="display text-center font-light leading-tight mb-2" style={{ fontSize: "clamp(1.8rem,6vw,3rem)" }}>
             Until I get to hold you again
           </h2>
-          <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>1st july · counting every second.</p>
+          <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>1st september · counting every second.</p>
 
           <div className="flex items-start justify-center gap-3 sm:gap-6">
             {units.map((u, i) => (
@@ -1848,23 +1849,24 @@ export default function App() {
   const [pwError, setPwError] = useState(false);
   const [entered, setEntered] = useState(false);
 
-  const PASSWORD = "babyboo";
+  // Password check — only a SHA-256 hash lives in the code, never the word itself.
+  // Asks every time the page is opened or refreshed (no remembering).
+  const PASSWORD_HASH = "6f4f7a3960ea271125aa000243b13218ff2812d4d21bbc432630ed21b0bd2a1d";
 
-  // remember unlock across visits
-  useEffect(() => {
-    try { if (localStorage.getItem("bb_unlocked") === "1") setUnlocked(true); } catch (e) {}
-  }, []);
-
-  const tryUnlock = () => {
-    if (pwInput.trim().toLowerCase() === PASSWORD) {
-      try { localStorage.setItem("bb_unlocked", "1"); } catch (e) {}
-      if (navigator.vibrate) navigator.vibrate(30);
-      setUnlocked(true);
-    } else {
-      setPwError(true);
-      if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
-      setTimeout(() => setPwError(false), 600);
-    }
+  const tryUnlock = async () => {
+    try {
+      const data = new TextEncoder().encode(pwInput.trim().toLowerCase());
+      const buf = await crypto.subtle.digest("SHA-256", data);
+      const hash = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+      if (hash === PASSWORD_HASH) {
+        if (navigator.vibrate) navigator.vibrate(30);
+        setUnlocked(true);
+        return;
+      }
+    } catch (e) { /* crypto unavailable — fall through to error */ }
+    setPwError(true);
+    if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
+    setTimeout(() => setPwError(false), 600);
   };
 
   // intro veil — give the cosmos a beat to initialize, then reveal
