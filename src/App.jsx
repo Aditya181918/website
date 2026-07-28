@@ -1851,7 +1851,7 @@ export default function App() {
 
   // Password check — only a SHA-256 hash lives in the code, never the word itself.
   // Asks every time the page is opened or refreshed (no remembering).
-  const PASSWORD_HASH = "fd572697628bd0fa0ee6caec83041bc2c806b6a616327c4d3ab3331798ad55ac";
+  const PASSWORD_HASH = "d422fe501f53579955a65160df522af64fff95c1f963567a18a6f19efff31dbc";
 
   const tryUnlock = async () => {
     try {
