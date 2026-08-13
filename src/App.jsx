@@ -324,7 +324,7 @@ function HoldSecret({ children }) {
 // Layered: deep starfield, drifting dust, soft nebula clouds, floating light motes.
 // Reads a scroll-progress ref (0..1) to push the camera forward through the world.
 
-function Cosmos({ progressRef, isMobile }) {
+function Cosmos({ progressRef, isMobile, rideRef }) {
   const mountRef = useRef(null);
   const rafRef = useRef(0);
   const stateRef = useRef(null);
@@ -490,21 +490,93 @@ function Cosmos({ progressRef, isMobile }) {
     // ── animation loop ──
     const clock = new THREE.Clock();
     let curZ = 600;
+    // ride state that decays back to normal after the ride ends
+    let rideY = 0, rideRoll = 0, rideFov = 62, rideZ = null;
+
+    // ride timing (seconds)
+    const RD = { climb: 4.5, hang: 1.5, drop: 3.5, turns: 3.5, out: 3 };
+    const T1 = RD.climb, T2 = T1 + RD.hang, T3 = T2 + RD.drop, T4 = T3 + RD.turns, T5 = T4 + RD.out;
+
     const animate = () => {
       const t = clock.getElapsedTime();
       const p = progressRef.current || 0; // 0..1 scroll progress
+      const ride = rideRef && rideRef.current;
 
-      // camera flies forward through the world as she scrolls
-      const targetZ = 600 - p * 1700;
-      curZ += (targetZ - curZ) * 0.05; // smooth easing
-      camera.position.z = curZ;
-
-      // pointer parallax eased
+      // pointer parallax eased (always)
       pointer.x += (pointer.tx - pointer.x) * 0.04;
       pointer.y += (pointer.ty - pointer.y) * 0.04;
-      camera.position.x = pointer.x * 40;
-      camera.position.y = -pointer.y * 28;
-      camera.lookAt(0, 0, curZ - 400);
+
+      if (ride && ride.active) {
+        // ─── THE ROLLERCOASTER ───
+        const rt = (performance.now() - ride.start) / 1000;
+        const base = ride.baseZ;
+
+        if (rt < T1) {
+          // the climb — slow, deliberate, tension building
+          const u = rt / T1;
+          const e = u * u;
+          rideY = e * 300;
+          rideZ = base - u * 140;
+          rideRoll = Math.sin(rt * 8) * 0.004; // faint clack-clack shudder
+          rideFov = 62;
+        } else if (rt < T2) {
+          // hang at the top — the worst/best second
+          const u = (rt - T1) / RD.hang;
+          rideY = 300 + Math.sin(u * Math.PI * 2) * 5;
+          rideZ = base - 140 - u * 25;
+          rideRoll = 0;
+          rideFov = 62 - u * 5;
+        } else if (rt < T3) {
+          // THE DROP
+          const u = (rt - T2) / RD.drop;
+          const e = u * u * u;
+          rideY = 300 - e * 460;
+          rideZ = base - 165 - e * 950;
+          rideRoll = Math.sin(u * Math.PI) * 0.16;
+          rideFov = 57 + e * 36; // widening = speed
+        } else if (rt < T4) {
+          // banking turns through the stars
+          const u = (rt - T3) / RD.turns;
+          rideY = -160 + Math.sin(u * Math.PI * 2) * 70 + u * 110;
+          rideZ = base - 1115 - u * 760;
+          rideRoll = Math.sin(u * Math.PI * 3) * 0.38;
+          rideFov = 93 - u * 15;
+        } else if (rt < T5) {
+          // easing out, coming home
+          const u = (rt - T4) / RD.out;
+          const e = 1 - Math.pow(1 - u, 3);
+          rideY = -50 * (1 - e);
+          rideZ = base - 1875 - e * 220;
+          rideRoll = Math.sin(u * Math.PI) * 0.06 * (1 - e);
+          rideFov = 78 - e * 16;
+        } else {
+          ride.active = false;
+          curZ = rideZ != null ? rideZ : curZ;
+          if (ride.onEnd) { ride.onEnd(); ride.onEnd = null; }
+        }
+
+        if (ride.active) {
+          camera.position.z = rideZ;
+          camera.position.x = pointer.x * 15 + Math.sin(rt * 1.3) * 12;
+          camera.position.y = rideY;
+          camera.lookAt(0, rideY * 0.55, rideZ - 400);
+          camera.rotation.z = rideRoll;
+          if (Math.abs(camera.fov - rideFov) > 0.05) { camera.fov = rideFov; camera.updateProjectionMatrix(); }
+        }
+      } else {
+        // ─── NORMAL: scroll-driven flight ───
+        const targetZ = 600 - p * 1700;
+        curZ += (targetZ - curZ) * 0.05;
+        // decay any leftover ride motion smoothly
+        rideY *= 0.93; rideRoll *= 0.93;
+        rideFov += (62 - rideFov) * 0.06;
+        camera.position.z = curZ;
+        camera.position.x = pointer.x * 40;
+        camera.position.y = -pointer.y * 28 + rideY;
+        camera.lookAt(0, 0, curZ - 400);
+        camera.rotation.z = rideRoll;
+        if (Math.abs(camera.fov - rideFov) > 0.05) { camera.fov = rideFov; camera.updateProjectionMatrix(); }
+      }
 
       // gentle rotation of star/dust fields for life
       groups.forEach((g) => {
@@ -543,7 +615,7 @@ function Cosmos({ progressRef, isMobile }) {
       motes.forEach((s) => s.material.dispose());
       if (renderer.domElement && renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
     };
-  }, [isMobile, progressRef]);
+  }, [isMobile, progressRef, rideRef]);
 
   return <div ref={mountRef} className="fixed inset-0" style={{ zIndex: 0, pointerEvents: "none" }} />;
 }
@@ -1159,7 +1231,7 @@ function ConstellationScene({ onSelect, onComplete }) {
 
   return (
     <div className="relative w-full max-w-2xl" style={{ zIndex: 2 }}>
-      <ChapterLabel num="vii" title="your stars" />
+      <ChapterLabel num="viii" title="your stars" />
       <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)", color: "#EAE6F0" }}>
         In every universe,
       </h2>
@@ -1492,7 +1564,7 @@ function CountdownScene() {
   ];
   return (
     <div className="w-full max-w-2xl flex flex-col items-center">
-      <ChapterLabel num="xi" title="counting down" />
+      <ChapterLabel num="xii" title="counting down" />
       {done ? (
         <>
           <h2 className="display text-center font-light leading-tight mb-4" style={{ fontSize: "clamp(2.2rem,8vw,4rem)", color: "#E8C39E" }}>
@@ -1820,6 +1892,120 @@ function CoffeeScene() {
   );
 }
 
+/* ============================ ROLLERCOASTER — the ride ============================ */
+// Hijacks the cosmos camera for ~16 seconds: the climb, the hang, the drop,
+// banking turns through the stars, then easing home.
+
+const RIDE_TOTAL = 16000; // ms — must match the Cosmos ride timing
+
+function RollercoasterScene({ rideRef, onRideChange, onCaption, registerSkip }) {
+  const [state, setState] = useState("idle"); // idle | riding | done
+  const [caption, setCaption] = useState("");
+  const timersRef = useRef([]);
+
+  const clearTimers = () => { timersRef.current.forEach(clearTimeout); timersRef.current = []; };
+  useEffect(() => () => clearTimers(), []);
+
+  const startRide = () => {
+    if (state === "riding") return;
+    setState("riding");
+    onRideChange(true);
+
+    rideRef.current = {
+      active: true,
+      start: performance.now(),
+      baseZ: 300,
+      onEnd: () => {},
+    };
+
+    // captions synced to the ride phases
+    const cues = [
+      [0, "up we go…"],
+      [4500, "…don't look down."],
+      [6000, "hold on!"],
+      [9500, "hands up!"],
+      [13000, "…okay. breathe."],
+    ];
+    cues.forEach(([ms, text]) => {
+      timersRef.current.push(setTimeout(() => { setCaption(text); onCaption(text); }, ms));
+    });
+
+    // haptics: a shudder on the climb, a jolt at the drop
+    if (navigator.vibrate) {
+      timersRef.current.push(setTimeout(() => navigator.vibrate([12, 180, 12, 180, 12, 180, 12]), 400));
+      timersRef.current.push(setTimeout(() => navigator.vibrate([60, 40, 120]), 6000));
+      timersRef.current.push(setTimeout(() => navigator.vibrate(30), 9500));
+    }
+
+    timersRef.current.push(setTimeout(() => {
+      setState("done");
+      setCaption("");
+      onCaption("");
+      onRideChange(false);
+    }, RIDE_TOTAL));
+  };
+
+  const skip = () => {
+    clearTimers();
+    if (rideRef.current) rideRef.current.active = false;
+    setState("done");
+    setCaption("");
+    onCaption("");
+    onRideChange(false);
+  };
+
+  // let App's overlay skip button trigger this
+  useEffect(() => { registerSkip(() => skip); }, [registerSkip]);
+
+  return (
+    <div className="w-full max-w-xl flex flex-col items-center">
+      {state !== "riding" && (
+        <>
+          <ChapterLabel num="vii" title="the ride" />
+          <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>
+            {state === "done" ? "again?" : "Want to go on a ride?"}
+          </h2>
+          <p className="text-center text-sm mb-9 italic" style={{ color: "rgba(234,230,240,0.5)" }}>
+            {state === "done" ? "I knew you'd say yes." : "you always pick the front row. hold on."}
+          </p>
+        </>
+      )}
+
+      {state !== "riding" && (
+        <motion.button
+          onClick={startRide}
+          whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+          className="display px-12 py-4 rounded-full text-lg grain"
+          style={{ color: "#0A0E27", background: "linear-gradient(135deg, #E8C39E, #f3d9bd)", boxShadow: "0 8px 40px rgba(232,195,158,0.3)" }}
+        >
+          {state === "done" ? "ride again" : "hold on tight"}
+        </motion.button>
+      )}
+
+      {/* the message after the ride */}
+      <AnimatePresence>
+        {state === "done" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="text-center mt-10 max-w-md"
+          >
+            <p className="display italic leading-snug" style={{ fontSize: "clamp(1.3rem,4.5vw,1.9rem)", color: "#EAE6F0" }}>
+              loving you is exactly this.
+            </p>
+            <p className="leading-relaxed mt-4" style={{ fontSize: "clamp(0.95rem,3.5vw,1.1rem)", color: "rgba(234,230,240,0.7)" }}>
+              the slow climb, the stomach drop, the screaming, and the second it ends — wanting to go again. I'd get back in line with you every single time.
+            </p>
+            <div className="flex justify-center mt-6"><Lily size={24} opacity={0.5} /></div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* overlay is rendered at App level so the content fade doesn't dim it */}
+    </div>
+  );
+}
+
 /* ============================ SCENE WRAPPER ============================ */
 
 function Scene({ children, className = "", tall = false }) {
@@ -1919,6 +2105,10 @@ export default function App() {
   const scrollRef = useRef(null);
   const { scrollYProgress } = useScroll({ container: scrollRef });
   const cosmosProgress = useRef(0);
+  const rideRef = useRef({ active: false, start: 0, baseZ: 300 });
+  const [riding, setRiding] = useState(false);
+  const [rideCaption, setRideCaption] = useState("");
+  const rideSkipRef = useRef(null);
   useEffect(() => {
     const unsub = scrollYProgress.on("change", (v) => { cosmosProgress.current = v; });
     return () => unsub();
@@ -2018,7 +2208,7 @@ export default function App() {
   return (
     <div className="body-font" style={{ color: "#EAE6F0", background: "transparent", minHeight: "100dvh" }}>
       <StyleTag />
-      <Cosmos progressRef={cosmosProgress} isMobile={isMobile} />
+      <Cosmos progressRef={cosmosProgress} isMobile={isMobile} rideRef={rideRef} />
 
       {/* site-wide grain + vignette — ties the whole world into one mood */}
       <div className="site-grain" aria-hidden="true" />
@@ -2088,6 +2278,42 @@ export default function App() {
           {pwError && <p style={{ color: "#e06b6b", marginTop: 12, fontSize: "0.85rem" }}>Incorrect password</p>}
         </div>
       )}
+
+      {/* RIDE OVERLAY — app level so the content fade never dims it */}
+      <AnimatePresence>
+        {riding && (
+          <motion.div
+            className="fixed inset-0 flex flex-col items-center justify-center pointer-events-none"
+            style={{ zIndex: 70 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}
+          >
+            <motion.div
+              className="absolute inset-0"
+              animate={{ opacity: [0.1, 0.1, 0.5, 0.35, 0.15] }}
+              transition={{ duration: 16, times: [0, 0.28, 0.55, 0.78, 1], ease: "easeInOut" }}
+              style={{ background: "radial-gradient(ellipse at center, transparent 35%, rgba(5,6,14,0.8) 100%)" }}
+            />
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={rideCaption}
+                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.6 }}
+                className="display italic relative"
+                style={{ fontSize: "clamp(1.6rem,6vw,3rem)", color: "#EAE6F0", textShadow: "0 0 40px rgba(232,195,158,0.5)" }}
+              >
+                {rideCaption}
+              </motion.p>
+            </AnimatePresence>
+            <button
+              onClick={() => { if (rideSkipRef.current) rideSkipRef.current(); }}
+              className="absolute pointer-events-auto text-xs eyebrow"
+              style={{ bottom: "calc(2.5rem + env(safe-area-inset-bottom,0px))", color: "rgba(234,230,240,0.45)" }}
+            >
+              skip
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* hidden youtube player */}
       <div id="yt-player" style={{ position: "fixed", bottom: 0, left: 0, width: 1, height: 1, opacity: 0.01, pointerEvents: "none" }} />
@@ -2201,9 +2427,11 @@ export default function App() {
       {entered && (
         <motion.div
           ref={(el) => { scrollRef.current = el; scrollRootRef.current = el; }}
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: riding ? 0.06 : 1 }}
+          transition={{ duration: riding ? 0.8 : 1.5 }}
           className="snap-container no-scrollbar"
-          style={{ height: "100dvh", overflowY: "scroll", scrollSnapType: "y proximity", scrollBehavior: "smooth", position: "relative", zIndex: 1 }}
+          style={{ height: "100dvh", overflowY: riding ? "hidden" : "scroll", scrollSnapType: "y proximity", scrollBehavior: "smooth", position: "relative", zIndex: 1 }}
         >
           {/* 1 · Balloons */}
           <Scene>
@@ -2296,6 +2524,9 @@ export default function App() {
           {/* 6 · Coffee — a slow morning */}
           <Scene><CoffeeScene /></Scene>
 
+          {/* 7 · Rollercoaster — the ride */}
+          <Scene><RollercoasterScene rideRef={rideRef} onRideChange={setRiding} onCaption={setRideCaption} registerSkip={(fn) => { rideSkipRef.current = fn(); }} /></Scene>
+
                     {/* 7 · "it'd be you" */}
           <Scene>
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 2, ease: "easeOut" }} className="text-center">
@@ -2315,7 +2546,7 @@ export default function App() {
             <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               <div className="lg:col-span-5 lg:sticky lg:top-24 text-center lg:text-left">
                 <div className="hidden lg:block mb-6"><Lily size={50} opacity={0.4} /></div>
-                <ChapterLabel num="viii" title="the small things" />
+                <ChapterLabel num="ix" title="the small things" />
                 <h2 className="display font-light leading-tight mb-4" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Tiny things I love about you.</h2>
                 <p className="italic" style={{ color: "rgba(234,230,240,0.55)" }}>the little things no one else would clock. I clock everything.</p>
               </div>
@@ -2335,7 +2566,7 @@ export default function App() {
           {/* 9 · Promise Jar — fireflies */}
           <Scene>
             <div className="w-full max-w-lg flex flex-col items-center">
-              <ChapterLabel num="ix" title="my promises" />
+              <ChapterLabel num="x" title="my promises" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>A jar of promises.</h2>
               <p className="text-center text-sm mb-12 italic" style={{ color: "rgba(234,230,240,0.5)" }}>each little light is one. open them, one by one.</p>
               <FireflyJar promises={promises} onAllOpened={() => setPromiseBurst(true)} />
@@ -2348,7 +2579,7 @@ export default function App() {
               className="w-full max-w-2xl p-8 sm:p-12 rounded-[32px] relative grain"
               style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(232,195,158,0.2)" }}>
               <div className="absolute top-7 right-7"><Lily size={34} opacity={0.5} /></div>
-              <ChapterLabel num="x" title="a letter" />
+              <ChapterLabel num="xi" title="a letter" />
               <h2 className="display font-light text-center mb-10" style={{ fontSize: "clamp(2.5rem,8vw,4rem)" }}>To {NAME},</h2>
               <div className="space-y-6 text-base sm:text-lg leading-relaxed" style={{ color: "rgba(234,230,240,0.8)" }}>
                 {[
@@ -2388,7 +2619,7 @@ export default function App() {
           {/* 12 · PULL THE STARS — tactile play */}
           <Scene>
             <div className="w-full max-w-2xl flex flex-col items-center">
-              <ChapterLabel num="xii" title="reach out" />
+              <ChapterLabel num="xiii" title="reach out" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Hold out your hand.</h2>
               <p className="text-center text-sm mb-8 italic" style={{ color: "rgba(234,230,240,0.5)" }}>press and drag — the stars come to you. they always do.</p>
               <PullStars />
@@ -2399,7 +2630,7 @@ export default function App() {
           {/* 13 · TIMELINE — our story, so far (the growing album) */}
           <Scene tall>
             <div className="w-full max-w-lg">
-              <ChapterLabel num="xiii" title="our story, so far" />
+              <ChapterLabel num="xiv" title="our story, so far" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Every time we meet,</h2>
               <p className="text-center text-sm mb-14 italic" style={{ color: "rgba(234,230,240,0.5)" }}>this page grows a little longer.</p>
 
