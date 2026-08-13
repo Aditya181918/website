@@ -39,12 +39,51 @@ const balloonNotes = [
   "I'd pick you in every timeline. Every single one.",
 ];
 
-const moods = [
-  { title: "Need reassurance?", text: "You are loved. Aggressively. Permanently. By me. There's nothing you could do about it, even if you tried.", accent: "#A8C5F0" },
-  { title: "Missing me?", text: "Good news: I'm probably missing you harder. It's not a competition, but I'm winning.", accent: "#C4B4FF" },
-  { title: "Need a smile?", text: "You're cute even when you're being dramatic. Especially when you're being dramatic.", accent: "#E8C39E" },
-  { title: "Overthinking?", text: "Hey. Put the thought down. Step away from the thought. We can overthink together later — it's a two-person job.", accent: "#B4DCDC" },
-  { title: "Need love?", text: "Consider this a hug in website form. The real one is coming. It's collecting interest.", accent: "#E0A8B8" },
+// Merged: the quick reassurance (short) + the full letter (long).
+// Tap a card → short line first, then the letter beneath it.
+const feelings = [
+  {
+    title: "when you miss me",
+    short: "Good news: I'm probably missing you harder. It's not a competition, but I'm winning.",
+    long: "Close your eyes. I'm right there — in the pause between your thoughts, in the warm side of the pillow. I never really leave; I just get quieter for a while. Missing me is allowed. I'm missing you right back, probably harder, definitely right now.",
+    accent: "#C4B4FF",
+  },
+  {
+    title: "when you're overthinking",
+    short: "Hey. Put the thought down. Step away from the thought. We can overthink together later — it's a two-person job.",
+    long: "Your brain is being loud again, isn't it? Here's the truth: none of it is as big as it feels at 1am. Whatever you said, whatever you replayed for the fourth time — it's okay. You're allowed to put the thought down. I'll hold it for a while. I have big pockets.",
+    accent: "#B4DCDC",
+  },
+  {
+    title: "when you need reassurance",
+    short: "You are loved. Aggressively. Permanently. By me. There's nothing you could do about it, even if you tried.",
+    long: "You are not too much. You are not too little. You are not a rough draft I'm editing. You are not at risk of being left. I'm not going anywhere — not when it's hard, not when you're quiet, not when you're convinced you're unlovable. Especially not then. That's exactly when I dig in.",
+    accent: "#A8C5F0",
+  },
+  {
+    title: "when you can't sleep",
+    short: "It's late and your brain has decided to host a conference. Borrow my calm.",
+    long: "Hi. It's late. Your eyes are heavy but your brain has decided to host a conference. Borrow my calm for tonight — imagine my hand on your back, slow circles, no agenda. The day is over. You did enough. You are enough. Sleep, my love.",
+    accent: "#C4B4FF",
+  },
+  {
+    title: "when life feels heavy",
+    short: "Put it down. Just for a few minutes. The world can hold itself together without you supervising.",
+    long: "Put it down. Whatever it is. Just for a few minutes — the world can hold itself together without you supervising. The weight you're carrying is real, but it was never meant to be carried alone. I'm here. Hand me the heavy end.",
+    accent: "#E0A8B8",
+  },
+  {
+    title: "when you need a smile",
+    short: "You're cute even when you're being dramatic. Especially when you're being dramatic.",
+    long: "",
+    accent: "#E8C39E",
+  },
+  {
+    title: "when you need a hug",
+    short: "Consider this a hug in website form. The real one is coming. It's collecting interest.",
+    long: "",
+    accent: "#E0A8B8",
+  },
 ];
 
 const episodeCards = [
@@ -54,22 +93,24 @@ const episodeCards = [
   { title: "The One I Never Want To End", text: "If life is kind, it gives me decades more of this. If it's very kind — slow mornings too." },
 ];
 
-const letters = [
-  { title: "Open when you miss me", text: "Close your eyes. I'm right there — in the pause between your thoughts, in the warm side of the pillow. I never really leave; I just get quieter for a while. Missing me is allowed. I'm missing you right back, probably harder, definitely right now." },
-  { title: "Open when you're overthinking", text: "Your brain is being loud again, isn't it? Here's the truth: none of it is as big as it feels at 1am. Whatever you said, whatever you replayed for the fourth time — it's okay. You're allowed to put the thought down. I'll hold it for a while. I have big pockets." },
-  { title: "Open when you can't sleep", text: "Hi. It's late. Your eyes are heavy but your brain has decided to host a conference. Borrow my calm for tonight — imagine my hand on your back, slow circles, no agenda. The day is over. You did enough. You are enough. Sleep, my love." },
-  { title: "Open when you need reassurance", text: "You are not too much. You are not too little. You are not a rough draft I'm editing. You are not at risk of being left. I'm not going anywhere — not when it's hard, not when you're quiet, not when you're convinced you're unlovable. Especially not then. That's exactly when I dig in." },
-  { title: "Open when life feels heavy", text: "Put it down. Whatever it is. Just for a few minutes — the world can hold itself together without you supervising. The weight you're carrying is real, but it was never meant to be carried alone. I'm here. Hand me the heavy end." },
-];
 
-const lateNightThoughts = [
+
+// Merged: the small things I notice + the things I think when it's quiet.
+const smallThings = [
+  "The way you say 'hmm' when you're thinking — like a tiny committee is deliberating in there.",
+  "How you go quiet when something actually matters to you.",
   "I wonder if you know how often you cross my mind. It's basically a commute at this point.",
+  "Your dramatic retelling of events that were, objectively, not that dramatic.",
   "You made life feel less lonely without even trying.",
+  "The burst-texting when you're excited. Seventeen messages. No punctuation. Pure joy.",
   "You feel familiar to my soul. Like I've known you across a few lifetimes and several questionable haircuts.",
+  "Your late-night energy. Where does it come from. Science needs to know.",
   "Sometimes I catch myself smiling at nothing. It's never nothing. It's you.",
+  "How you make a grocery run sound like an epic saga with three plot twists.",
   "I hope someone told you today how rare you are. If not — consider it done.",
+  "The way you're a completely different person before your first coffee.",
   "Loving you doesn't feel like a decision. It feels like remembering something I always knew.",
-  "You are the softest part of my day. Every day. No contest.",
+  "How your name became my favourite word without asking my permission.",
 ];
 
 // Cancer constellation — her zodiac. 5 real stars + 3 memory stars.
@@ -84,15 +125,7 @@ const stars = [
   { x: 46, y: 55, name: "", text: "You're the reason I believe in slow, sure, stubborn love.", connects: [2] },
 ];
 
-const tinyThings = [
-  "The way you say 'hmm' when you're thinking — like a tiny committee is deliberating in there.",
-  "How you go quiet when something actually matters to you.",
-  "Your dramatic retelling of events that were, objectively, not that dramatic.",
-  "The burst-texting when you're excited. Seventeen messages. No punctuation. Pure joy.",
-  "Your late-night energy. Where does it come from. Science needs to know.",
-  "How you make a grocery run sound like an epic saga with three plot twists.",
-  "How your name became my favourite word without asking my permission.",
-];
+
 
 const promises = [
   "I promise to always answer when you call. Yes, even mid-meeting. Especially mid-meeting.",
@@ -875,12 +908,18 @@ function TextModal({ text, close }) {
   );
 }
 
-function LetterModal({ letter, close }) {
+function FeelingModal({ feeling, close }) {
   return (
     <Modal close={close} maxWidth="max-w-xl">
-      <p className="eyebrow text-[10px] mb-4" style={{ color: "rgba(168,197,240,0.5)" }}>a letter</p>
-      <h3 className="display text-2xl sm:text-3xl mb-6 leading-snug" style={{ color: "#EAE6F0" }}>{letter.title}</h3>
-      <p className="text-base sm:text-lg leading-relaxed" style={{ color: "rgba(234,230,240,0.85)" }}>{letter.text}</p>
+      <p className="eyebrow text-[10px] mb-4" style={{ color: "rgba(168,197,240,0.5)" }}>for right now</p>
+      <h3 className="display text-2xl sm:text-3xl mb-6 leading-snug" style={{ color: "#EAE6F0" }}>{feeling.title}</h3>
+      <p className="text-base sm:text-lg leading-relaxed" style={{ color: "rgba(234,230,240,0.9)" }}>{feeling.short}</p>
+      {feeling.long ? (
+        <>
+          <div className="h-px my-6" style={{ background: "linear-gradient(to right, transparent, rgba(232,195,158,0.3), transparent)" }} />
+          <p className="text-base leading-relaxed" style={{ color: "rgba(234,230,240,0.75)" }}>{feeling.long}</p>
+        </>
+      ) : null}
       <p className="text-sm mt-8 italic" style={{ color: "rgba(234,230,240,0.45)" }}>— yours, always.</p>
     </Modal>
   );
@@ -2072,11 +2111,115 @@ function RollercoasterScene({ rideRef, onRideChange, onCaption, registerSkip }) 
   );
 }
 
+/* ============================ STAR MAP — navigate the journey ============================ */
+// Every chapter is a star. Tap one and fly there. Visited chapters glow warm.
+
+const CHAPTERS = [
+  { id: "ch-balloons",  label: "too big for texts", x: 18, y: 78 },
+  { id: "ch-feelings",  label: "however you feel",  x: 32, y: 62 },
+  { id: "ch-friends",   label: "the one where",     x: 22, y: 44 },
+  { id: "ch-small",     label: "the small things",  x: 40, y: 32 },
+  { id: "ch-coffee",    label: "a slow morning",    x: 58, y: 22 },
+  { id: "ch-ride",      label: "the ride",          x: 74, y: 34 },
+  { id: "ch-you",       label: "it'd be you",       x: 62, y: 48 },
+  { id: "ch-stars",     label: "your stars",        x: 78, y: 58 },
+  { id: "ch-promises",  label: "my promises",       x: 60, y: 68 },
+  { id: "ch-letter",    label: "a letter",          x: 44, y: 76 },
+  { id: "ch-countdown", label: "counting down",     x: 30, y: 88 },
+  { id: "ch-pull",      label: "reach out",         x: 52, y: 92 },
+  { id: "ch-timeline",  label: "our story",         x: 72, y: 82 },
+];
+
+// the line that threads the chapters together, in order
+const MAP_LINKS = CHAPTERS.map((_, i) => i).slice(0, -1).map((i) => [i, i + 1]);
+
+function StarMap({ open, close, onJump, currentId, visited }) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 flex flex-col items-center justify-center px-5"
+          style={{ zIndex: 120, background: "rgba(5,8,22,0.88)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}
+          onClick={close}
+        >
+          <motion.div
+            onClick={(e) => e.stopPropagation()}
+            initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="w-full max-w-lg"
+          >
+            <p className="eyebrow text-[10px] text-center mb-2" style={{ color: "#E8C39E" }}>the map</p>
+            <h3 className="display text-center font-light mb-1" style={{ fontSize: "clamp(1.5rem,5vw,2.2rem)", color: "#EAE6F0" }}>
+              Where do you want to go?
+            </h3>
+            <p className="text-center text-xs italic mb-6" style={{ color: "rgba(234,230,240,0.45)" }}>tap a star to travel there.</p>
+
+            <div className="relative w-full" style={{ height: "min(58vh, 460px)" }}>
+              {/* connecting thread */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                {MAP_LINKS.map(([a, b], i) => {
+                  const A = CHAPTERS[a], B = CHAPTERS[b];
+                  const lit = visited.has(A.id) && visited.has(B.id);
+                  return (
+                    <line key={i} x1={A.x} y1={A.y} x2={B.x} y2={B.y}
+                      stroke={lit ? "rgba(232,195,158,0.45)" : "rgba(168,197,240,0.12)"}
+                      strokeWidth={lit ? 0.35 : 0.2} strokeLinecap="round" />
+                  );
+                })}
+              </svg>
+
+              {CHAPTERS.map((c, i) => {
+                const isHere = c.id === currentId;
+                const seen = visited.has(c.id);
+                return (
+                  <motion.button
+                    key={c.id}
+                    onPointerUp={(e) => { e.stopPropagation(); onJump(c.id); }}
+                    className="absolute flex flex-col items-center"
+                    style={{ left: `${c.x}%`, top: `${c.y}%`, transform: "translate(-50%,-50%)", width: 78, touchAction: "manipulation" }}
+                    whileHover={{ scale: 1.12 }} whileTap={{ scale: 0.94 }}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.045, duration: 0.5 }}
+                  >
+                    <motion.span
+                      animate={isHere ? { scale: [1, 1.5, 1], opacity: [0.8, 1, 0.8] } : { scale: 1, opacity: seen ? 0.95 : 0.5 }}
+                      transition={isHere ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.4 }}
+                      className="rounded-full"
+                      style={{
+                        width: isHere ? 13 : 9, height: isHere ? 13 : 9,
+                        background: seen || isHere ? "radial-gradient(circle,#fff,#ffe5b0 55%,#e8c39e)" : "radial-gradient(circle,#fff,#a8c5f0)",
+                        boxShadow: seen || isHere ? "0 0 18px rgba(232,195,158,0.9)" : "0 0 8px rgba(168,197,240,0.6)",
+                      }}
+                    />
+                    <span
+                      className="text-[9px] mt-1.5 text-center leading-tight"
+                      style={{ color: isHere ? "#E8C39E" : "rgba(234,230,240,0.55)" }}
+                    >
+                      {c.label}
+                    </span>
+                  </motion.button>
+                );
+              })}
+            </div>
+
+            <button onClick={close} className="block mx-auto mt-4 text-xs eyebrow" style={{ color: "rgba(234,230,240,0.45)" }}>
+              close
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 /* ============================ SCENE WRAPPER ============================ */
 
-function Scene({ children, className = "", tall = false }) {
+function Scene({ children, className = "", tall = false, id }) {
   return (
     <section
+      id={id}
       className={`snap-scene flex flex-col items-center ${tall ? "justify-start" : "justify-center"} px-5 sm:px-6 ${className}`}
       style={{ scrollSnapAlign: "start", minHeight: "100dvh", boxSizing: "border-box", paddingTop: tall ? "7rem" : "5rem", paddingBottom: tall ? "7rem" : "5rem", position: "relative" }}
     >
@@ -2158,8 +2301,7 @@ export default function App() {
     return () => clearTimeout(t);
   }, [entered]);
   const [selectedMemory, setSelectedMemory] = useState(null);
-  const [selectedMood, setSelectedMood] = useState(null);
-  const [selectedLetter, setSelectedLetter] = useState(null);
+  const [selectedFeeling, setSelectedFeeling] = useState(null);
   const [selectedNote, setSelectedNote] = useState(null);
   const [hugOpen, setHugOpen] = useState(false);
   const [musicOpen, setMusicOpen] = useState(false);
@@ -2175,6 +2317,30 @@ export default function App() {
   const [riding, setRiding] = useState(false);
   const [rideCaption, setRideCaption] = useState("");
   const rideSkipRef = useRef(null);
+  const [mapOpen, setMapOpen] = useState(false);
+  const [currentId, setCurrentId] = useState("ch-balloons");
+  const [visited, setVisited] = useState(() => new Set(["ch-balloons"]));
+
+  // track which chapter she's on (drives the map's "you are here")
+  const handleScroll = useCallback((e) => {
+    const el = e.currentTarget;
+    const idx = Math.round(el.scrollTop / el.clientHeight);
+    const ch = CHAPTERS[Math.max(0, Math.min(CHAPTERS.length - 1, idx))];
+    if (ch && ch.id !== currentId) {
+      setCurrentId(ch.id);
+      setVisited((v) => (v.has(ch.id) ? v : new Set(v).add(ch.id)));
+    }
+  }, [currentId]);
+
+  const jumpTo = (id) => {
+    setMapOpen(false);
+    setVisited((v) => (v.has(id) ? v : new Set(v).add(id)));
+    setCurrentId(id);
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 350);
+  };
   useEffect(() => {
     const unsub = scrollYProgress.on("change", (v) => { cosmosProgress.current = v; });
     return () => unsub();
@@ -2381,9 +2547,42 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* STAR MAP */}
+      <StarMap open={mapOpen} close={() => setMapOpen(false)} onJump={jumpTo} currentId={currentId} visited={visited} />
+
       {/* hidden youtube player */}
       <div id="yt-player" style={{ position: "fixed", bottom: 0, left: 0, width: 1, height: 1, opacity: 0.01, pointerEvents: "none" }} />
 
+
+      {/* map button — top left, opens the star map */}
+      {entered && (
+        <button
+          onClick={() => setMapOpen(true)}
+          className="p-3 sm:p-4 rounded-full grain"
+          aria-label="map"
+          style={{
+            position: "fixed",
+            top: "calc(1.25rem + env(safe-area-inset-top, 0px))",
+            left: "calc(1.25rem + env(safe-area-inset-left, 0px))",
+            zIndex: 60,
+            background: "rgba(255,255,255,0.06)",
+            backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+            border: "1px solid rgba(232,195,158,0.18)",
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
+            <g stroke="#E8C39E" strokeWidth="1.2" strokeLinecap="round">
+              <line x1="5" y1="17" x2="10" y2="11" opacity="0.7" />
+              <line x1="10" y1="11" x2="16" y2="13" opacity="0.7" />
+              <line x1="16" y1="13" x2="19" y2="6" opacity="0.7" />
+            </g>
+            <g fill="#E8C39E">
+              <circle cx="5" cy="17" r="1.7" /><circle cx="10" cy="11" r="1.4" />
+              <circle cx="16" cy="13" r="1.4" /><circle cx="19" cy="6" r="1.9" />
+            </g>
+          </svg>
+        </button>
+      )}
 
       {/* top controls — inline-positioned, safe-area aware, above everything except modals */}
       <button
@@ -2493,6 +2692,7 @@ export default function App() {
       {entered && (
         <motion.div
           ref={(el) => { scrollRef.current = el; scrollRootRef.current = el; }}
+          onScroll={handleScroll}
           initial={{ opacity: 0 }}
           animate={{ opacity: riding ? 0.06 : 1 }}
           transition={{ duration: riding ? 0.8 : 1.5 }}
@@ -2500,7 +2700,7 @@ export default function App() {
           style={{ height: "100dvh", overflowY: riding ? "hidden" : "scroll", scrollSnapType: "y proximity", scrollBehavior: "smooth", position: "relative", zIndex: 1 }}
         >
           {/* 1 · Balloons */}
-          <Scene>
+          <Scene id="ch-balloons">
             <ChapterLabel num="i" title="too big for texts" />
             <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Some feelings are too big for texts.</h2>
             <p className="text-center text-sm mb-10" style={{ color: "rgba(234,230,240,0.5)" }}>so I put them in balloons. tap them.</p>
@@ -2509,20 +2709,20 @@ export default function App() {
             </div>
           </Scene>
 
-          {/* 2 · Moods */}
-          <Scene>
+          {/* 2 · However you feel (moods + letters merged) */}
+          <Scene id="ch-feelings">
             <div className="w-full max-w-5xl">
               <ChapterLabel num="ii" title="however you feel" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>What do you need right now?</h2>
               <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>there's something here for every version of you.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                {moods.map((m, i) => (
+                {feelings.map((f, i) => (
                   <motion.button key={i} whileHover={{ y: -8, scale: 1.03 }} whileTap={{ scale: 0.98 }}
-                    onClick={() => setSelectedMood(m)}
+                    onClick={() => setSelectedFeeling(f)}
                     className="text-left p-7 rounded-[24px] relative overflow-hidden grain"
-                    style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: `0 8px 32px ${m.accent}22` }}>
-                    <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${m.accent}33 0%, transparent 70%)`, filter: "blur(20px)" }} />
-                    <h3 className="display text-2xl mb-2 relative z-10" style={{ color: "#EAE6F0" }}>{m.title}</h3>
+                    style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: `0 8px 32px ${f.accent}22` }}>
+                    <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${f.accent}33 0%, transparent 70%)`, filter: "blur(20px)" }} />
+                    <h3 className="display text-xl sm:text-2xl mb-2 relative z-10 leading-snug" style={{ color: "#EAE6F0" }}>{f.title}</h3>
                     <p className="text-sm relative z-10" style={{ color: "rgba(234,230,240,0.5)" }}>tap to open</p>
                   </motion.button>
                 ))}
@@ -2531,7 +2731,7 @@ export default function App() {
           </Scene>
 
                     {/* 3 · Friends */}
-          <Scene>
+          <Scene id="ch-friends">
             <div className="w-full max-w-5xl">
               <ChapterLabel num="iii" title="the one where" />
               <h2 className="display text-center font-light leading-tight mb-10" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>The One Where…</h2>
@@ -2549,52 +2749,36 @@ export default function App() {
             </div>
           </Scene>
 
-          {/* 4 · Open When */}
-          <Scene>
-            <div className="w-full max-w-5xl">
-              <ChapterLabel num="iv" title="for whenever" />
-              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Open when…</h2>
-              <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>letters for the moments I can't be there fast enough.</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {letters.map((l, i) => (
-                  <motion.button key={i} whileHover={{ y: -8, scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setSelectedLetter(l)}
-                    className="text-left p-6 rounded-[22px] flex flex-col gap-3 grain"
-                    style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                    <div className="rounded-full p-2.5 w-fit" style={{ background: "rgba(232,195,158,0.12)" }}><Lily size={18} opacity={0.7} /></div>
-                    <h3 className="display text-xl sm:text-2xl leading-snug" style={{ color: "#EAE6F0" }}>{l.title}</h3>
-                    <span className="text-xs" style={{ color: "rgba(234,230,240,0.35)" }}>tap to open</span>
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-          </Scene>
-
-          {/* 5 · Late Night Thoughts */}
-          <Scene>
+          {/* 4 · The small things (late night + tiny things merged) */}
+          <Scene id="ch-small">
             <div className="w-full">
-              <ChapterLabel num="v" title="late night" />
-              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Late night thoughts.</h2>
-              <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>the things I think when the world goes quiet.</p>
+              <ChapterLabel num="iv" title="the small things" />
+              <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>The things I notice.</h2>
+              <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>swipe — the little things no one else would clock. I clock everything.</p>
               <div className="overflow-x-auto no-scrollbar px-4" style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
                 <div className="flex gap-4 pb-4 mx-auto" style={{ width: "max-content" }}>
-                  {lateNightThoughts.map((t, i) => (
-                    <div key={i} className="rounded-[26px] p-8 grain" style={{ width: 270, minHeight: 200, flexShrink: 0, scrollSnapAlign: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                      <p className="display text-lg sm:text-xl italic leading-relaxed" style={{ color: "rgba(234,230,240,0.85)" }}>"{t}"</p>
+                  {smallThings.map((t, i) => (
+                    <div key={i} className="rounded-[26px] p-8 grain flex items-center" style={{ width: 270, minHeight: 210, flexShrink: 0, scrollSnapAlign: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      <div>
+                        <div className="mb-4"><Lily size={16} opacity={0.6} /></div>
+                        <p className="display text-lg sm:text-xl italic leading-relaxed" style={{ color: "rgba(234,230,240,0.88)" }}>{t}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
+              <p className="text-center text-[11px] mt-4 eyebrow" style={{ color: "rgba(168,197,240,0.4)" }}>{smallThings.length} things · keep swiping</p>
             </div>
           </Scene>
 
           {/* 6 · Coffee — a slow morning */}
-          <Scene><CoffeeScene /></Scene>
+          <Scene id="ch-coffee"><CoffeeScene /></Scene>
 
           {/* 7 · Rollercoaster — the ride */}
-          <Scene><RollercoasterScene rideRef={rideRef} onRideChange={setRiding} onCaption={setRideCaption} registerSkip={(fn) => { rideSkipRef.current = fn(); }} /></Scene>
+          <Scene id="ch-ride"><RollercoasterScene rideRef={rideRef} onRideChange={setRiding} onCaption={setRideCaption} registerSkip={(fn) => { rideSkipRef.current = fn(); }} /></Scene>
 
                     {/* 7 · "it'd be you" */}
-          <Scene>
+          <Scene id="ch-you">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 2, ease: "easeOut" }} className="text-center">
               <p className="text-sm mb-6 italic" style={{ color: "rgba(234,230,240,0.4)" }}>if i could only say one thing,</p>
               <h2 className="display font-light leading-[0.95]" style={{ fontSize: "clamp(4rem,16vw,11rem)" }}>it'd be</h2>
@@ -2605,32 +2789,10 @@ export default function App() {
           </Scene>
 
           {/* 7 · Constellation */}
-          <Scene><ConstellationScene onSelect={setSelectedMemory} onComplete={triggerSkyGlow} /></Scene>
-
-                    {/* 8 · Tiny Things */}
-          <Scene>
-            <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              <div className="lg:col-span-5 lg:sticky lg:top-24 text-center lg:text-left">
-                <div className="hidden lg:block mb-6"><Lily size={50} opacity={0.4} /></div>
-                <ChapterLabel num="ix" title="the small things" />
-                <h2 className="display font-light leading-tight mb-4" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Tiny things I love about you.</h2>
-                <p className="italic" style={{ color: "rgba(234,230,240,0.55)" }}>the little things no one else would clock. I clock everything.</p>
-              </div>
-              <div className="lg:col-span-7 space-y-4">
-                {tinyThings.map((t, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}
-                    className="rounded-2xl p-5 sm:p-6 flex items-start gap-4 grain"
-                    style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.08)", marginLeft: (i % 2) * 16 }}>
-                    <div className="mt-1 flex-shrink-0"><Lily size={16} opacity={0.6} /></div>
-                    <p className="leading-relaxed" style={{ color: "rgba(234,230,240,0.85)" }}>{t}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </Scene>
+          <Scene id="ch-stars"><ConstellationScene onSelect={setSelectedMemory} onComplete={triggerSkyGlow} /></Scene>
 
           {/* 9 · Promise Jar — fireflies */}
-          <Scene>
+          <Scene id="ch-promises">
             <div className="w-full max-w-lg flex flex-col items-center">
               <ChapterLabel num="x" title="my promises" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>A jar of promises.</h2>
@@ -2639,8 +2801,8 @@ export default function App() {
             </div>
           </Scene>
 
-          {/* 10 · Final letter — words appear one by one, like it's being written for her */}
-          <Scene>
+          {/* 10 · Final letter */}
+          <Scene id="ch-letter">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.4 }}
               className="w-full max-w-2xl p-8 sm:p-12 rounded-[32px] relative grain"
               style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(232,195,158,0.2)" }}>
@@ -2680,10 +2842,10 @@ export default function App() {
           </Scene>
 
           {/* 11 · COUNTDOWN — until we meet */}
-          <Scene><CountdownScene /></Scene>
+          <Scene id="ch-countdown"><CountdownScene /></Scene>
 
-          {/* 12 · PULL THE STARS — tactile play */}
-          <Scene>
+          {/* 12 · PULL THE STARS */}
+          <Scene id="ch-pull">
             <div className="w-full max-w-2xl flex flex-col items-center">
               <ChapterLabel num="xiii" title="reach out" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Hold out your hand.</h2>
@@ -2694,7 +2856,7 @@ export default function App() {
           </Scene>
 
           {/* 13 · TIMELINE — our story, so far (the growing album) */}
-          <Scene tall>
+          <Scene id="ch-timeline" tall>
             <div className="w-full max-w-lg">
               <ChapterLabel num="xiv" title="our story, so far" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Every time we meet,</h2>
@@ -2743,8 +2905,7 @@ export default function App() {
 
       {/* POPUPS */}
       <AnimatePresence>{selectedNote && <TextModal text={selectedNote} close={() => setSelectedNote(null)} />}</AnimatePresence>
-      <AnimatePresence>{selectedMood && <TextModal text={selectedMood.text} close={() => setSelectedMood(null)} />}</AnimatePresence>
-      <AnimatePresence>{selectedLetter && <LetterModal letter={selectedLetter} close={() => setSelectedLetter(null)} />}</AnimatePresence>
+      <AnimatePresence>{selectedFeeling && <FeelingModal feeling={selectedFeeling} close={() => setSelectedFeeling(null)} />}</AnimatePresence>
       <AnimatePresence>{selectedMemory && <MemoryModal memory={selectedMemory} close={() => setSelectedMemory(null)} />}</AnimatePresence>
       <AnimatePresence>{hugOpen && <HugExperience close={() => setHugOpen(false)} />}</AnimatePresence>
 
