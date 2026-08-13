@@ -961,7 +961,7 @@ function HugButton({ onTriggered }) {
       initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 1.5, type: "spring", stiffness: 120 }}
       className="fixed left-5 z-40"
-      style={{ bottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}
+      style={{ bottom: "calc(6.5rem + env(safe-area-inset-bottom, 0px))" }}
     >
       <AnimatePresence>
         {holding && (
@@ -2214,14 +2214,152 @@ function StarMap({ open, close, onJump, currentId, visited }) {
   );
 }
 
+/* ============================ SECTIONS & NAVIGATION ============================ */
+
+const SECTIONS = {
+  us:     { label: "Us",     tag: "the story of you and me", chapters: ["ch-friends", "ch-coffee", "ch-ride", "ch-timeline"] },
+  you:    { label: "You",    tag: "everything I notice",     chapters: ["ch-feelings", "ch-small", "ch-stars", "ch-you"] },
+  always: { label: "Always", tag: "what I'm promising",      chapters: ["ch-promises", "ch-letter", "ch-countdown"] },
+  play:   { label: "Play",   tag: "things to touch",         chapters: ["ch-balloons", "ch-pull"] },
+};
+const SECTION_KEYS = ["us", "you", "always", "play"];
+
+// simple line-art icons for each section
+function SectionIcon({ name, size = 20, color = "#E8C39E" }) {
+  const s = { stroke: color, strokeWidth: 1.3, fill: "none", strokeLinecap: "round", strokeLinejoin: "round" };
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ display: "block" }}>
+      {name === "home" && <g {...s}><path d="M4 11l8-6 8 6" /><path d="M6 10v9h12v-9" /></g>}
+      {name === "us" && <g {...s}><circle cx="9" cy="9" r="3.4" /><circle cx="15" cy="15" r="3.4" /><path d="M11.4 11.4l1.2 1.2" /></g>}
+      {name === "you" && <g {...s}><path d="M12 4l1.9 5.1L19 11l-5.1 1.9L12 18l-1.9-5.1L5 11l5.1-1.9z" /></g>}
+      {name === "always" && <g {...s}><path d="M12 20s-6.5-4.3-6.5-9A3.5 3.5 0 0112 8.5 3.5 3.5 0 0118.5 11c0 4.7-6.5 9-6.5 9z" /></g>}
+      {name === "play" && <g {...s}><circle cx="12" cy="12" r="7.5" /><path d="M12 4.5v15M4.5 12h15" /></g>}
+    </svg>
+  );
+}
+
+function HomeHub({ onOpenSection, onJourney, greeting }) {
+  return (
+    <div className="min-h-[100dvh] flex flex-col items-center justify-center px-6 py-24" style={{ position: "relative", zIndex: 2 }}>
+      <motion.p
+        initial={{ opacity: 0, y: -8 }} animate={{ opacity: 0.85, y: 0 }} transition={{ duration: 1.6 }}
+        className="italic text-center text-[15px] sm:text-lg mb-6" style={{ color: "#A8C5F0" }}
+      >
+        {greeting}
+      </motion.p>
+
+      <motion.h1
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.8, delay: 0.2 }}
+        className="display font-light leading-[0.95] text-center mb-4"
+        style={{ fontSize: "clamp(2.6rem,10vw,5.5rem)", letterSpacing: "-0.02em" }}
+      >
+        For you,<br /><span className="grad-gold italic">always.</span>
+      </motion.h1>
+
+      <motion.p
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.6, delay: 0.6 }}
+        className="text-center text-sm mb-12 italic max-w-xs" style={{ color: "rgba(234,230,240,0.5)" }}
+      >
+        wander wherever you like. it's all yours.
+      </motion.p>
+
+      {/* section cards */}
+      <div className="w-full max-w-md grid grid-cols-2 gap-3 sm:gap-4">
+        {SECTION_KEYS.map((k, i) => (
+          <motion.button
+            key={k}
+            onClick={() => onOpenSection(k)}
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.8 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+            whileHover={{ y: -6, scale: 1.03 }} whileTap={{ scale: 0.97 }}
+            className="text-left p-6 rounded-[24px] relative overflow-hidden grain"
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(232,195,158,0.18)",
+              boxShadow: "0 8px 32px rgba(232,195,158,0.07)",
+              minHeight: 130,
+            }}
+          >
+            <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none"
+              style={{ background: "radial-gradient(circle, rgba(232,195,158,0.22) 0%, transparent 70%)", filter: "blur(16px)" }} />
+            <div className="relative z-10 flex flex-col h-full justify-between">
+              <SectionIcon name={k} size={22} />
+              <div className="mt-5">
+                <h3 className="display text-2xl leading-none" style={{ color: "#EAE6F0" }}>{SECTIONS[k].label}</h3>
+                <p className="text-[11px] mt-1.5 leading-snug" style={{ color: "rgba(234,230,240,0.45)" }}>{SECTIONS[k].tag}</p>
+              </div>
+            </div>
+          </motion.button>
+        ))}
+      </div>
+
+      {/* read it in order */}
+      <motion.button
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.4, delay: 1.5 }}
+        onClick={onJourney}
+        whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+        className="display mt-8 px-9 py-3.5 rounded-full text-base"
+        style={{ color: "#0A0E27", background: "linear-gradient(135deg, #E8C39E, #f3d9bd)", boxShadow: "0 8px 30px rgba(232,195,158,0.25)" }}
+      >
+        read it in order
+      </motion.button>
+      <motion.p
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.4, delay: 1.8 }}
+        className="text-[11px] mt-3 italic" style={{ color: "rgba(234,230,240,0.35)" }}
+      >
+        the whole thing, the way I wrote it.
+      </motion.p>
+    </div>
+  );
+}
+
+function BottomBar({ view, onNav }) {
+  const items = [{ key: "home", label: "Home" }, ...SECTION_KEYS.map((k) => ({ key: k, label: SECTIONS[k].label }))];
+  return (
+    <motion.nav
+      initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className="fixed left-0 right-0 flex justify-center"
+      style={{ bottom: 0, zIndex: 65, paddingBottom: "env(safe-area-inset-bottom, 0px)", pointerEvents: "none" }}
+    >
+      <div
+        className="flex items-center gap-1 mb-3 px-2 py-2 rounded-full grain"
+        style={{
+          background: "rgba(12,16,42,0.72)",
+          backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+          border: "1px solid rgba(232,195,158,0.18)",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.45)",
+          pointerEvents: "auto",
+        }}
+      >
+        {items.map((it) => {
+          const active = view === it.key;
+          return (
+            <button
+              key={it.key}
+              onClick={() => onNav(it.key)}
+              className="flex flex-col items-center rounded-full px-3 sm:px-4 py-1.5"
+              style={{ background: active ? "rgba(232,195,158,0.16)" : "transparent", transition: "background 0.3s ease", touchAction: "manipulation" }}
+            >
+              <SectionIcon name={it.key} size={18} color={active ? "#E8C39E" : "rgba(234,230,240,0.5)"} />
+              <span className="text-[9px] mt-0.5" style={{ color: active ? "#E8C39E" : "rgba(234,230,240,0.45)" }}>{it.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </motion.nav>
+  );
+}
+
 /* ============================ SCENE WRAPPER ============================ */
 
-function Scene({ children, className = "", tall = false, id }) {
+function Scene({ children, className = "", tall = false, id, hidden = false }) {
   return (
     <section
       id={id}
-      className={`snap-scene flex flex-col items-center ${tall ? "justify-start" : "justify-center"} px-5 sm:px-6 ${className}`}
-      style={{ scrollSnapAlign: "start", minHeight: "100dvh", boxSizing: "border-box", paddingTop: tall ? "7rem" : "5rem", paddingBottom: tall ? "7rem" : "5rem", position: "relative" }}
+      className={`snap-scene flex-col items-center ${tall ? "justify-start" : "justify-center"} px-5 sm:px-6 ${className}`}
+      style={{ display: hidden ? "none" : "flex", scrollSnapAlign: "start", minHeight: "100dvh", boxSizing: "border-box", paddingTop: tall ? "7rem" : "5rem", paddingBottom: tall ? "7rem" : "5rem", position: "relative" }}
     >
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -2318,17 +2456,36 @@ export default function App() {
   const [rideCaption, setRideCaption] = useState("");
   const rideSkipRef = useRef(null);
   const [mapOpen, setMapOpen] = useState(false);
+  const [view, setView] = useState("home"); // home | us | you | always | play | journey
+
+  // which chapters render in the current view
+  const showChapter = useCallback((id) => {
+    if (view === "journey") return true;
+    const s = SECTIONS[view];
+    return s ? s.chapters.includes(id) : false;
+  }, [view]);
+
+  const navTo = (key) => {
+    setView(key);
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  };
   const [currentId, setCurrentId] = useState("ch-balloons");
   const [visited, setVisited] = useState(() => new Set(["ch-balloons"]));
 
   // track which chapter she's on (drives the map's "you are here")
   const handleScroll = useCallback((e) => {
     const el = e.currentTarget;
-    const idx = Math.round(el.scrollTop / el.clientHeight);
-    const ch = CHAPTERS[Math.max(0, Math.min(CHAPTERS.length - 1, idx))];
-    if (ch && ch.id !== currentId) {
-      setCurrentId(ch.id);
-      setVisited((v) => (v.has(ch.id) ? v : new Set(v).add(ch.id)));
+    // find which visible scene is nearest the top of the viewport
+    const secs = el.querySelectorAll("section[id^='ch-']");
+    let best = null, bestDist = Infinity;
+    secs.forEach((s) => {
+      if (s.offsetParent === null) return; // hidden
+      const d = Math.abs(s.getBoundingClientRect().top);
+      if (d < bestDist) { bestDist = d; best = s.id; }
+    });
+    if (best && best !== currentId) {
+      setCurrentId(best);
+      setVisited((v) => (v.has(best) ? v : new Set(v).add(best)));
     }
   }, [currentId]);
 
@@ -2336,10 +2493,13 @@ export default function App() {
     setMapOpen(false);
     setVisited((v) => (v.has(id) ? v : new Set(v).add(id)));
     setCurrentId(id);
+    // switch to whichever section contains this chapter
+    const key = SECTION_KEYS.find((k) => SECTIONS[k].chapters.includes(id));
+    if (key && view !== key && view !== "journey") setView(key);
     setTimeout(() => {
       const el = document.getElementById(id);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 350);
+    }, 420);
   };
   useEffect(() => {
     const unsub = scrollYProgress.on("change", (v) => { cosmosProgress.current = v; });
@@ -2418,7 +2578,7 @@ export default function App() {
         setTiltEnabled(true);
       }
     } catch (e) { /* tilt just won't activate; everything else still works */ }
-    setTimeout(() => setEntered(true), 1400);
+    setTimeout(() => { setEntered(true); setView("home"); }, 1400);
   };
 
   const toggleMute = () => {
@@ -2688,8 +2848,29 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* THE JOURNEY */}
-      {entered && (
+      {/* HOME HUB */}
+      {entered && view === "home" && (
+        <motion.div
+          key="home"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2 }}
+          className="no-scrollbar"
+          style={{ height: "100dvh", overflowY: "auto", position: "relative", zIndex: 1 }}
+        >
+          <HomeHub
+            greeting={greeting}
+            onOpenSection={(k) => navTo(k)}
+            onJourney={() => navTo("journey")}
+          />
+        </motion.div>
+      )}
+
+      {/* BOTTOM NAV — everywhere except home-less states */}
+      <AnimatePresence>
+        {entered && !riding && <BottomBar view={view} onNav={navTo} />}
+      </AnimatePresence>
+
+      {/* THE JOURNEY / SECTIONS */}
+      {entered && view !== "home" && (
         <motion.div
           ref={(el) => { scrollRef.current = el; scrollRootRef.current = el; }}
           onScroll={handleScroll}
@@ -2700,7 +2881,7 @@ export default function App() {
           style={{ height: "100dvh", overflowY: riding ? "hidden" : "scroll", scrollSnapType: "y proximity", scrollBehavior: "smooth", position: "relative", zIndex: 1 }}
         >
           {/* 1 · Balloons */}
-          <Scene id="ch-balloons">
+          <Scene id="ch-balloons" hidden={!showChapter("ch-balloons")}>
             <ChapterLabel num="i" title="too big for texts" />
             <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Some feelings are too big for texts.</h2>
             <p className="text-center text-sm mb-10" style={{ color: "rgba(234,230,240,0.5)" }}>so I put them in balloons. tap them.</p>
@@ -2710,7 +2891,7 @@ export default function App() {
           </Scene>
 
           {/* 2 · However you feel (moods + letters merged) */}
-          <Scene id="ch-feelings">
+          <Scene id="ch-feelings" hidden={!showChapter("ch-feelings")}>
             <div className="w-full max-w-5xl">
               <ChapterLabel num="ii" title="however you feel" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>What do you need right now?</h2>
@@ -2731,7 +2912,7 @@ export default function App() {
           </Scene>
 
                     {/* 3 · Friends */}
-          <Scene id="ch-friends">
+          <Scene id="ch-friends" hidden={!showChapter("ch-friends")}>
             <div className="w-full max-w-5xl">
               <ChapterLabel num="iii" title="the one where" />
               <h2 className="display text-center font-light leading-tight mb-10" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>The One Where…</h2>
@@ -2750,7 +2931,7 @@ export default function App() {
           </Scene>
 
           {/* 4 · The small things (late night + tiny things merged) */}
-          <Scene id="ch-small">
+          <Scene id="ch-small" hidden={!showChapter("ch-small")}>
             <div className="w-full">
               <ChapterLabel num="iv" title="the small things" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>The things I notice.</h2>
@@ -2772,13 +2953,13 @@ export default function App() {
           </Scene>
 
           {/* 6 · Coffee — a slow morning */}
-          <Scene id="ch-coffee"><CoffeeScene /></Scene>
+          <Scene id="ch-coffee" hidden={!showChapter("ch-coffee")}><CoffeeScene /></Scene>
 
           {/* 7 · Rollercoaster — the ride */}
-          <Scene id="ch-ride"><RollercoasterScene rideRef={rideRef} onRideChange={setRiding} onCaption={setRideCaption} registerSkip={(fn) => { rideSkipRef.current = fn(); }} /></Scene>
+          <Scene id="ch-ride" hidden={!showChapter("ch-ride")}><RollercoasterScene rideRef={rideRef} onRideChange={setRiding} onCaption={setRideCaption} registerSkip={(fn) => { rideSkipRef.current = fn(); }} /></Scene>
 
                     {/* 7 · "it'd be you" */}
-          <Scene id="ch-you">
+          <Scene id="ch-you" hidden={!showChapter("ch-you")}>
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 2, ease: "easeOut" }} className="text-center">
               <p className="text-sm mb-6 italic" style={{ color: "rgba(234,230,240,0.4)" }}>if i could only say one thing,</p>
               <h2 className="display font-light leading-[0.95]" style={{ fontSize: "clamp(4rem,16vw,11rem)" }}>it'd be</h2>
@@ -2789,10 +2970,10 @@ export default function App() {
           </Scene>
 
           {/* 7 · Constellation */}
-          <Scene id="ch-stars"><ConstellationScene onSelect={setSelectedMemory} onComplete={triggerSkyGlow} /></Scene>
+          <Scene id="ch-stars" hidden={!showChapter("ch-stars")}><ConstellationScene onSelect={setSelectedMemory} onComplete={triggerSkyGlow} /></Scene>
 
           {/* 9 · Promise Jar — fireflies */}
-          <Scene id="ch-promises">
+          <Scene id="ch-promises" hidden={!showChapter("ch-promises")}>
             <div className="w-full max-w-lg flex flex-col items-center">
               <ChapterLabel num="x" title="my promises" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>A jar of promises.</h2>
@@ -2802,7 +2983,7 @@ export default function App() {
           </Scene>
 
           {/* 10 · Final letter */}
-          <Scene id="ch-letter">
+          <Scene id="ch-letter" hidden={!showChapter("ch-letter")}>
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.4 }}
               className="w-full max-w-2xl p-8 sm:p-12 rounded-[32px] relative grain"
               style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(232,195,158,0.2)" }}>
@@ -2842,10 +3023,10 @@ export default function App() {
           </Scene>
 
           {/* 11 · COUNTDOWN — until we meet */}
-          <Scene id="ch-countdown"><CountdownScene /></Scene>
+          <Scene id="ch-countdown" hidden={!showChapter("ch-countdown")}><CountdownScene /></Scene>
 
           {/* 12 · PULL THE STARS */}
-          <Scene id="ch-pull">
+          <Scene id="ch-pull" hidden={!showChapter("ch-pull")}>
             <div className="w-full max-w-2xl flex flex-col items-center">
               <ChapterLabel num="xiii" title="reach out" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Hold out your hand.</h2>
@@ -2856,7 +3037,7 @@ export default function App() {
           </Scene>
 
           {/* 13 · TIMELINE — our story, so far (the growing album) */}
-          <Scene id="ch-timeline" tall>
+          <Scene id="ch-timeline" hidden={!showChapter("ch-timeline")} tall>
             <div className="w-full max-w-lg">
               <ChapterLabel num="xiv" title="our story, so far" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Every time we meet,</h2>
