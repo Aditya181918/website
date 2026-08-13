@@ -466,6 +466,96 @@ function Cosmos({ progressRef, isMobile, rideRef }) {
       }
     }
 
+    // ══════════ THE RIDE: track, rings, speed streaks ══════════
+    const RIDE_BASE_Z = 300;
+    const RD_ = { climb: 4.5, hang: 1.5, drop: 3.5, turns: 3.5, out: 3 };
+    const _T1 = RD_.climb, _T2 = _T1 + RD_.hang, _T3 = _T2 + RD_.drop, _T4 = _T3 + RD_.turns, _T5 = _T4 + RD_.out;
+
+    // one source of truth for the path — camera AND rails use this
+    const ridePath = (rt) => {
+      let x = 0, y = 0, z = 0, roll = 0;
+      if (rt < _T1) {
+        const u = rt / _T1, e = u * u;
+        y = e * 300; z = RIDE_BASE_Z - u * 140; roll = 0;
+      } else if (rt < _T2) {
+        const u = (rt - _T1) / RD_.hang;
+        y = 300 + Math.sin(u * Math.PI * 2) * 5; z = RIDE_BASE_Z - 140 - u * 25; roll = 0;
+      } else if (rt < _T3) {
+        const u = (rt - _T2) / RD_.drop, e = u * u * u;
+        y = 300 - e * 460; z = RIDE_BASE_Z - 165 - e * 950; roll = Math.sin(u * Math.PI) * 0.16;
+      } else if (rt < _T4) {
+        const u = (rt - _T3) / RD_.turns;
+        y = -160 + Math.sin(u * Math.PI * 2) * 70 + u * 110;
+        z = RIDE_BASE_Z - 1115 - u * 760;
+        x = Math.sin(u * Math.PI * 3) * 130;           // lateral swing = real turns
+        roll = -Math.sin(u * Math.PI * 3) * 0.42;      // bank into them
+      } else {
+        const u = Math.min(1, (rt - _T4) / RD_.out), e = 1 - Math.pow(1 - u, 3);
+        y = -50 * (1 - e); z = RIDE_BASE_Z - 1875 - e * 220;
+        x = Math.sin(Math.PI * 3) * 130 * (1 - e);
+        roll = Math.sin(u * Math.PI) * 0.06 * (1 - e);
+      }
+      return { x, y, z, roll };
+    };
+
+    const rideGroup = new THREE.Group();
+    rideGroup.visible = false;
+    scene.add(rideGroup);
+
+    {
+      // ── rails ──
+      const STEPS = 260, GAUGE = 26;
+      const leftPts = [], rightPts = [], tiePts = [];
+      for (let i = 0; i <= STEPS; i++) {
+        const rt = (i / STEPS) * _T5;
+        const p = ridePath(rt);
+        const px = Math.cos(p.roll) * GAUGE, py = Math.sin(p.roll) * GAUGE;
+        leftPts.push(new THREE.Vector3(p.x - px, p.y - py, p.z));
+        rightPts.push(new THREE.Vector3(p.x + px, p.y + py, p.z));
+        if (i % 4 === 0) {
+          tiePts.push(new THREE.Vector3(p.x - px, p.y - py, p.z));
+          tiePts.push(new THREE.Vector3(p.x + px, p.y + py, p.z));
+        }
+      }
+      const railMat = new THREE.LineBasicMaterial({ color: 0xe8c39e, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false });
+      rideGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(leftPts), railMat));
+      rideGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(rightPts), railMat));
+      const tieMat = new THREE.LineBasicMaterial({ color: 0xa8c5f0, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false });
+      rideGroup.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(tiePts), tieMat));
+
+      // ── glowing rings to fly through ──
+      const ringMat = new THREE.LineBasicMaterial({ color: 0xe0a8b8, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false });
+      for (let i = 2; i < 26; i++) {
+        const rt = (i / 26) * _T5;
+        const p = ridePath(rt);
+        const pts = [];
+        const R = 70 + Math.sin(i) * 12;
+        for (let a = 0; a <= 40; a++) {
+          const ang = (a / 40) * Math.PI * 2;
+          pts.push(new THREE.Vector3(p.x + Math.cos(ang) * R, p.y + Math.sin(ang) * R, p.z));
+        }
+        rideGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), ringMat));
+      }
+
+      // ── speed streaks: long thin lines that whip past at velocity ──
+      const streakPts = [];
+      const SN = isMobile ? 260 : 520;
+      for (let i = 0; i < SN; i++) {
+        const rt = Math.random() * _T5;
+        const p = ridePath(rt);
+        const ang = Math.random() * Math.PI * 2;
+        const rad = 70 + Math.random() * 320;
+        const sx = p.x + Math.cos(ang) * rad;
+        const sy = p.y + Math.sin(ang) * rad;
+        const len = 50 + Math.random() * 130;
+        streakPts.push(new THREE.Vector3(sx, sy, p.z + len / 2));
+        streakPts.push(new THREE.Vector3(sx, sy, p.z - len / 2));
+      }
+      const streakMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending, depthWrite: false });
+      const streaks = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(streakPts), streakMat);
+      rideGroup.add(streaks);
+    }
+
     stateRef.current = { scene, camera, renderer, groups, nebula, motes };
 
     // ── pointer parallax (subtle) ──
@@ -509,62 +599,37 @@ function Cosmos({ progressRef, isMobile, rideRef }) {
       if (ride && ride.active) {
         // ─── THE ROLLERCOASTER ───
         const rt = (performance.now() - ride.start) / 1000;
-        const base = ride.baseZ;
 
-        if (rt < T1) {
-          // the climb — slow, deliberate, tension building
-          const u = rt / T1;
-          const e = u * u;
-          rideY = e * 300;
-          rideZ = base - u * 140;
-          rideRoll = Math.sin(rt * 8) * 0.004; // faint clack-clack shudder
-          rideFov = 62;
-        } else if (rt < T2) {
-          // hang at the top — the worst/best second
-          const u = (rt - T1) / RD.hang;
-          rideY = 300 + Math.sin(u * Math.PI * 2) * 5;
-          rideZ = base - 140 - u * 25;
-          rideRoll = 0;
-          rideFov = 62 - u * 5;
-        } else if (rt < T3) {
-          // THE DROP
-          const u = (rt - T2) / RD.drop;
-          const e = u * u * u;
-          rideY = 300 - e * 460;
-          rideZ = base - 165 - e * 950;
-          rideRoll = Math.sin(u * Math.PI) * 0.16;
-          rideFov = 57 + e * 36; // widening = speed
-        } else if (rt < T4) {
-          // banking turns through the stars
-          const u = (rt - T3) / RD.turns;
-          rideY = -160 + Math.sin(u * Math.PI * 2) * 70 + u * 110;
-          rideZ = base - 1115 - u * 760;
-          rideRoll = Math.sin(u * Math.PI * 3) * 0.38;
-          rideFov = 93 - u * 15;
-        } else if (rt < T5) {
-          // easing out, coming home
-          const u = (rt - T4) / RD.out;
-          const e = 1 - Math.pow(1 - u, 3);
-          rideY = -50 * (1 - e);
-          rideZ = base - 1875 - e * 220;
-          rideRoll = Math.sin(u * Math.PI) * 0.06 * (1 - e);
-          rideFov = 78 - e * 16;
-        } else {
+        if (rt >= _T5) {
           ride.active = false;
           curZ = rideZ != null ? rideZ : curZ;
           if (ride.onEnd) { ride.onEnd(); ride.onEnd = null; }
-        }
+        } else {
+          const p = ridePath(rt);
+          rideY = p.y; rideZ = p.z; rideRoll = p.roll;
 
-        if (ride.active) {
-          camera.position.z = rideZ;
-          camera.position.x = pointer.x * 15 + Math.sin(rt * 1.3) * 12;
-          camera.position.y = rideY;
-          camera.lookAt(0, rideY * 0.55, rideZ - 400);
-          camera.rotation.z = rideRoll;
+          // field of view widens with speed — this is what sells the drop
+          let speedU = 0;
+          if (rt >= _T2 && rt < _T3) speedU = Math.pow((rt - _T2) / RD_.drop, 3);
+          else if (rt >= _T3 && rt < _T4) speedU = 1 - ((rt - _T3) / RD_.turns) * 0.3;
+          else if (rt >= _T4) speedU = Math.max(0, 0.7 - ((rt - _T4) / RD_.out) * 0.7);
+          rideFov = 58 + speedU * 38;
+
+          rideGroup.visible = true;
+          const shake = rt < _T1 ? Math.sin(rt * 26) * 0.8 : 0; // clack-clack on the climb
+
+          camera.position.set(p.x + shake + pointer.x * 8, p.y + 14, p.z);
+          camera.lookAt(
+            ridePath(Math.min(_T5, rt + 0.55)).x,
+            ridePath(Math.min(_T5, rt + 0.55)).y + 14,
+            ridePath(Math.min(_T5, rt + 0.55)).z
+          );
+          camera.rotation.z = p.roll;
           if (Math.abs(camera.fov - rideFov) > 0.05) { camera.fov = rideFov; camera.updateProjectionMatrix(); }
         }
       } else {
         // ─── NORMAL: scroll-driven flight ───
+        rideGroup.visible = false;
         const targetZ = 600 - p * 1700;
         curZ += (targetZ - curZ) * 0.05;
         // decay any leftover ride motion smoothly
@@ -612,6 +677,7 @@ function Cosmos({ progressRef, isMobile, rideRef }) {
       disc.dispose();
       groups.forEach((g) => { g.obj.geometry.dispose(); g.obj.material.dispose(); });
       nebula.forEach((s) => s.material.dispose());
+      rideGroup.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
       motes.forEach((s) => s.material.dispose());
       if (renderer.domElement && renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
     };
