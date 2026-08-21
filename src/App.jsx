@@ -928,270 +928,310 @@ function FeelingModal({ feeling, close }) {
 /* ============================ HUG EXPERIENCE ============================ */
 
 function HugButton({ onTriggered }) {
-  const [holding, setHolding] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const intervalRef = useRef(null);
-  const doneRef = useRef(false);
-  const HOLD = 2000, TICK = 30;
-
-  const start = () => {
-    if (doneRef.current) return;
-    setHolding(true);
-    if (navigator.vibrate) navigator.vibrate(15);
-    const t0 = Date.now();
-    intervalRef.current = setInterval(() => {
-      const pct = Math.min((Date.now() - t0) / HOLD, 1);
-      setProgress(pct);
-      if (pct >= 1 && !doneRef.current) {
-        doneRef.current = true;
-        clearInterval(intervalRef.current);
-        if (navigator.vibrate) navigator.vibrate([30, 60, 30]);
-        onTriggered();
-      }
-    }, TICK);
-  };
-  const end = () => {
-    clearInterval(intervalRef.current);
-    if (!doneRef.current) { setHolding(false); setProgress(0); }
-  };
-  useEffect(() => () => clearInterval(intervalRef.current), []);
-
   return (
-    <motion.div
+    <motion.button
       initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay: 1.5, type: "spring", stiffness: 120 }}
-      className="fixed left-5 z-40"
-      style={{ bottom: "calc(6.5rem + env(safe-area-inset-bottom, 0px))" }}
+      transition={{ delay: 1.2, type: "spring", stiffness: 120 }}
+      whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
+      onClick={onTriggered}
+      className="fixed left-5 z-40 rounded-full p-4 sm:p-5 select-none grain"
+      style={{
+        bottom: "calc(6.5rem + env(safe-area-inset-bottom, 0px))",
+        background: "rgba(255,255,255,0.06)",
+        backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid rgba(232,195,158,0.2)",
+        boxShadow: "0 0 40px rgba(232,195,158,0.2)",
+        touchAction: "manipulation",
+      }}
+      aria-label="need a hug"
     >
-      <AnimatePresence>
-        {holding && (
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1 + progress * 2.5, opacity: 0.5 - progress * 0.3 }}
-            exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.15 }}
-            className="absolute inset-0 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(232,195,158,0.5) 0%, transparent 70%)", filter: "blur(20px)" }}
-          />
-        )}
-      </AnimatePresence>
-      <motion.button
-        onMouseDown={start} onMouseUp={end} onMouseLeave={end}
-        onTouchStart={start} onTouchEnd={end} onTouchCancel={end}
-        animate={{ scale: holding ? 1 + progress * 0.15 : [1, 1.04, 1] }}
-        transition={holding ? { duration: 0.15 } : { duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-        className="relative rounded-full p-4 sm:p-5 select-none grain"
-        style={{
-          background: "rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-          border: "1px solid rgba(232,195,158,0.2)",
-          boxShadow: `0 0 ${40 + progress * 60}px rgba(232,195,158,${0.2 + progress * 0.5})`,
-          touchAction: "manipulation",
-        }}
+      <motion.span
+        animate={{ scale: [1, 1.06, 1] }}
+        transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+        className="flex items-center gap-2"
       >
-        <div className="flex items-center gap-2">
-          <Hand size={20} style={{ color: "#E8C39E" }} />
-          <span className="text-sm body-font hidden sm:inline" style={{ color: "rgba(234,230,240,0.85)" }}>
-            {holding ? "hold on..." : "need a hug?"}
-          </span>
-        </div>
-        {holding && (
-          <svg className="absolute inset-0 w-full h-full pointer-events-none -rotate-90" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(232,195,158,0.9)" strokeWidth="2"
-              strokeDasharray={`${progress * 301.6} 301.6`} />
-          </svg>
-        )}
-      </motion.button>
-    </motion.div>
+        <Hand size={20} style={{ color: "#E8C39E" }} />
+        <span className="text-sm body-font hidden sm:inline" style={{ color: "rgba(234,230,240,0.85)" }}>need a hug?</span>
+      </motion.span>
+    </motion.button>
   );
 }
 
-function HugExperience({ close }) {
-  // Phases: "greet" (a few warm lines) → "breathe" (guided breathing embrace, stays until she leaves)
-  const [phase, setPhase] = useState("greet");
-  const [greetStep, setGreetStep] = useState(0);
-  const [breathState, setBreathState] = useState("in"); // in | hold | out
-  const [cycles, setCycles] = useState(0);
-  const [closing, setClosing] = useState(false);
+/* ============================ HUG — held, not watched ============================ */
 
-  // time-aware opening line
-  const openingLine = useRef((() => {
+const HUG_MODES = {
+  sad: {
+    key: "sad",
+    label: "I'm sad",
+    opening: "oh, love. come here.",
+    lines: [
+      "you don't have to explain it. not to me.",
+      "it's allowed to just be heavy today.",
+      "I'm not going to try to fix it. I'm just going to stay.",
+      "you are not a burden. you have never been a burden.",
+      `I've got you, ${NAME}. for as long as you need.`,
+    ],
+    tint: "224,168,184",
+  },
+  overwhelmed: {
+    key: "overwhelmed",
+    label: "I'm overwhelmed",
+    opening: "okay. everything stops for a second.",
+    lines: [
+      "you don't have to hold all of it at once.",
+      "nothing on that list is more important than you right now.",
+      "breathe out. slower than that. yes — like that.",
+      "it will still be there in ten minutes. so will I.",
+      `one thing at a time, ${NAME}. and not yet.`,
+    ],
+    tint: "180,220,220",
+  },
+  miss: {
+    key: "miss",
+    label: "I just miss you",
+    opening: "I know. I miss you too — more than I let on.",
+    lines: [
+      "close your eyes. I'm right here.",
+      "this is the part where I'd not let go first.",
+      "I'm counting the days too. every single one.",
+      "the distance is temporary. this isn't.",
+      `soon, ${NAME}. properly. for real.`,
+    ],
+    tint: "232,195,158",
+  },
+};
+
+function HugExperience({ close }) {
+  const [mode, setMode] = useState(null);       // null = choosing
+  const [holding, setHolding] = useState(false);
+  const [heldSecs, setHeldSecs] = useState(0);
+  const [lineIdx, setLineIdx] = useState(-1);   // -1 = opening line
+  const [leaving, setLeaving] = useState(false);
+  const beatRef = useRef(null);
+  const tickRef = useRef(null);
+
+  const M = mode ? HUG_MODES[mode] : null;
+
+  // time-aware first words
+  const timeLine = useRef((() => {
     const h = new Date().getHours();
-    if (h >= 0 && h < 5) return `you should be asleep, ${NAME}. but come here first.`;
-    if (h < 12) return `good morning, ${NAME}. come here for a second.`;
-    if (h < 18) return `hey, ${NAME}. come here.`;
-    return `long day? come here, ${NAME}.`;
+    if (h >= 0 && h < 5) return `it's late, ${NAME}.`;
+    if (h < 12) return `morning, ${NAME}.`;
+    if (h < 18) return `hey, ${NAME}.`;
+    return `long day, ${NAME}?`;
   })()).current;
 
-  const greetLines = [
-    openingLine,
-    "you don't have to hold it all by yourself.",
-    "let's just breathe for a moment. follow me.",
-  ];
-
-  // ── greeting phase: advance through lines, then begin breathing ──
+  // ── heartbeat + line progression while she holds ──
   useEffect(() => {
-    if (phase !== "greet" || closing) return;
-    if (greetStep < greetLines.length - 1) {
-      const t = setTimeout(() => setGreetStep((s) => s + 1), 3400);
-      return () => clearTimeout(t);
-    } else {
-      const t = setTimeout(() => setPhase("breathe"), 3200);
-      return () => clearTimeout(t);
-    }
-  }, [phase, greetStep, closing, greetLines.length]);
-
-  // ── breathing engine: in (4s) → hold (4s) → out (6s), looping ──
-  const BREATH = { in: 4000, hold: 4000, out: 6000 };
-  useEffect(() => {
-    if (phase !== "breathe" || closing) return;
-    // haptic cue at the start of each state
-    if (navigator.vibrate) {
-      if (breathState === "in") navigator.vibrate(40);
-      else if (breathState === "out") navigator.vibrate([20, 30, 20]);
-    }
-    const dur = BREATH[breathState];
-    const t = setTimeout(() => {
-      setBreathState((s) => {
-        if (s === "in") return "hold";
-        if (s === "hold") return "out";
-        // completed a full cycle
-        setCycles((c) => c + 1);
-        return "in";
+    if (!holding || !M) return;
+    // steady heartbeat: lub-dub, ~60bpm
+    const beat = () => { if (navigator.vibrate) navigator.vibrate([26, 95, 42]); };
+    beat();
+    beatRef.current = setInterval(beat, 1150);
+    tickRef.current = setInterval(() => {
+      setHeldSecs((s) => {
+        const n = s + 1;
+        // a new line every ~5 seconds held
+        setLineIdx((li) => (n % 5 === 0 && li < M.lines.length - 1 ? li + 1 : li));
+        return n;
       });
-    }, dur);
-    return () => clearTimeout(t);
-  }, [phase, breathState, closing]);
+    }, 1000);
+    return () => { clearInterval(beatRef.current); clearInterval(tickRef.current); };
+  }, [holding, M]);
 
-  const doClose = () => {
-    setClosing(true);
-    if (navigator.vibrate) navigator.vibrate(30);
-    setTimeout(close, 1400);
+  useEffect(() => () => { clearInterval(beatRef.current); clearInterval(tickRef.current); }, []);
+
+  const startHold = () => { if (M) { setHolding(true); if (lineIdx < 0) setLineIdx(0); } };
+  const endHold = () => setHolding(false);
+
+  const chooseMode = (k) => {
+    setMode(k);
+    if (navigator.vibrate) navigator.vibrate(20);
   };
 
-  // embrace scale: arms drawing inward on inhale/hold, easing out on exhale
-  const embraceScale = breathState === "out" ? 1.15 : 1;
-  const breathWord = breathState === "in" ? "breathe in…" : breathState === "hold" ? "hold…" : "and let go…";
-  const breathDur = (BREATH[breathState] / 1000);
+  const doLeave = () => {
+    setLeaving(true);
+    clearInterval(beatRef.current); clearInterval(tickRef.current);
+    if (navigator.vibrate) navigator.vibrate(30);
+    setTimeout(close, 1500);
+  };
+
+  const tint = M ? M.tint : "232,195,158";
 
   return (
     <motion.div
       className="fixed inset-0 flex items-center justify-center px-6 overflow-hidden"
-      style={{ zIndex: 110, background: "radial-gradient(circle at center, rgba(35,30,50,0.97) 0%, rgba(10,14,39,0.98) 60%, rgba(5,8,22,1) 100%)", backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)" }}
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.4 }}
+      style={{
+        zIndex: 110,
+        background: "radial-gradient(circle at center, rgba(30,26,46,0.97) 0%, rgba(10,14,39,0.98) 60%, rgba(5,8,22,1) 100%)",
+        backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)",
+        touchAction: "none",
+      }}
+      initial={{ opacity: 0 }} animate={{ opacity: leaving ? 0 : 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.2 }}
+      onPointerDown={M ? startHold : undefined}
+      onPointerUp={M ? endHold : undefined}
+      onPointerCancel={M ? endHold : undefined}
+      onPointerLeave={M ? endHold : undefined}
     >
-      {/* THE EMBRACE — warmth that wraps inward from the screen edges like arms */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        animate={{
-          opacity: phase === "breathe" ? (breathState === "out" ? 0.35 : 0.7) : 0.4,
-        }}
-        transition={{ duration: phase === "breathe" ? breathDur : 2, ease: "easeInOut" }}
-        style={{
-          background: "radial-gradient(circle at center, transparent 30%, rgba(232,195,158,0.18) 75%, rgba(232,195,158,0.35) 100%)",
-        }}
-      />
-      {/* central warm glow that grows on inhale, recedes on exhale (the held breath) */}
-      <motion.div
-        className="absolute pointer-events-none rounded-full"
-        animate={{
-          scale: phase === "breathe" ? (breathState === "out" ? 0.7 : breathState === "hold" ? 1.18 : 1.18) : 1,
-          opacity: phase === "breathe" ? (breathState === "out" ? 0.25 : 0.5) : 0.4,
-        }}
-        transition={{ duration: phase === "breathe" ? breathDur : 3, ease: breathState === "in" ? "easeIn" : breathState === "out" ? "easeOut" : "linear" }}
-        style={{
-          width: "60vmin", height: "60vmin",
-          background: "radial-gradient(circle, rgba(232,195,158,0.45) 0%, rgba(224,168,184,0.18) 45%, transparent 70%)",
-          filter: "blur(40px)",
-        }}
-      />
+      {/* ── THE ARMS — two luminous arcs that close around her ── */}
+      {M && (
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="armL" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor={`rgba(${tint},0)`} />
+              <stop offset="60%" stopColor={`rgba(${tint},0.55)`} />
+              <stop offset="100%" stopColor={`rgba(${tint},0.8)`} />
+            </linearGradient>
+            <linearGradient id="armR" x1="1" y1="0" x2="0" y2="0">
+              <stop offset="0%" stopColor={`rgba(${tint},0)`} />
+              <stop offset="60%" stopColor={`rgba(${tint},0.55)`} />
+              <stop offset="100%" stopColor={`rgba(${tint},0.8)`} />
+            </linearGradient>
+          </defs>
+          <motion.path
+            d="M -30 40 Q 90 190 200 250"
+            fill="none" stroke="url(#armL)" strokeWidth="26" strokeLinecap="round"
+            animate={{ x: holding ? 55 : -40, opacity: holding ? 0.95 : 0.35 }}
+            transition={{ duration: holding ? 1.6 : 2.4, ease: [0.22, 1, 0.36, 1] }}
+            style={{ filter: `blur(1px) drop-shadow(0 0 26px rgba(${tint},0.6))` }}
+          />
+          <motion.path
+            d="M 430 40 Q 310 190 200 250"
+            fill="none" stroke="url(#armR)" strokeWidth="26" strokeLinecap="round"
+            animate={{ x: holding ? -55 : 40, opacity: holding ? 0.95 : 0.35 }}
+            transition={{ duration: holding ? 1.6 : 2.4, ease: [0.22, 1, 0.36, 1] }}
+            style={{ filter: `blur(1px) drop-shadow(0 0 26px rgba(${tint},0.6))` }}
+          />
+        </svg>
+      )}
 
-      {/* soft floating embers drifting inward */}
-      {[...Array(14)].map((_, i) => (
+      {/* warmth that swells while held, with a heartbeat pulse */}
+      {M && (
         <motion.div
-          key={i}
-          initial={{ opacity: 0 }}
-          animate={{
-            opacity: [0, 0.6, 0],
-            x: [`${(Math.cos((i / 14) * Math.PI * 2)) * 50}vw`, "0vw"],
-            y: [`${(Math.sin((i / 14) * Math.PI * 2)) * 50}vh`, "0vh"],
+          className="absolute pointer-events-none rounded-full"
+          animate={holding
+            ? { scale: [1, 1.05, 1], opacity: 0.6 }
+            : { scale: 1, opacity: 0.2 }}
+          transition={holding
+            ? { scale: { duration: 1.15, repeat: Infinity, ease: "easeInOut" }, opacity: { duration: 1.4 } }
+            : { duration: 2 }}
+          style={{
+            width: "72vmin", height: "72vmin",
+            background: `radial-gradient(circle, rgba(${tint},0.5) 0%, rgba(${tint},0.15) 45%, transparent 72%)`,
+            filter: "blur(44px)",
           }}
-          transition={{ duration: 7 + (i % 4) * 1.5, repeat: Infinity, delay: i * 0.5, ease: "easeInOut" }}
-          className="absolute rounded-full pointer-events-none"
-          style={{ width: 3 + (i % 3), height: 3 + (i % 3), background: "rgba(232,195,158,0.7)", boxShadow: "0 0 12px rgba(232,195,158,0.7)" }}
         />
-      ))}
+      )}
 
-      {/* close — always available; she leaves when she's ready */}
-      {!closing && (
-        <button onClick={doClose} className="absolute top-6 right-6 text-white/40 hover:text-white/80 z-20" aria-label="close" style={{ top: "calc(1.5rem + env(safe-area-inset-top,0px))" }}>
+      {/* close */}
+      {!leaving && (
+        <button
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={doLeave}
+          className="absolute right-6 text-white/40 hover:text-white/80 z-20"
+          style={{ top: "calc(1.5rem + env(safe-area-inset-top,0px))" }}
+          aria-label="close"
+        >
           <X size={22} />
         </button>
       )}
 
-      {/* GREETING PHASE */}
+      {/* ── CHOOSING ── */}
       <AnimatePresence mode="wait">
-        {phase === "greet" && !closing && (
-          <motion.div key={`greet-${greetStep}`} className="relative z-10 max-w-2xl text-center"
-            initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -12, filter: "blur(8px)" }}
-            transition={{ duration: 1.4, ease: "easeOut" }}
+        {!mode && !leaving && (
+          <motion.div key="choose" className="relative z-10 text-center max-w-md w-full"
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.9 }}
           >
-            <p className="display leading-relaxed px-4" style={{ fontSize: "clamp(2rem,6vw,3.6rem)", color: "#EAE6F0", textShadow: "0 0 40px rgba(232,195,158,0.3)" }}>
-              {greetLines[greetStep]}
-            </p>
+            <p className="display leading-snug mb-2" style={{ fontSize: "clamp(1.9rem,6vw,3rem)", color: "#EAE6F0" }}>{timeLine}</p>
+            <p className="text-sm italic mb-10" style={{ color: "rgba(234,230,240,0.55)" }}>what kind of hug do you need?</p>
+            <div className="flex flex-col gap-3">
+              {Object.values(HUG_MODES).map((m, i) => (
+                <motion.button
+                  key={m.key}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={() => chooseMode(m.key)}
+                  initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + i * 0.12, duration: 0.7 }}
+                  whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}
+                  className="w-full py-4 rounded-full grain"
+                  style={{
+                    background: `rgba(${m.tint},0.10)`,
+                    border: `1px solid rgba(${m.tint},0.4)`,
+                    color: "#EAE6F0", fontSize: "1.05rem",
+                    backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+                  }}
+                >
+                  {m.label}
+                </motion.button>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* BREATHING PHASE */}
+      {/* ── BEING HELD ── */}
       <AnimatePresence>
-        {phase === "breathe" && !closing && (
-          <motion.div className="relative z-10 text-center flex flex-col items-center"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.6 }}>
-            {/* breathing ring she follows */}
-            <motion.div
-              className="rounded-full flex items-center justify-center mb-10"
-              animate={{
-                scale: breathState === "out" ? 0.78 : 1.12,
-                boxShadow: breathState === "out"
-                  ? "0 0 30px rgba(232,195,158,0.3), inset 0 0 30px rgba(232,195,158,0.15)"
-                  : "0 0 70px rgba(232,195,158,0.6), inset 0 0 50px rgba(232,195,158,0.25)",
-              }}
-              transition={{ duration: breathDur, ease: breathState === "in" ? "easeIn" : breathState === "out" ? "easeOut" : "linear" }}
-              style={{
-                width: "min(46vw, 200px)", height: "min(46vw, 200px)",
-                border: "1.5px solid rgba(232,195,158,0.5)",
-                background: "radial-gradient(circle, rgba(232,195,158,0.12), transparent 70%)",
-              }}
-            >
-              <AnimatePresence mode="wait">
-                <motion.span key={breathState}
-                  initial={{ opacity: 0 }} animate={{ opacity: 0.9 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}
-                  className="display italic" style={{ fontSize: "clamp(1.1rem,4vw,1.6rem)", color: "#EAE6F0" }}>
-                  {breathWord}
-                </motion.span>
-              </AnimatePresence>
+        {mode && !leaving && (
+          <motion.div key="held" className="relative z-10 text-center max-w-lg w-full flex flex-col items-center"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={lineIdx}
+                initial={{ opacity: 0, y: 14, filter: "blur(6px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, y: -10, filter: "blur(6px)" }}
+                transition={{ duration: 1.3, ease: "easeOut" }}
+                className="display leading-snug px-4"
+                style={{ fontSize: "clamp(1.5rem,5vw,2.6rem)", color: "#EAE6F0", textShadow: `0 0 40px rgba(${tint},0.4)` }}
+              >
+                {lineIdx < 0 ? M.opening : M.lines[Math.min(lineIdx, M.lines.length - 1)]}
+              </motion.p>
+            </AnimatePresence>
+
+            {/* hold prompt / held state */}
+            <motion.div className="mt-14 flex flex-col items-center" animate={{ opacity: holding ? 0.55 : 0.9 }} transition={{ duration: 0.8 }}>
+              <motion.div
+                animate={holding ? { scale: [1, 1.18, 1] } : { scale: [1, 1.06, 1] }}
+                transition={{ duration: holding ? 1.15 : 2.4, repeat: Infinity, ease: "easeInOut" }}
+                className="rounded-full mb-4"
+                style={{
+                  width: 46, height: 46,
+                  border: `1.5px solid rgba(${tint},0.7)`,
+                  background: holding ? `radial-gradient(circle, rgba(${tint},0.35), transparent 70%)` : "transparent",
+                  boxShadow: holding ? `0 0 40px rgba(${tint},0.6)` : `0 0 14px rgba(${tint},0.25)`,
+                }}
+              />
+              <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.6)" }}>
+                {holding ? "I've got you. don't let go yet." : "press and hold anywhere — I'll hold back."}
+              </p>
+              {holding && heldSecs > 8 && (
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 0.45 }} transition={{ duration: 1.5 }}
+                  className="text-[11px] mt-2" style={{ color: "rgba(234,230,240,0.5)" }}>
+                  stay as long as you need.
+                </motion.p>
+              )}
             </motion.div>
 
-            <p className="display leading-snug px-6 max-w-xl" style={{ fontSize: "clamp(1.4rem,4.5vw,2.4rem)", color: "#EAE6F0", textShadow: "0 0 30px rgba(232,195,158,0.3)" }}>
-              {cycles < 1 && "I'm right here. breathe with me."}
-              {cycles >= 1 && cycles < 3 && "there you go. the world can wait."}
-              {cycles >= 3 && cycles < 5 && `nothing to fix right now. just this. just us.`}
-              {cycles >= 5 && `I've got you, ${NAME}. I've always got you.`}
-            </p>
-
-            <button onClick={doClose} className="mt-12 px-8 py-3 rounded-full" style={{ border: "1px solid rgba(232,195,158,0.3)", color: "rgba(234,230,240,0.7)", background: "rgba(255,255,255,0.04)" }}>
+            <button
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={doLeave}
+              className="mt-12 px-8 py-3 rounded-full"
+              style={{ border: `1px solid rgba(${tint},0.3)`, color: "rgba(234,230,240,0.7)", background: "rgba(255,255,255,0.04)" }}
+            >
               <span className="text-sm">I'm okay now</span>
             </button>
-            <p className="text-xs mt-5 italic" style={{ color: "rgba(234,230,240,0.4)" }}>stay as long as you need.</p>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* CLOSING */}
+      {/* leaving */}
       <AnimatePresence>
-        {closing && (
-          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 0.8, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}
-            className="absolute bottom-16 left-0 right-0 text-center display text-xl sm:text-2xl italic px-6" style={{ color: "rgba(232,195,158,0.85)" }}>
+        {leaving && (
+          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 0.85, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}
+            className="absolute bottom-20 left-0 right-0 text-center display text-xl sm:text-2xl italic px-6"
+            style={{ color: `rgba(${tint},0.9)` }}>
             come back whenever you need this.
           </motion.p>
         )}
@@ -1199,6 +1239,7 @@ function HugExperience({ close }) {
     </motion.div>
   );
 }
+
 /* ============================ TIMELINE — the growing album ============================ */
 
 function TimelineView({ deviceTilt }) {
