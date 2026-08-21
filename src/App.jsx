@@ -934,8 +934,10 @@ function HugButton({ onTriggered }) {
       transition={{ delay: 1.2, type: "spring", stiffness: 120 }}
       whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
       onClick={onTriggered}
-      className="fixed left-5 rounded-full p-4 sm:p-5 select-none grain"
+      className="rounded-full p-4 sm:p-5 select-none grain"
       style={{
+        position: "fixed",
+        left: "calc(1.25rem + env(safe-area-inset-left, 0px))",
         bottom: "calc(6.5rem + env(safe-area-inset-bottom, 0px))",
         zIndex: 95,
         background: "rgba(232,195,158,0.14)",
@@ -3249,6 +3251,9 @@ function StyleTag() {
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       .grain { position: relative; }
+      .grain.fixed { position: fixed; }
+      .grain.absolute { position: absolute; }
+      .grain.sticky { position: sticky; }
       .grain::after {
         content:''; position:absolute; inset:0; pointer-events:none; opacity:0.4; border-radius:inherit;
         background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
