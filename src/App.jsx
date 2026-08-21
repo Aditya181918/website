@@ -1643,7 +1643,7 @@ function Firefly({ x, y, f }) {
 
 /* ============================ COUNTDOWN — until we meet ============================ */
 // Live ticking countdown to the next time they're together.
-const MEET_DATE = new Date("2026-09-01T00:00:00+05:30"); // 1 September 2026, IST
+const MEET_DATE = new Date("2026-09-02T00:00:00+05:30"); // 2 September 2026, IST
 
 function useCountdown(target) {
   const [now, setNow] = useState(() => Date.now());
@@ -1684,7 +1684,7 @@ function CountdownScene() {
           <h2 className="display text-center font-light leading-tight mb-2" style={{ fontSize: "clamp(1.8rem,6vw,3rem)" }}>
             Until I get to hold you again
           </h2>
-          <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>1st september · counting every second.</p>
+          <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>2nd september · counting every second.</p>
 
           <div className="flex items-start justify-center gap-3 sm:gap-6">
             {units.map((u, i) => (
