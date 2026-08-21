@@ -934,13 +934,14 @@ function HugButton({ onTriggered }) {
       transition={{ delay: 1.2, type: "spring", stiffness: 120 }}
       whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
       onClick={onTriggered}
-      className="fixed left-5 z-40 rounded-full p-4 sm:p-5 select-none grain"
+      className="fixed left-5 rounded-full p-4 sm:p-5 select-none grain"
       style={{
         bottom: "calc(6.5rem + env(safe-area-inset-bottom, 0px))",
-        background: "rgba(255,255,255,0.06)",
+        zIndex: 95,
+        background: "rgba(232,195,158,0.14)",
         backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-        border: "1px solid rgba(232,195,158,0.2)",
-        boxShadow: "0 0 40px rgba(232,195,158,0.2)",
+        border: "1px solid rgba(232,195,158,0.45)",
+        boxShadow: "0 0 34px rgba(232,195,158,0.35)",
         touchAction: "manipulation",
       }}
       aria-label="need a hug"
@@ -2362,7 +2363,7 @@ function BottomBar({ view, onNav }) {
       initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className="fixed left-0 right-0 flex justify-center"
-      style={{ bottom: 0, zIndex: 65, paddingBottom: "env(safe-area-inset-bottom, 0px)", pointerEvents: "none" }}
+      style={{ bottom: 0, zIndex: 95, paddingBottom: "env(safe-area-inset-bottom, 0px)", pointerEvents: "none" }}
     >
       <div
         className="flex items-center gap-1 mb-3 px-2 py-2 rounded-full grain"
@@ -2765,7 +2766,7 @@ export default function App() {
             position: "fixed",
             top: "calc(1.25rem + env(safe-area-inset-top, 0px))",
             left: "calc(1.25rem + env(safe-area-inset-left, 0px))",
-            zIndex: 60,
+            zIndex: 95,
             background: "rgba(255,255,255,0.06)",
             backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
             border: "1px solid rgba(232,195,158,0.18)",
@@ -2794,7 +2795,7 @@ export default function App() {
           position: "fixed",
           top: "calc(1.25rem + env(safe-area-inset-top, 0px))",
           right: "calc(1.25rem + env(safe-area-inset-right, 0px))",
-          zIndex: 60,
+          zIndex: 95,
           background: "rgba(255,255,255,0.06)",
           backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
@@ -2812,7 +2813,7 @@ export default function App() {
             position: "fixed",
             top: "calc(1.25rem + env(safe-area-inset-top, 0px))",
             right: "calc(4.75rem + env(safe-area-inset-right, 0px))",
-            zIndex: 60,
+            zIndex: 95,
             background: "rgba(255,255,255,0.06)",
             backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
