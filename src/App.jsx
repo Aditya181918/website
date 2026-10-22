@@ -1380,7 +1380,7 @@ function ConstellationScene({ onSelect, onComplete }) {
 
   return (
     <div className="relative w-full max-w-2xl" style={{ zIndex: 2 }}>
-      <ChapterLabel num="viii" title="your stars" />
+      <ChapterLabel num="vii" title="your stars" />
       <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)", color: "#EAE6F0" }}>
         In every universe,
       </h2>
@@ -1687,7 +1687,7 @@ function Firefly({ x, y, f }) {
 
 /* ============================ COUNTDOWN — until we meet ============================ */
 // Live ticking countdown to the next time they're together.
-const MEET_DATE = new Date("2026-09-02T00:00:00+05:30"); // 2 September 2026, IST
+const MEET_DATE = new Date("2026-10-30T00:00:00+05:30"); // 30 October 2026, IST
 
 function useCountdown(target) {
   const [now, setNow] = useState(() => Date.now());
@@ -1713,7 +1713,7 @@ function CountdownScene() {
   ];
   return (
     <div className="w-full max-w-2xl flex flex-col items-center">
-      <ChapterLabel num="xii" title="counting down" />
+      <ChapterLabel num="xi" title="counting down" />
       {done ? (
         <>
           <h2 className="display text-center font-light leading-tight mb-4" style={{ fontSize: "clamp(2.2rem,8vw,4rem)", color: "#E8C39E" }}>
@@ -1728,7 +1728,7 @@ function CountdownScene() {
           <h2 className="display text-center font-light leading-tight mb-2" style={{ fontSize: "clamp(1.8rem,6vw,3rem)" }}>
             Until I get to hold you again
           </h2>
-          <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>2nd september · counting every second.</p>
+          <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>30th october · counting every second.</p>
 
           <div className="flex items-start justify-center gap-3 sm:gap-6">
             {units.map((u, i) => (
@@ -1922,7 +1922,7 @@ function CoffeeScene() {
 
   return (
     <div className="w-full max-w-xl flex flex-col items-center">
-      <ChapterLabel num="vi" title="a slow morning" />
+      <ChapterLabel num="v" title="a slow morning" />
       <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>I made you a cold coffee.</h2>
       <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>
         {poured ? "just the way you like it. no sugar." : "tap the glass."}
@@ -2110,7 +2110,7 @@ function RollercoasterScene({ rideRef, onRideChange, onCaption, registerSkip }) 
     <div className="w-full max-w-xl flex flex-col items-center">
       {state !== "riding" && (
         <>
-          <ChapterLabel num="vii" title="the ride" />
+          <ChapterLabel num="vi" title="the ride" />
           <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>
             {state === "done" ? "again?" : "Want to go on a ride?"}
           </h2>
@@ -2167,6 +2167,7 @@ const CHAPTERS = [
   { id: "ch-ride",      label: "the ride",          x: 74, y: 34 },
   { id: "ch-you",       label: "it'd be you",       x: 62, y: 48 },
   { id: "ch-stars",     label: "your stars",        x: 78, y: 58 },
+  { id: "ch-horoscope", label: "your horoscope",    x: 90, y: 70 },
   { id: "ch-promises",  label: "my promises",       x: 60, y: 68 },
   { id: "ch-letter",    label: "a letter",          x: 44, y: 76 },
   { id: "ch-countdown", label: "counting down",     x: 30, y: 88 },
@@ -2262,7 +2263,7 @@ function StarMap({ open, close, onJump, currentId, visited }) {
 
 const SECTIONS = {
   us:     { label: "Us",     tag: "the story of you and me", chapters: ["ch-friends", "ch-coffee", "ch-ride", "ch-timeline"] },
-  you:    { label: "You",    tag: "everything I notice",     chapters: ["ch-feelings", "ch-small", "ch-stars", "ch-you"] },
+  you:    { label: "You",    tag: "everything I notice",     chapters: ["ch-feelings", "ch-small", "ch-stars", "ch-horoscope", "ch-you"] },
   always: { label: "Always", tag: "what I'm promising",      chapters: ["ch-promises", "ch-letter", "ch-countdown"] },
   play:   { label: "Play",   tag: "things to touch",         chapters: ["ch-balloons", "ch-pull"] },
 };
@@ -2393,6 +2394,184 @@ function BottomBar({ view, onNav }) {
         })}
       </div>
     </motion.nav>
+  );
+}
+
+/* ============================ HOROSCOPE — Cancer, written by someone biased ============================ */
+// A new reading every day (rolls over at midnight IST). Same reading all day.
+
+const HORO = {
+  openers: [
+    "The stars have looked at your chart and, frankly, they're impressed.",
+    "Mercury is doing something complicated today. You, however, are doing great.",
+    "The moon — your ruling planet and your biggest fan — is in a generous mood.",
+    "The universe is leaning slightly in your direction today. It does that a lot.",
+    "A rare alignment occurs: you, a cold coffee, and nobody bothering you before it.",
+    "The cosmos checked on you this morning. You were asleep. It decided to let you be.",
+    "Venus was asked about you and refused to stop talking.",
+    "The stars are aligned today, mostly because they want a better view of you.",
+    "Your sign feels everything deeply. Today, that's your superpower.",
+    "Something small and lovely is heading your way. It might be a text. It might be from me.",
+    "Jupiter says you're due for a win. Jupiter is rarely wrong about you.",
+    "Clear skies, mild drama, and a 100% chance of being adored.",
+  ],
+  predictions: [
+    "Someone will think about you at least forty times today. This is a conservative estimate.",
+    "You will tell a story with more plot twists than the event actually had. Everyone will love it.",
+    "Something you've been overthinking turns out simpler than your brain made it.",
+    "You will be right about something today. Possibly everything.",
+    "Someone far away will smile at his phone because of you. He will deny it.",
+    "You'll say 'hmm' at least once in a way that makes someone fall for you again.",
+    "Your instincts are sharp today. Trust the crab.",
+    "A small thing will annoy you before coffee. It will be forgiven after.",
+    "Your energy peaks late tonight. As usual. Science still has questions.",
+    "A good conversation is coming. Ideally a long one. Ideally with me.",
+    "You'll be braver than you feel. That's how it usually goes with you.",
+    "Someone is counting down to seeing you. The stars can confirm he's very bad at waiting.",
+  ],
+  advice: [
+    "Drink your coffee before making any announcements.",
+    "Let someone take care of you for once. He's volunteering.",
+    "Put the overthinking down. It'll still be there tomorrow — and so will I.",
+    "Say the thing. You're usually right to.",
+    "Rest counts as productive. The stars insist.",
+    "Be as gentle with yourself as you'd want anyone else to be.",
+    "Reply to his texts promptly. The stars are not biased. (They are.)",
+    "Avoid sugar. In your coffee. You knew that.",
+    "Take the front row — on rollercoasters and in life.",
+    "Count the days. There aren't that many left.",
+  ],
+  drinks: ["cold coffee, no sugar", "black coffee, strong enough to scare people", "iced coffee, extra ice", "whatever he makes you", "water. drink some. I mean it."],
+  moods: ["soft, with a chance of dramatic", "sunny after coffee", "cozy, clingy, perfect", "fierce and adorable", "sleepy but determined", "radiant, as usual"],
+};
+
+// deterministic per-day randomness
+function seededRand(seedStr) {
+  let h = 1779033703 ^ seedStr.length;
+  for (let i = 0; i < seedStr.length; i++) { h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); }
+  return () => {
+    h = Math.imul(h ^ (h >>> 16), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return ((h ^= h >>> 16) >>> 0) / 4294967296;
+  };
+}
+
+function moonPhaseName(date) {
+  const synodic = 29.530588853;
+  const age = (((date.getTime() - Date.UTC(2000, 0, 6, 18, 14)) / 86400000) % synodic + synodic) % synodic;
+  if (age < 1.84) return "new moon";
+  if (age < 5.53) return "waxing crescent";
+  if (age < 9.22) return "first quarter";
+  if (age < 12.91) return "waxing gibbous";
+  if (age < 16.61) return "full moon";
+  if (age < 20.30) return "waning gibbous";
+  if (age < 23.99) return "last quarter";
+  if (age < 27.68) return "waning crescent";
+  return "new moon";
+}
+
+function CancerGlyph({ size = 40, color = "#E8C39E" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.3" strokeLinecap="round">
+      <circle cx="7" cy="9" r="2.6" />
+      <path d="M7 6.4 Q 15 2.8 21 7.8" />
+      <circle cx="17" cy="15" r="2.6" />
+      <path d="M17 17.6 Q 9 21.2 3 16.2" />
+    </svg>
+  );
+}
+
+function Stars({ n }) {
+  return (
+    <span style={{ letterSpacing: 2 }}>
+      <span style={{ color: "#E8C39E" }}>{"★".repeat(n)}</span>
+      <span style={{ color: "rgba(234,230,240,0.2)" }}>{"★".repeat(5 - n)}</span>
+    </span>
+  );
+}
+
+function HoroscopeScene() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => { const t = setInterval(() => setNow(new Date()), 60000); return () => clearInterval(t); }, []);
+
+  // today's date in IST
+  const ist = new Date(now.getTime() + 5.5 * 3600 * 1000);
+  const dayKey = ist.toISOString().slice(0, 10);
+  const r = seededRand("cancer-" + dayKey);
+  const pick = (arr) => arr[Math.floor(r() * arr.length)];
+
+  const reading = {
+    opener: pick(HORO.openers),
+    prediction: pick(HORO.predictions),
+    advice: pick(HORO.advice),
+    drink: pick(HORO.drinks),
+    mood: pick(HORO.moods),
+    number: r() < 0.25 ? "30 (as in 30 October)" : String(1 + Math.floor(r() * 99)),
+    drama: 2 + Math.floor(r() * 4),
+    coffee: 3 + Math.floor(r() * 3),
+  };
+
+  const dateLabel = ist.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+  const minsToMidnight = 24 * 60 - (ist.getUTCHours() * 60 + ist.getUTCMinutes());
+  const nextIn = `${Math.floor(minsToMidnight / 60)}h ${minsToMidnight % 60}m`;
+
+  const stat = (label, value) => (
+    <div className="flex justify-between gap-4 py-2.5" style={{ borderBottom: "1px solid rgba(232,195,158,0.1)" }}>
+      <span className="eyebrow text-[9px] pt-1" style={{ color: "rgba(232,195,158,0.7)" }}>{label}</span>
+      <span className="text-sm text-right" style={{ color: "rgba(234,230,240,0.85)" }}>{value}</span>
+    </div>
+  );
+
+  return (
+    <div className="w-full max-w-lg flex flex-col items-center">
+      <ChapterLabel num="viii" title="your horoscope" />
+      <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Cancer, today.</h2>
+      <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>written daily by someone extremely biased.</p>
+
+      <motion.div
+        key={dayKey}
+        initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full p-7 sm:p-9 rounded-[28px] grain"
+        style={{
+          background: "rgba(255,255,255,0.05)",
+          backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+          border: "1px solid rgba(232,195,158,0.2)",
+          boxShadow: "0 12px 48px rgba(232,195,158,0.08)",
+        }}
+      >
+        <div className="flex items-center gap-4 mb-6">
+          <motion.div animate={{ rotate: [0, 6, 0, -6, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}>
+            <CancerGlyph size={44} />
+          </motion.div>
+          <div>
+            <p className="display text-xl leading-tight" style={{ color: "#EAE6F0" }}>{dateLabel}</p>
+            <p className="text-[11px] mt-0.5" style={{ color: "rgba(234,230,240,0.45)" }}>Cancer · 21 June – 22 July</p>
+          </div>
+        </div>
+
+        <p className="display italic leading-snug mb-4" style={{ fontSize: "clamp(1.15rem,4vw,1.4rem)", color: "#EAE6F0" }}>{reading.opener}</p>
+        <p className="leading-relaxed mb-4" style={{ color: "rgba(234,230,240,0.8)" }}>{reading.prediction}</p>
+        <p className="leading-relaxed mb-7" style={{ color: "rgba(234,230,240,0.8)" }}>
+          <span style={{ color: "#E8C39E" }}>Advice: </span>{reading.advice}
+        </p>
+
+        {stat("lucky drink", reading.drink)}
+        {stat("lucky number", reading.number)}
+        {stat("mood forecast", reading.mood)}
+        {stat("moon tonight", moonPhaseName(now))}
+        {stat("compatibility", "off the charts with one specific person")}
+
+        <div className="mt-6 space-y-2 text-sm">
+          <div className="flex justify-between"><span style={{ color: "rgba(234,230,240,0.6)" }}>love</span><Stars n={5} /></div>
+          <div className="flex justify-between"><span style={{ color: "rgba(234,230,240,0.6)" }}>drama</span><Stars n={reading.drama} /></div>
+          <div className="flex justify-between"><span style={{ color: "rgba(234,230,240,0.6)" }}>coffee required</span><Stars n={reading.coffee} /></div>
+        </div>
+      </motion.div>
+
+      <p className="text-center text-[11px] mt-6 italic" style={{ color: "rgba(234,230,240,0.4)" }}>
+        a new reading in {nextIn}. the stars are already working on it.
+      </p>
+    </div>
   );
 }
 
@@ -3016,10 +3195,13 @@ export default function App() {
           {/* 7 · Constellation */}
           <Scene id="ch-stars" hidden={!showChapter("ch-stars")}><ConstellationScene onSelect={setSelectedMemory} onComplete={triggerSkyGlow} /></Scene>
 
+          {/* Horoscope — Cancer, daily */}
+          <Scene id="ch-horoscope" hidden={!showChapter("ch-horoscope")}><HoroscopeScene /></Scene>
+
           {/* 9 · Promise Jar — fireflies */}
           <Scene id="ch-promises" hidden={!showChapter("ch-promises")}>
             <div className="w-full max-w-lg flex flex-col items-center">
-              <ChapterLabel num="x" title="my promises" />
+              <ChapterLabel num="ix" title="my promises" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>A jar of promises.</h2>
               <p className="text-center text-sm mb-12 italic" style={{ color: "rgba(234,230,240,0.5)" }}>each little light is one. open them, one by one.</p>
               <FireflyJar promises={promises} onAllOpened={() => setPromiseBurst(true)} />
@@ -3032,7 +3214,7 @@ export default function App() {
               className="w-full max-w-2xl p-8 sm:p-12 rounded-[32px] relative grain"
               style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(232,195,158,0.2)" }}>
               <div className="absolute top-7 right-7"><Lily size={34} opacity={0.5} /></div>
-              <ChapterLabel num="xi" title="a letter" />
+              <ChapterLabel num="x" title="a letter" />
               <h2 className="display font-light text-center mb-10" style={{ fontSize: "clamp(2.5rem,8vw,4rem)" }}>To {NAME},</h2>
               <div className="space-y-6 text-base sm:text-lg leading-relaxed" style={{ color: "rgba(234,230,240,0.8)" }}>
                 {[
@@ -3072,7 +3254,7 @@ export default function App() {
           {/* 12 · PULL THE STARS */}
           <Scene id="ch-pull" hidden={!showChapter("ch-pull")}>
             <div className="w-full max-w-2xl flex flex-col items-center">
-              <ChapterLabel num="xiii" title="reach out" />
+              <ChapterLabel num="xii" title="reach out" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Hold out your hand.</h2>
               <p className="text-center text-sm mb-8 italic" style={{ color: "rgba(234,230,240,0.5)" }}>press and drag — the stars come to you. they always do.</p>
               <PullStars />
@@ -3083,7 +3265,7 @@ export default function App() {
           {/* 13 · TIMELINE — our story, so far (the growing album) */}
           <Scene id="ch-timeline" hidden={!showChapter("ch-timeline")} tall>
             <div className="w-full max-w-lg">
-              <ChapterLabel num="xiv" title="our story, so far" />
+              <ChapterLabel num="xiii" title="our story, so far" />
               <h2 className="display text-center font-light leading-tight mb-3" style={{ fontSize: "clamp(2rem,7vw,3.5rem)" }}>Every time we meet,</h2>
               <p className="text-center text-sm mb-14 italic" style={{ color: "rgba(234,230,240,0.5)" }}>this page grows a little longer.</p>
 
