@@ -1780,67 +1780,80 @@ function CountdownScene() {
 
 function PullStars() {
   const canvasRef = useRef(null);
-  const pointerRef = useRef({ x: 0, y: 0, active: false });
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let W, H, raf;
+    const palette = ["232,195,158", "168,197,240", "224,168,184", "255,255,255"];
+    let W = 0, H = 0, raf, stars = [];
+    const ptr = { x: 0, y: 0, active: false };
+
+    // (re)build the star field for the current size — safe to call any time
+    const build = () => {
+      const count = Math.max(60, Math.min(150, Math.floor((W * H) / 2400)));
+      stars = [...Array(count)].map(() => {
+        const hx = Math.random() * W, hy = Math.random() * H;
+        return {
+          hx, hy, x: hx, y: hy, vx: 0, vy: 0,
+          r: 1 + Math.random() * 2.2,
+          c: palette[Math.floor(Math.random() * palette.length)],
+          tw: Math.random() * Math.PI * 2, tws: 0.5 + Math.random() * 1.5,
+        };
+      });
+    };
 
     const resize = () => {
-      W = canvas.clientWidth; H = canvas.clientHeight;
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      if (!w || !h) return; // still hidden — wait until visible
+      const changed = Math.abs(w - W) > 2 || Math.abs(h - H) > 2;
+      W = w; H = h;
       canvas.width = W * dpr; canvas.height = H * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (changed || stars.length === 0) build();
     };
+
+    // fires when the canvas goes from hidden → visible, and on any size change
+    const ro = new ResizeObserver(resize);
+    ro.observe(canvas);
     resize();
 
-    const COUNT = Math.min(140, Math.floor((W * H) / 2600));
-    const palette = ["232,195,158", "168,197,240", "224,168,184", "255,255,255"];
-    const stars = [...Array(COUNT)].map(() => {
-      const hx = Math.random() * W, hy = Math.random() * H;
-      return {
-        hx, hy, x: hx, y: hy, vx: 0, vy: 0,
-        r: 0.8 + Math.random() * 2.2,
-        c: palette[Math.floor(Math.random() * palette.length)],
-        tw: Math.random() * Math.PI * 2,
-        tws: 0.5 + Math.random() * 1.5,
-      };
-    });
-
-    const getXY = (e) => {
+    const toLocal = (e) => {
       const rect = canvas.getBoundingClientRect();
-      const cx = e.touches ? e.touches[0].clientX : e.clientX;
-      const cy = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: cx - rect.left, y: cy - rect.top };
+      ptr.x = e.clientX - rect.left;
+      ptr.y = e.clientY - rect.top;
     };
-    const down = (e) => { const p = getXY(e); pointerRef.current = { x: p.x, y: p.y, active: true }; };
-    const move = (e) => { if (!pointerRef.current.active) return; const p = getXY(e); pointerRef.current.x = p.x; pointerRef.current.y = p.y; };
-    const up = () => { pointerRef.current.active = false; };
+    const down = (e) => {
+      ptr.active = true; toLocal(e);
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+      if (navigator.vibrate) navigator.vibrate(8);
+    };
+    const move = (e) => { if (ptr.active) toLocal(e); };
+    const up = () => { ptr.active = false; };
 
     canvas.addEventListener("pointerdown", down);
     canvas.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
-    canvas.addEventListener("touchstart", down, { passive: true });
-    canvas.addEventListener("touchmove", move, { passive: true });
-    window.addEventListener("touchend", up);
+    canvas.addEventListener("pointerup", up);
+    canvas.addEventListener("pointercancel", up);
+    canvas.addEventListener("lostpointercapture", up);
 
     let t = 0;
     const loop = () => {
+      raf = requestAnimationFrame(loop);
+      if (!W || !H) return;
       t += 0.016;
       ctx.clearRect(0, 0, W, H);
-      const ptr = pointerRef.current;
+      const reach = Math.max(W, H) * 0.45;
 
-      // draw faint connecting lines between gathered stars near the pointer
+      // faint threads between stars gathered near the finger
       if (ptr.active) {
-        ctx.strokeStyle = "rgba(232,195,158,0.10)";
+        const near = stars.filter((s) => Math.hypot(s.x - ptr.x, s.y - ptr.y) < 95);
+        ctx.strokeStyle = "rgba(232,195,158,0.14)";
         ctx.lineWidth = 0.6;
-        const near = stars.filter((s) => Math.hypot(s.x - ptr.x, s.y - ptr.y) < 90);
-        for (let i = 0; i < near.length; i++) {
-          for (let j = i + 1; j < near.length; j++) {
-            const d = Math.hypot(near[i].x - near[j].x, near[i].y - near[j].y);
-            if (d < 46) { ctx.beginPath(); ctx.moveTo(near[i].x, near[i].y); ctx.lineTo(near[j].x, near[j].y); ctx.stroke(); }
+        for (let i = 0; i < near.length; i++) for (let j = i + 1; j < near.length; j++) {
+          if (Math.hypot(near[i].x - near[j].x, near[i].y - near[j].y) < 48) {
+            ctx.beginPath(); ctx.moveTo(near[i].x, near[i].y); ctx.lineTo(near[j].x, near[j].y); ctx.stroke();
           }
         }
       }
@@ -1848,53 +1861,44 @@ function PullStars() {
       stars.forEach((s) => {
         if (ptr.active) {
           const dx = ptr.x - s.x, dy = ptr.y - s.y;
-          const dist = Math.hypot(dx, dy) || 1;
-          if (dist < 200) {
-            const pull = (1 - dist / 200) * 0.9;
-            s.vx += (dx / dist) * pull;
-            s.vy += (dy / dist) * pull;
+          const d = Math.hypot(dx, dy) || 1;
+          if (d < reach) {
+            const pull = (1 - d / reach) * 1.1;
+            s.vx += (dx / d) * pull; s.vy += (dy / d) * pull;
           }
         } else {
-          // drift home
-          s.vx += (s.hx - s.x) * 0.012;
-          s.vy += (s.hy - s.y) * 0.012;
+          s.vx += (s.hx - s.x) * 0.012; s.vy += (s.hy - s.y) * 0.012;
         }
         s.vx *= 0.86; s.vy *= 0.86;
         s.x += s.vx; s.y += s.vy;
 
-        const tw = 0.55 + Math.sin(t * s.tws + s.tw) * 0.35;
+        const a = 0.55 + Math.sin(t * s.tws + s.tw) * 0.35;
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${s.c},${tw})`;
-        ctx.shadowBlur = 6;
-        ctx.shadowColor = `rgba(${s.c},0.7)`;
+        ctx.fillStyle = `rgba(${s.c},${a})`;
+        ctx.shadowBlur = 7; ctx.shadowColor = `rgba(${s.c},0.75)`;
         ctx.fill();
       });
       ctx.shadowBlur = 0;
 
-      // soft glow at the pointer when active
       if (ptr.active) {
-        const g = ctx.createRadialGradient(ptr.x, ptr.y, 0, ptr.x, ptr.y, 70);
-        g.addColorStop(0, "rgba(232,195,158,0.18)");
+        const g = ctx.createRadialGradient(ptr.x, ptr.y, 0, ptr.x, ptr.y, 80);
+        g.addColorStop(0, "rgba(232,195,158,0.22)");
         g.addColorStop(1, "rgba(232,195,158,0)");
         ctx.fillStyle = g;
-        ctx.fillRect(ptr.x - 70, ptr.y - 70, 140, 140);
+        ctx.fillRect(ptr.x - 80, ptr.y - 80, 160, 160);
       }
-
-      raf = requestAnimationFrame(loop);
     };
     loop();
 
-    window.addEventListener("resize", resize);
     return () => {
       cancelAnimationFrame(raf);
+      ro.disconnect();
       canvas.removeEventListener("pointerdown", down);
       canvas.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-      canvas.removeEventListener("touchstart", down);
-      canvas.removeEventListener("touchmove", move);
-      window.removeEventListener("touchend", up);
-      window.removeEventListener("resize", resize);
+      canvas.removeEventListener("pointerup", up);
+      canvas.removeEventListener("pointercancel", up);
+      canvas.removeEventListener("lostpointercapture", up);
     };
   }, []);
 
@@ -1902,7 +1906,11 @@ function PullStars() {
     <canvas
       ref={canvasRef}
       className="w-full rounded-[24px]"
-      style={{ height: "min(52vh, 420px)", display: "block", touchAction: "none", cursor: "grab" }}
+      style={{
+        height: "min(52vh, 420px)", display: "block", touchAction: "none", cursor: "grab",
+        background: "rgba(255,255,255,0.02)", border: "1px solid rgba(232,195,158,0.12)",
+        WebkitUserSelect: "none", userSelect: "none",
+      }}
     />
   );
 }
