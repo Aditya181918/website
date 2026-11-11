@@ -1417,6 +1417,99 @@ function HugExperience({ close }) {
   );
 }
 
+/* ============================ FLOATING FRAME — a photo suspended in space ============================ */
+// Each photo hangs in 3D: turned away and distant as it approaches, rotating to face her
+// as it reaches the centre of the screen, then turning away again. It bobs gently and
+// answers to the tilt of her phone.
+
+function FloatingFrame({ src, caption, deviceTilt, index = 0 }) {
+  const wrapRef = useRef(null);
+  const frameRef = useRef(null);
+  const shadowRef = useRef(null);
+  const capRef = useRef(null);
+  const tiltRef = useRef({ x: 0, y: 0 });
+  tiltRef.current = deviceTilt || { x: 0, y: 0 };
+
+  useEffect(() => {
+    const wrap = wrapRef.current, frame = frameRef.current;
+    if (!wrap || !frame) return;
+    const dir = index % 2 === 0 ? 1 : -1;
+    const phase = index * 1.7;
+    const cur = { ry: dir * 42, rx: 14, tz: -190, op: 0, y: 0 };
+    const t0 = performance.now();
+    let raf;
+
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      if (wrap.offsetParent === null) return; // section hidden
+      const r = wrap.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      if (r.bottom < -vh * 0.5 || r.top > vh * 1.5) return; // far off-screen
+
+      const t = (performance.now() - t0) / 1000;
+      const c = (r.top + r.height / 2 - vh / 2) / vh; // 0 when centred
+      const a = Math.max(-1, Math.min(1, c * 1.7));
+      const away = Math.abs(a);
+      const tl = tiltRef.current;
+
+      const target = {
+        ry: dir * away * 42 + Math.sin(t * 0.5 + phase) * 3 + (tl.x || 0) * 9,
+        rx: a * 16 + Math.cos(t * 0.4 + phase) * 2 - (tl.y || 0) * 9,
+        tz: -away * 190,
+        op: 1 - away * 0.5,
+        y: Math.sin(t * 0.9 + phase) * 7,
+      };
+      cur.ry += (target.ry - cur.ry) * 0.1;
+      cur.rx += (target.rx - cur.rx) * 0.1;
+      cur.tz += (target.tz - cur.tz) * 0.1;
+      cur.op += (target.op - cur.op) * 0.1;
+      cur.y += (target.y - cur.y) * 0.1;
+
+      const rz = Math.sin(t * 0.6 + phase) * 1.1;
+      frame.style.transform = `translate3d(0, ${cur.y.toFixed(2)}px, ${cur.tz.toFixed(1)}px) rotateX(${cur.rx.toFixed(2)}deg) rotateY(${cur.ry.toFixed(2)}deg) rotateZ(${rz.toFixed(2)}deg)`;
+      frame.style.opacity = cur.op.toFixed(3);
+      if (shadowRef.current) {
+        shadowRef.current.style.transform = `scaleX(${(1 - cur.y / 60).toFixed(3)})`;
+        shadowRef.current.style.opacity = Math.max(0, 0.55 * cur.op - cur.y / 70).toFixed(3);
+      }
+      if (capRef.current) capRef.current.style.opacity = Math.max(0, 1 - away * 1.3).toFixed(3);
+    };
+    loop();
+    return () => cancelAnimationFrame(raf);
+  }, [index]);
+
+  return (
+    <div ref={wrapRef} className="relative mx-auto" style={{ perspective: "1100px" }}>
+      <div ref={frameRef} className="relative" style={{ transformStyle: "preserve-3d", willChange: "transform, opacity", opacity: 0 }}>
+        {/* back plate — gives the frame real thickness when it turns */}
+        <div
+          className="absolute inset-0 rounded-[20px]"
+          style={{ transform: "translateZ(-24px)", background: "rgba(232,195,158,0.10)", border: "1px solid rgba(232,195,158,0.3)", boxShadow: "0 0 60px rgba(232,195,158,0.22)" }}
+        />
+        <div
+          className="relative rounded-[20px] overflow-hidden grain"
+          style={{ border: "1px solid rgba(232,195,158,0.35)", boxShadow: "0 34px 90px rgba(0,0,0,0.6), 0 0 0 7px rgba(255,255,255,0.03)" }}
+        >
+          <img src={src} alt="us" draggable={false} style={{ width: "100%", display: "block", filter: "saturate(1.05) contrast(1.02)" }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at center, transparent 55%, rgba(10,14,39,0.45) 100%)" }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(110deg, rgba(255,255,255,0.10) 0%, transparent 38%, transparent 100%)" }} />
+        </div>
+      </div>
+
+      {/* soft pool of light beneath, breathing with the float */}
+      <div
+        ref={shadowRef}
+        className="mx-auto"
+        style={{ width: "62%", height: 18, marginTop: 20, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(232,195,158,0.4), transparent 70%)", filter: "blur(8px)", opacity: 0 }}
+      />
+      <p ref={capRef} className="display italic text-center mt-4 text-xl sm:text-2xl px-6" style={{ color: "#EAE6F0", opacity: 0 }}>
+        {caption}
+      </p>
+      <div className="flex justify-center mt-5"><Lily size={26} opacity={0.5} /></div>
+    </div>
+  );
+}
+
 /* ============================ TIMELINE — the growing album ============================ */
 
 function TimelineView({ deviceTilt }) {
@@ -1469,9 +1562,7 @@ function TimelineView({ deviceTilt }) {
           <div className="space-y-14 pl-10 pb-14">
             {visit.moments.map((m, mi) => {
               const card = (
-                <div style={{ transform: `rotate(${mi % 2 === 0 ? -1.5 : 1.5}deg)` }}>
-                  <TiltPhoto src={m.src} caption={m.caption} deviceTilt={deviceTilt} instant />
-                </div>
+                <FloatingFrame src={m.src} caption={m.caption} deviceTilt={deviceTilt} index={mi} />
               );
               return (
                 <div key={mi} className="relative">
@@ -1519,26 +1610,125 @@ function TimelineView({ deviceTilt }) {
 
 /* ============================ CONSTELLATION SCENE ============================ */
 
+// depth (toward / away from her) for each star — makes the constellation a real 3D object
+const STAR_Z = [-20, 14, 0, 24, -26, 12, -16, 6];
+
 function ConstellationScene({ onSelect, onComplete }) {
   const [found, setFound] = useState([]);
-  const [shoot, setShoot] = useState(0);
-  // 3D depth field: the whole constellation tilts slowly + responds to pointer
-  const rx = useSpring(0, { stiffness: 60, damping: 18 });
-  const ry = useSpring(0, { stiffness: 60, damping: 18 });
+  const foundRef = useRef(found);
+  foundRef.current = found;
+  const stageRef = useRef(null);
+  const canvasRef = useRef(null);
+  const starEls = useRef([]);
+  const orbit = useRef({ yaw: 0, pitch: 0, vyaw: 0, vpitch: 0, dragging: false, x: 0, y: 0, moved: 0, lastTouch: 0 });
 
+  // ── the 3D engine: rotate every point, project it, place it ──
   useEffect(() => {
-    const t = setInterval(() => setShoot((k) => k + 1), 9000);
-    return () => clearInterval(t);
+    const stage = stageRef.current, canvas = canvasRef.current;
+    if (!stage || !canvas) return;
+    const ctx = canvas.getContext("2d");
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let W = 0, H = 0, raf;
+
+    // background dust scattered through a sphere, for depth
+    const dust = [...Array(90)].map(() => {
+      const r = 30 + Math.cbrt(Math.random()) * 55;
+      const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+      return { x: r * Math.sin(ph) * Math.cos(th), y: r * Math.sin(ph) * Math.sin(th), z: r * Math.cos(ph), s: 0.5 + Math.random() * 1.2, tw: Math.random() * 6.28 };
+    });
+    const pts = stars.map((s, i) => ({ x: s.x - 50, y: s.y - 50, z: STAR_Z[i % STAR_Z.length] }));
+    const D = 240; // camera distance
+    const t0 = performance.now();
+
+    const frame = () => {
+      raf = requestAnimationFrame(frame);
+      const w = stage.clientWidth, h = stage.clientHeight;
+      if (!w || !h) return; // hidden — wait
+      if (w !== W || h !== H) {
+        W = w; H = h;
+        canvas.width = W * dpr; canvas.height = H * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      const t = (performance.now() - t0) / 1000;
+      const o = orbit.current;
+
+      if (!o.dragging) {
+        o.yaw += o.vyaw; o.pitch += o.vpitch;
+        o.vyaw *= 0.94; o.vpitch *= 0.94;
+        // left alone, it drifts home so the Cancer shape re-forms, then sways gently
+        if (performance.now() - o.lastTouch > 2500) {
+          const base = Math.round(o.yaw / (Math.PI * 2)) * Math.PI * 2;
+          o.yaw += (base + Math.sin(t * 0.35) * 0.32 - o.yaw) * 0.03;
+          o.pitch += (Math.sin(t * 0.27) * 0.12 - o.pitch) * 0.03;
+        }
+      }
+      o.pitch = Math.max(-1.1, Math.min(1.1, o.pitch));
+
+      const cy = Math.cos(o.yaw), sy = Math.sin(o.yaw), cp = Math.cos(o.pitch), sp = Math.sin(o.pitch);
+      const unit = (Math.min(W, H) / 100) * 0.92;
+      const proj = (p) => {
+        const x1 = p.x * cy + p.z * sy, z1 = -p.x * sy + p.z * cy;
+        const y2 = p.y * cp - z1 * sp, z2 = p.y * sp + z1 * cp;
+        const f = D / (D - z2);
+        return { sx: W / 2 + x1 * f * unit, sy: H / 2 + y2 * f * unit, f, z: z2 };
+      };
+
+      ctx.clearRect(0, 0, W, H);
+
+      dust.forEach((d) => {
+        const q = proj(d);
+        const a = Math.max(0.05, (0.2 + 0.2 * Math.sin(t * 1.3 + d.tw)) * Math.min(1.2, q.f));
+        ctx.beginPath();
+        ctx.arc(q.sx, q.sy, d.s * q.f, 0, 6.283);
+        ctx.fillStyle = `rgba(200,215,255,${a.toFixed(3)})`;
+        ctx.fill();
+      });
+
+      const P = pts.map(proj);
+      const f = foundRef.current;
+
+      stars.forEach((s, i) => (s.connects || []).forEach((j) => {
+        const a = P[i], b = P[j];
+        if (!b) return;
+        const both = f.includes(i) && f.includes(j);
+        ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy);
+        ctx.strokeStyle = both ? `rgba(232,195,158,${(0.55 + 0.25 * Math.sin(t * 2)).toFixed(3)})` : "rgba(168,197,240,0.2)";
+        ctx.lineWidth = both ? 1.6 : 0.8;
+        ctx.stroke();
+      }));
+
+      P.forEach((q, i) => {
+        const el = starEls.current[i];
+        if (!el) return;
+        el.style.transform = `translate3d(${(q.sx - 32).toFixed(1)}px, ${(q.sy - 32).toFixed(1)}px, 0) scale(${q.f.toFixed(3)})`;
+        el.style.zIndex = String(100 + Math.round(q.z));
+        el.style.opacity = Math.max(0.45, Math.min(1, 0.75 + q.z / 160)).toFixed(3);
+      });
+    };
+    frame();
+    return () => cancelAnimationFrame(raf);
   }, []);
 
-  const onMove = (e) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    ry.set(((e.clientX - r.left) / r.width - 0.5) * 12);
-    rx.set(-((e.clientY - r.top) / r.height - 0.5) * 12);
+  // ── orbit with a finger (horizontal drags turn it; vertical swipes still scroll the page) ──
+  const onDown = (e) => {
+    const o = orbit.current;
+    o.dragging = true; o.x = e.clientX; o.y = e.clientY; o.moved = 0; o.vyaw = 0; o.vpitch = 0;
+    o.lastTouch = performance.now();
   };
-  const onLeave = () => { rx.set(0); ry.set(0); };
+  const onMove = (e) => {
+    const o = orbit.current;
+    if (!o.dragging) return;
+    const dx = e.clientX - o.x, dy = e.clientY - o.y;
+    o.x = e.clientX; o.y = e.clientY;
+    o.moved += Math.abs(dx) + Math.abs(dy);
+    o.yaw += dx * 0.008; o.pitch += dy * 0.006;
+    o.vyaw = dx * 0.008; o.vpitch = dy * 0.006;
+    o.lastTouch = performance.now();
+  };
+  const onUp = () => { const o = orbit.current; o.dragging = false; o.lastTouch = performance.now(); };
 
   const tap = (s, i) => {
+    if (orbit.current.moved > 10) return; // she was orbiting, not tapping
     onSelect(s);
     if (!found.includes(i)) {
       const next = [...found, i];
@@ -1547,7 +1737,7 @@ function ConstellationScene({ onSelect, onComplete }) {
     }
   };
 
-  let progress = "tap the stars to find me.";
+  let progress = "drag to turn the sky · tap the stars to find me.";
   if (found.length > 0 && found.length < 4) progress = `${found.length} of ${stars.length} found.`;
   else if (found.length >= 4 && found.length < stars.length) progress = `halfway home. ${stars.length - found.length} to go.`;
   else if (found.length === stars.length) progress = "you found me. every single one.";
@@ -1561,64 +1751,52 @@ function ConstellationScene({ onSelect, onComplete }) {
       <p className="text-center text-base mb-1" style={{ color: "rgba(234,230,240,0.6)" }}>I think I'd still find you.</p>
       <p className="text-center text-xs italic mb-8 h-4" style={{ color: "#E8C39E", opacity: 0.7 }}>{progress}</p>
 
-      <div style={{ perspective: "1000px" }}>
-        <motion.div
-          onMouseMove={onMove} onMouseLeave={onLeave}
-          style={{ rotateX: rx, rotateY: ry, transformStyle: "preserve-3d", height: "min(56vh, 440px)", maxWidth: 460 }}
-          className="relative mx-auto"
-        >
-          {/* connecting lines */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-            {stars.map((s, i) => (s.connects || []).map((t) => {
-              const tg = stars[t]; if (!tg) return null;
-              const both = found.includes(i) && found.includes(t);
-              return (
-                <motion.line key={`${i}-${t}`} x1={s.x} y1={s.y} x2={tg.x} y2={tg.y}
-                  stroke={both ? "rgba(232,195,158,0.6)" : "rgba(168,197,240,0.12)"} strokeWidth={both ? 0.4 : 0.18} strokeLinecap="round"
-                  animate={{ opacity: both ? [0.7, 1, 0.7] : 0.4 }} transition={{ duration: both ? 3 : 1, repeat: both ? Infinity : 0 }} />
-              );
-            }))}
-          </svg>
+      <div
+        ref={stageRef}
+        onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onUp}
+        className="relative mx-auto"
+        style={{ height: "min(56vh, 440px)", maxWidth: 460, touchAction: "pan-y", cursor: "grab", userSelect: "none", WebkitUserSelect: "none" }}
+      >
+        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ pointerEvents: "none" }} />
 
-          <AnimatePresence>
-            <motion.div key={shoot}
-              initial={{ x: "-12%", y: `${10 + (shoot * 13) % 40}%`, opacity: 0 }}
-              animate={{ x: "112%", y: `${45 + (shoot * 7) % 30}%`, opacity: [0, 1, 1, 0] }}
-              transition={{ duration: 1.8, ease: "easeOut" }}
-              className="absolute pointer-events-none"
-              style={{ width: 60, height: 1.5, background: "linear-gradient(to right, transparent, rgba(255,255,255,0.9), rgba(232,195,158,0.6))", boxShadow: "0 0 8px rgba(232,195,158,0.8)" }}
-            />
-          </AnimatePresence>
-
-          {stars.map((s, i) => {
-            const isF = found.includes(i);
-            const vs = s.lead ? 18 : 11;
-            // Stars at different z-depths for parallax-in-3D
-            const z = s.lead ? 30 : 10;
-            return (
-              <motion.button key={i}
-                onPointerUp={(e) => { e.stopPropagation(); tap(s, i); }}
-                className="absolute flex items-center justify-center"
-                style={{ left: `${s.x}%`, top: `${s.y}%`, width: 64, height: 64, transform: `translate(-50%,-50%) translateZ(${z}px)`, touchAction: "manipulation" }}
-                whileHover={{ scale: 1.35 }} whileTap={{ scale: 0.9 }} aria-label={`memory ${i + 1}`}>
-                <motion.div
-                  animate={{ opacity: isF ? [0.5, 0.9, 0.5] : [0.15, 0.4, 0.15], scale: isF ? [1, 1.3, 1] : [1, 1.1, 1] }}
-                  transition={{ duration: 3 + (i % 3), repeat: Infinity }}
-                  className="absolute rounded-full pointer-events-none"
-                  style={{ width: vs * 2.6, height: vs * 2.6, filter: "blur(5px)", background: isF ? "radial-gradient(circle,rgba(232,195,158,0.45),transparent 70%)" : "radial-gradient(circle,rgba(168,197,240,0.3),transparent 70%)" }} />
-                <motion.div
-                  animate={{ opacity: isF ? [0.7, 1, 0.7] : [0.5, 0.9, 0.5], scale: [1, 1.15, 1] }}
-                  transition={{ duration: 3 + (i % 4), repeat: Infinity }}
-                  className="rounded-full relative"
-                  style={{ width: vs, height: vs,
-                    background: isF ? "radial-gradient(circle,#fff,#ffe5b0 50%,#e8c39e)" : s.lead ? "radial-gradient(circle,#fff,#c5dcff 60%,#a8c5f0)" : "radial-gradient(circle,#fff,#a8c5f0 70%,transparent)",
-                    boxShadow: isF ? "0 0 24px rgba(232,195,158,0.9),0 0 8px #fff" : s.lead ? "0 0 18px rgba(168,197,240,0.9)" : "0 0 12px rgba(168,197,240,0.7)" }} />
-                {isF && <motion.span initial={{ opacity: 0, y: -4 }} animate={{ opacity: 0.5, y: 0 }} transition={{ delay: 0.3 }}
-                  className="absolute text-[9px]" style={{ top: -15, color: "rgba(234,230,240,0.6)" }}>{i + 1}</motion.span>}
-              </motion.button>
-            );
-          })}
-        </motion.div>
+        {stars.map((s, i) => {
+          const isF = found.includes(i);
+          const vs = s.lead ? 18 : 11;
+          return (
+            <button
+              key={i}
+              ref={(el) => { starEls.current[i] = el; }}
+              onClick={() => tap(s, i)}
+              aria-label={`memory ${i + 1}`}
+              className="flex items-center justify-center"
+              style={{
+                position: "absolute", left: 0, top: 0, width: 64, height: 64, opacity: 0,
+                background: "transparent", border: "none", padding: 0, cursor: "pointer",
+                touchAction: "pan-y", willChange: "transform", WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              <motion.div
+                animate={{ opacity: isF ? [0.5, 0.9, 0.5] : [0.15, 0.4, 0.15], scale: isF ? [1, 1.3, 1] : [1, 1.1, 1] }}
+                transition={{ duration: 3 + (i % 3), repeat: Infinity }}
+                className="absolute rounded-full pointer-events-none"
+                style={{ width: vs * 2.6, height: vs * 2.6, filter: "blur(5px)", background: isF ? "radial-gradient(circle,rgba(232,195,158,0.45),transparent 70%)" : "radial-gradient(circle,rgba(168,197,240,0.3),transparent 70%)" }}
+              />
+              <motion.div
+                animate={{ opacity: isF ? [0.7, 1, 0.7] : [0.5, 0.9, 0.5], scale: [1, 1.15, 1] }}
+                transition={{ duration: 3 + (i % 4), repeat: Infinity }}
+                className="rounded-full relative"
+                style={{
+                  width: vs, height: vs,
+                  background: isF ? "radial-gradient(circle,#fff,#ffe5b0 50%,#e8c39e)" : s.lead ? "radial-gradient(circle,#fff,#c5dcff 60%,#a8c5f0)" : "radial-gradient(circle,#fff,#a8c5f0 70%,transparent)",
+                  boxShadow: isF ? "0 0 24px rgba(232,195,158,0.9),0 0 8px #fff" : s.lead ? "0 0 18px rgba(168,197,240,0.9)" : "0 0 12px rgba(168,197,240,0.7)",
+                }}
+              />
+              {isF && (
+                <span className="absolute text-[9px]" style={{ top: 6, color: "rgba(234,230,240,0.6)" }}>{i + 1}</span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       <AnimatePresence>
@@ -1861,7 +2039,7 @@ function Firefly({ x, y, f }) {
 
 /* ============================ COUNTDOWN — until we meet ============================ */
 // Live ticking countdown to the next time they're together.
-const MEET_DATE = new Date("2026-10-30T00:00:00+05:30"); // 30 October 2026, IST
+const MEET_DATE = new Date("2026-12-03T00:00:00+05:30"); // 3 December 2026, IST
 
 function useCountdown(target) {
   const [now, setNow] = useState(() => Date.now());
@@ -1902,7 +2080,7 @@ function CountdownScene() {
           <h2 className="display text-center font-light leading-tight mb-2" style={{ fontSize: "clamp(1.8rem,6vw,3rem)" }}>
             Until I get to hold you again
           </h2>
-          <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>30th october · counting every second.</p>
+          <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>3rd december · counting every second.</p>
 
           <div className="flex items-start justify-center gap-3 sm:gap-6">
             {units.map((u, i) => (
@@ -2709,7 +2887,7 @@ function HoroscopeScene() {
     advice: pick(HORO.advice),
     drink: pick(HORO.drinks),
     mood: pick(HORO.moods),
-    number: r() < 0.25 ? "30 (as in 30 October)" : String(1 + Math.floor(r() * 99)),
+    number: r() < 0.25 ? "3 (as in 3 December)" : String(1 + Math.floor(r() * 99)),
     drama: 2 + Math.floor(r() * 4),
     coffee: 3 + Math.floor(r() * 3),
   };
