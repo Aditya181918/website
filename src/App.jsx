@@ -357,7 +357,7 @@ function HoldSecret({ children }) {
 // Layered: deep starfield, drifting dust, soft nebula clouds, floating light motes.
 // Reads a scroll-progress ref (0..1) to push the camera forward through the world.
 
-function Cosmos({ progressRef, isMobile, rideRef }) {
+function Cosmos({ progressRef, isMobile, rideRef, navRef }) {
   const mountRef = useRef(null);
   const rafRef = useRef(0);
   const stateRef = useRef(null);
@@ -499,6 +499,100 @@ function Cosmos({ progressRef, isMobile, rideRef }) {
       }
     }
 
+    // ══════════ 3D HOME HUB · WARP · MOOD (all attached to the camera) ══════════
+    scene.add(camera); // so camera-attached objects render
+    camera.add(new THREE.AmbientLight(0xffffff, 0.8));
+    const keyLight = new THREE.DirectionalLight(0xfff1dc, 2.4);
+    keyLight.position.set(-170, 230, 140);
+    camera.add(keyLight);
+
+    const hubGroup = new THREE.Group();
+    hubGroup.visible = false;
+    camera.add(hubGroup);
+    keyLight.target = hubGroup;
+
+    // soft banded surface so the spheres visibly spin
+    const bandTex = (() => {
+      const c = document.createElement("canvas"); c.width = 256; c.height = 128;
+      const g = c.getContext("2d");
+      g.fillStyle = "#ffffff"; g.fillRect(0, 0, 256, 128);
+      for (let i = 0; i < 34; i++) {
+        g.fillStyle = Math.random() > 0.5 ? `rgba(0,0,0,${0.05 + Math.random() * 0.16})` : `rgba(255,255,255,${0.1 + Math.random() * 0.2})`;
+        g.fillRect(0, Math.random() * 128, 256, 1 + Math.random() * 9);
+      }
+      for (let i = 0; i < 40; i++) {
+        g.fillStyle = `rgba(0,0,0,${0.04 + Math.random() * 0.08})`;
+        g.beginPath(); g.ellipse(Math.random() * 256, Math.random() * 128, 4 + Math.random() * 16, 2 + Math.random() * 5, 0, 0, Math.PI * 2); g.fill();
+      }
+      const t = new THREE.CanvasTexture(c); t.wrapS = THREE.RepeatWrapping; return t;
+    })();
+
+    const ORB_COLORS = [0xe8b27a, 0x9dbdf5, 0xe58fa9, 0xb09cff]; // us · you · always · play
+    const sphereGeo = new THREE.SphereGeometry(1, 40, 28);
+    const ringGeo = new THREE.RingGeometry(1.42, 1.5, 72);
+    const orbs = ORB_COLORS.map((col, i) => {
+      const group = new THREE.Group();
+      const mesh = new THREE.Mesh(sphereGeo, new THREE.MeshStandardMaterial({
+        color: col, map: bandTex, roughness: 0.6, metalness: 0.08, emissive: col, emissiveIntensity: 0.3, transparent: true, opacity: 0,
+      }));
+      mesh.rotation.z = 0.25 + i * 0.12;
+      const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: disc, color: col, transparent: true, opacity: 0.4, depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
+      }));
+      glow.scale.set(5.4, 5.4, 1);
+      const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({
+        color: col, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending,
+      }));
+      ring.rotation.x = Math.PI / 2.25 + i * 0.18;
+      ring.rotation.y = i * 0.5;
+      group.add(glow); group.add(mesh); group.add(ring);
+      hubGroup.add(group);
+      return { group, mesh, ring, scale: 1, depth: 0 };
+    });
+
+    // hub geometry adapts to the screen shape
+    const HUB_DIST = 380;
+    let hubR = 70, orbR = 24, hubY = 0;
+    const layoutHub = () => {
+      const visH = 2 * HUB_DIST * Math.tan((62 * Math.PI) / 360);
+      const visW = visH * (W() / H());
+      hubR = Math.max(52, Math.min(150, visW * 0.31));
+      orbR = hubR * 0.36;
+      hubY = -visH * 0.03;
+      hubGroup.position.set(0, hubY, -HUB_DIST);
+    };
+    layoutHub();
+
+    // warp streaks — hyperspace lines used when travelling between sections
+    const WARP_N = isMobile ? 150 : 260;
+    const warpData = [...Array(WARP_N)].map(() => {
+      const ang = Math.random() * Math.PI * 2, rad = 26 + Math.random() * 260;
+      return { x: Math.cos(ang) * rad, y: Math.sin(ang) * rad, z: -Math.random() * 900, len: 40 + Math.random() * 110 };
+    });
+    const warpPos = new Float32Array(WARP_N * 6);
+    const warpGeo = new THREE.BufferGeometry();
+    warpGeo.setAttribute("position", new THREE.BufferAttribute(warpPos, 3));
+    const warpMat = new THREE.LineBasicMaterial({ color: 0xfff3e0, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+    const warp = new THREE.LineSegments(warpGeo, warpMat);
+    warp.frustumCulled = false; warp.visible = false;
+    camera.add(warp);
+
+    // mood light — each section tints the whole sky
+    const MOODS = { pre: 0xe8c39e, home: 0xe8c39e, flight: 0xfff3e0, journey: 0xe8c39e, us: 0xf0a868, you: 0x7fa8f5, always: 0xe87fa0, play: 0x9f8cff };
+    const moodCol = new THREE.Color(MOODS.home);
+    const moodTarget = new THREE.Color(MOODS.home);
+    const moodSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: disc, color: moodCol, transparent: true, opacity: 0.08, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending, fog: false,
+    }));
+    moodSprite.position.set(0, 0, -900);
+    moodSprite.scale.set(2400, 2400, 1);
+    moodSprite.renderOrder = -1;
+    camera.add(moodSprite);
+    nebula.forEach((s) => { s.userData.base = s.material.color.clone(); });
+
+    let hubAlpha = 0, warpFov = 0;
+    const projV = new THREE.Vector3();
+
     // ══════════ THE RIDE: track, rings, speed streaks ══════════
     const RIDE_BASE_Z = 300;
     const RD_ = { climb: 4.5, hang: 1.5, drop: 3.5, turns: 3.5, out: 3 };
@@ -607,6 +701,7 @@ function Cosmos({ progressRef, isMobile, rideRef }) {
       camera.aspect = W() / H();
       camera.updateProjectionMatrix();
       renderer.setSize(W(), H());
+      layoutHub();
     };
     window.addEventListener("resize", onResize);
 
@@ -664,7 +759,8 @@ function Cosmos({ progressRef, isMobile, rideRef }) {
         // ─── NORMAL: scroll-driven flight ───
         rideGroup.visible = false;
         const targetZ = 600 - p * 1700;
-        curZ += (targetZ - curZ) * 0.05;
+        if (navRef && navRef.current && navRef.current.snap) { curZ = targetZ; navRef.current.snap = false; }
+        else curZ += (targetZ - curZ) * 0.05;
         // decay any leftover ride motion smoothly
         rideY *= 0.93; rideRoll *= 0.93;
         rideFov += (62 - rideFov) * 0.06;
@@ -673,7 +769,8 @@ function Cosmos({ progressRef, isMobile, rideRef }) {
         camera.position.y = -pointer.y * 28 + rideY;
         camera.lookAt(0, 0, curZ - 400);
         camera.rotation.z = rideRoll;
-        if (Math.abs(camera.fov - rideFov) > 0.05) { camera.fov = rideFov; camera.updateProjectionMatrix(); }
+        const wantFov = rideFov + warpFov;
+        if (Math.abs(camera.fov - wantFov) > 0.05) { camera.fov = wantFov; camera.updateProjectionMatrix(); }
       }
 
       // gentle rotation of star/dust fields for life
@@ -695,7 +792,81 @@ function Cosmos({ progressRef, isMobile, rideRef }) {
         s.material.opacity = 0.5 + Math.sin(t * u.spd * 1.5 + u.phase) * 0.25;
       });
 
+      // ─── HUB · WARP · MOOD ───
+      const nav = (navRef && navRef.current) || {};
+      let warpW = 0;
+      if (nav.flightStart) {
+        const fu = (performance.now() - nav.flightStart) / (nav.flightDur || 1400);
+        if (fu >= 1) nav.flightStart = 0; else warpW = Math.sin(Math.PI * fu);
+      }
+      warpFov = warpW * 30;
+      warp.visible = warpW > 0.01;
+      if (warp.visible) {
+        const spd = 14 + warpW * 46;
+        for (let i = 0; i < WARP_N; i++) {
+          const d = warpData[i];
+          d.z += spd; if (d.z > 10) d.z -= 910;
+          const o = i * 6;
+          warpPos[o] = d.x; warpPos[o + 1] = d.y; warpPos[o + 2] = d.z;
+          warpPos[o + 3] = d.x; warpPos[o + 4] = d.y; warpPos[o + 5] = d.z - d.len * (0.4 + warpW);
+        }
+        warpGeo.attributes.position.needsUpdate = true;
+        warpMat.opacity = warpW * 0.6;
+      }
+
+      moodTarget.setHex(MOODS[nav.view] !== undefined ? MOODS[nav.view] : MOODS.home);
+      moodCol.lerp(moodTarget, 0.035);
+      moodSprite.material.color.copy(moodCol);
+      const moodBase = (nav.view === "us" || nav.view === "you" || nav.view === "always" || nav.view === "play") ? 0.13 : 0.06;
+      moodSprite.material.opacity += ((moodBase + warpW * 0.3) - moodSprite.material.opacity) * 0.08;
+      nebula.forEach((s) => { if (s.userData.base) s.material.color.copy(s.userData.base).lerp(moodCol, 0.5); });
+
+      const hubOn = nav.view === "home";
+      hubAlpha += ((hubOn ? 1 : 0) - hubAlpha) * 0.07;
+      hubGroup.visible = hubAlpha > 0.02;
+      if (hubGroup.visible) {
+        if (!nav.dragging) { nav.hubRot = (nav.hubRot || 0) + (nav.hubVel || 0) + 0.0022; nav.hubVel = (nav.hubVel || 0) * 0.94; }
+        orbs.forEach((o, i) => {
+          const a = (nav.hubRot || 0) + i * (Math.PI / 2);
+          const sel = nav.selected === i;
+          o.depth = Math.cos(a);
+          o.scale += ((sel ? 5 : 1) - o.scale) * 0.07;
+          o.group.position.set(Math.sin(a) * hubR, -o.depth * hubR * 0.16 + Math.sin(t * 0.8 + i * 1.7) * 2.2, o.depth * hubR * 0.9);
+          o.group.scale.setScalar(orbR * o.scale);
+          o.mesh.rotation.y = t * 0.25 + i;
+          o.ring.rotation.z = t * 0.15 + i;
+          o.mesh.material.opacity = Math.min(1, hubAlpha * 1.3);
+          o.ring.material.opacity = 0.45 * hubAlpha;
+          o.group.children[0].material.opacity = 0.4 * hubAlpha;
+        });
+      }
+
       renderer.render(scene, camera);
+
+      // project each orb to the screen so its HTML label / tap target follows it
+      if (nav.orbEls) {
+        const Wp = W(), Hp = H();
+        const k = (Hp / 2) / Math.tan((camera.fov * Math.PI) / 360);
+        orbs.forEach((o, i) => {
+          const el = nav.orbEls[i];
+          if (!el) return;
+          if (!hubOn || !hubGroup.visible) {
+            if (el.style.opacity !== "0") { el.style.opacity = "0"; el.style.pointerEvents = "none"; }
+            return;
+          }
+          o.group.getWorldPosition(projV);
+          const dist = projV.distanceTo(camera.position);
+          projV.project(camera);
+          const sx = (projV.x * 0.5 + 0.5) * Wp, sy = (-projV.y * 0.5 + 0.5) * Hp;
+          const size = Math.max(68, ((orbR * o.scale) / dist) * k * 2.1);
+          const front = (o.depth + 1) / 2;
+          el.style.width = size + "px"; el.style.height = size + "px";
+          el.style.transform = `translate3d(${sx - size / 2}px, ${sy - size / 2}px, 0)`;
+          el.style.opacity = String(hubAlpha * (0.5 + 0.5 * front));
+          el.style.zIndex = String(1 + Math.round(front * 10));
+          el.style.pointerEvents = "auto";
+        });
+      }
       rafRef.current = requestAnimationFrame(animate);
     };
     animate();
@@ -711,10 +882,13 @@ function Cosmos({ progressRef, isMobile, rideRef }) {
       groups.forEach((g) => { g.obj.geometry.dispose(); g.obj.material.dispose(); });
       nebula.forEach((s) => s.material.dispose());
       rideGroup.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+      hubGroup.traverse((o) => { if (o.material) o.material.dispose(); });
+      sphereGeo.dispose(); ringGeo.dispose(); bandTex.dispose();
+      warpGeo.dispose(); warpMat.dispose(); moodSprite.material.dispose();
       motes.forEach((s) => s.material.dispose());
       if (renderer.domElement && renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
     };
-  }, [isMobile, progressRef, rideRef]);
+  }, [isMobile, progressRef, rideRef, navRef]);
 
   return <div ref={mountRef} className="fixed inset-0" style={{ zIndex: 0, pointerEvents: "none" }} />;
 }
@@ -2291,78 +2465,100 @@ function SectionIcon({ name, size = 20, color = "#E8C39E" }) {
   );
 }
 
-function HomeHub({ onOpenSection, onJourney, greeting }) {
+function HomeHub({ onOpenSection, onJourney, greeting, navRef }) {
+  const drag = useRef({ active: false, x: 0, moved: 0 });
+
+  const onDown = (e) => {
+    drag.current = { active: true, x: e.clientX, moved: 0 };
+    navRef.current.dragging = true;
+    navRef.current.hubVel = 0;
+  };
+  const onMove = (e) => {
+    const d = drag.current;
+    if (!d.active) return;
+    const dx = e.clientX - d.x;
+    d.x = e.clientX;
+    d.moved += Math.abs(dx);
+    navRef.current.hubRot = (navRef.current.hubRot || 0) + dx * 0.009;
+    navRef.current.hubVel = dx * 0.009;
+  };
+  const onUp = () => { drag.current.active = false; navRef.current.dragging = false; };
+
+  const pick = (k, i) => {
+    if (drag.current.moved > 8) return; // that was a drag, not a tap
+    navRef.current.selected = i;
+    if (navigator.vibrate) navigator.vibrate(18);
+    onOpenSection(k);
+  };
+
+  useEffect(() => {
+    const nav = navRef.current;
+    return () => { nav.dragging = false; };
+  }, [navRef]);
+
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center justify-center px-6 py-24" style={{ position: "relative", zIndex: 2 }}>
-      <motion.p
-        initial={{ opacity: 0, y: -8 }} animate={{ opacity: 0.85, y: 0 }} transition={{ duration: 1.6 }}
-        className="italic text-center text-[15px] sm:text-lg mb-6" style={{ color: "#A8C5F0" }}
-      >
-        {greeting}
-      </motion.p>
-
-      <motion.h1
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.8, delay: 0.2 }}
-        className="display font-light leading-[0.95] text-center mb-4"
-        style={{ fontSize: "clamp(2.6rem,10vw,5.5rem)", letterSpacing: "-0.02em" }}
-      >
-        For you,<br /><span className="grad-gold italic">always.</span>
-      </motion.h1>
-
-      <motion.p
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.6, delay: 0.6 }}
-        className="text-center text-sm mb-12 italic max-w-xs" style={{ color: "rgba(234,230,240,0.5)" }}
-      >
-        wander wherever you like. it's all yours.
-      </motion.p>
-
-      {/* section cards */}
-      <div className="w-full max-w-md grid grid-cols-2 gap-3 sm:gap-4">
-        {SECTION_KEYS.map((k, i) => (
-          <motion.button
-            key={k}
-            onClick={() => onOpenSection(k)}
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.8 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
-            whileHover={{ y: -6, scale: 1.03 }} whileTap={{ scale: 0.97 }}
-            className="text-left p-6 rounded-[24px] relative overflow-hidden grain"
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-              border: "1px solid rgba(232,195,158,0.18)",
-              boxShadow: "0 8px 32px rgba(232,195,158,0.07)",
-              minHeight: 130,
-            }}
-          >
-            <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none"
-              style={{ background: "radial-gradient(circle, rgba(232,195,158,0.22) 0%, transparent 70%)", filter: "blur(16px)" }} />
-            <div className="relative z-10 flex flex-col h-full justify-between">
-              <SectionIcon name={k} size={22} />
-              <div className="mt-5">
-                <h3 className="display text-2xl leading-none" style={{ color: "#EAE6F0" }}>{SECTIONS[k].label}</h3>
-                <p className="text-[11px] mt-1.5 leading-snug" style={{ color: "rgba(234,230,240,0.45)" }}>{SECTIONS[k].tag}</p>
-              </div>
-            </div>
-          </motion.button>
-        ))}
+    <div
+      onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onUp}
+      className="flex flex-col items-center justify-between px-6"
+      style={{ height: "100dvh", position: "relative", zIndex: 2, overflow: "hidden", touchAction: "none", userSelect: "none", WebkitUserSelect: "none" }}
+    >
+      {/* top — greeting + title */}
+      <div className="text-center" style={{ paddingTop: "calc(5.2rem + env(safe-area-inset-top, 0px))" }}>
+        <motion.p
+          initial={{ opacity: 0, y: -8 }} animate={{ opacity: 0.85, y: 0 }} transition={{ duration: 1.6 }}
+          className="italic text-[14px] sm:text-lg mb-3" style={{ color: "#A8C5F0" }}
+        >
+          {greeting}
+        </motion.p>
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.8, delay: 0.2 }}
+          className="display font-light leading-[0.98]"
+          style={{ fontSize: "clamp(2.2rem,8.5vw,4.6rem)", letterSpacing: "-0.02em" }}
+        >
+          For you, <span className="grad-gold italic">always.</span>
+        </motion.h1>
       </div>
 
-      {/* read it in order */}
-      <motion.button
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.4, delay: 1.5 }}
-        onClick={onJourney}
-        whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-        className="display mt-8 px-9 py-3.5 rounded-full text-base"
-        style={{ color: "#0A0E27", background: "linear-gradient(135deg, #E8C39E, #f3d9bd)", boxShadow: "0 8px 30px rgba(232,195,158,0.25)" }}
-      >
-        read it in order
-      </motion.button>
-      <motion.p
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.4, delay: 1.8 }}
-        className="text-[11px] mt-3 italic" style={{ color: "rgba(234,230,240,0.35)" }}
-      >
-        the whole thing, the way I wrote it.
-      </motion.p>
+      {/* bottom — hint + read in order */}
+      <div className="text-center flex flex-col items-center" style={{ paddingBottom: "calc(6.4rem + env(safe-area-inset-bottom, 0px))" }}>
+        <motion.p
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.4, delay: 1.4 }}
+          className="eyebrow text-[9px] mb-4" style={{ color: "rgba(168,197,240,0.55)" }}
+        >
+          drag to turn · tap a world
+        </motion.p>
+        <motion.button
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.4, delay: 1.6 }}
+          onClick={() => { if (drag.current.moved <= 8) onJourney(); }}
+          whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+          className="display px-8 py-3 rounded-full text-[15px]"
+          style={{ color: "#0A0E27", background: "linear-gradient(135deg, #E8C39E, #f3d9bd)", boxShadow: "0 8px 30px rgba(232,195,158,0.25)" }}
+        >
+          read it in order
+        </motion.button>
+      </div>
+
+      {/* tap targets + labels — positioned every frame by the 3D scene */}
+      <div className="fixed inset-0" style={{ pointerEvents: "none" }}>
+        {SECTION_KEYS.map((k, i) => (
+          <button
+            key={k}
+            ref={(el) => { if (!navRef.current.orbEls) navRef.current.orbEls = []; navRef.current.orbEls[i] = el; }}
+            onClick={() => pick(k, i)}
+            aria-label={SECTIONS[k].label}
+            style={{
+              position: "absolute", left: 0, top: 0, width: 72, height: 72, borderRadius: "50%",
+              background: "transparent", border: "none", padding: 0, opacity: 0, pointerEvents: "none",
+              cursor: "pointer", touchAction: "none", willChange: "transform, opacity", WebkitTapHighlightColor: "transparent",
+            }}
+          >
+            <span style={{ position: "absolute", top: "100%", left: "50%", transform: "translateX(-50%)", marginTop: 6, whiteSpace: "nowrap", textAlign: "center", pointerEvents: "none" }}>
+              <span className="display" style={{ display: "block", fontSize: "1.2rem", lineHeight: 1, color: "#EAE6F0", textShadow: "0 2px 14px rgba(5,6,14,0.9)" }}>{SECTIONS[k].label}</span>
+              <span style={{ display: "block", fontSize: "9.5px", marginTop: 4, color: "rgba(234,230,240,0.55)", textShadow: "0 2px 10px rgba(5,6,14,0.9)" }}>{SECTIONS[k].tag}</span>
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -2682,6 +2878,10 @@ export default function App() {
   const scrollRef = useRef(null);
   const { scrollYProgress } = useScroll({ container: scrollRef });
   const cosmosProgress = useRef(0);
+  // shared with the 3D scene: current view, hub rotation, flight state, orb tap targets
+  const navRef = useRef({ view: "pre", hubRot: 0.5, hubVel: 0, dragging: false, selected: null, flightStart: 0, flightDur: 1400, snap: false, orbEls: [] });
+  const [fading, setFading] = useState(false);
+  const navBusy = useRef(false);
   const rideRef = useRef({ active: false, start: 0, baseZ: 300 });
   const [riding, setRiding] = useState(false);
   const [rideCaption, setRideCaption] = useState("");
@@ -2696,9 +2896,28 @@ export default function App() {
     return s ? s.chapters.includes(id) : false;
   }, [view]);
 
+  // keep the 3D scene informed of where she is
+  useEffect(() => { navRef.current.view = entered ? view : "pre"; }, [entered, view]);
+
+  // travel between sections: content fades, the camera warps through space, the new place fades in
   const navTo = (key) => {
-    setView(key);
-    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    if (key === view || navBusy.current) return;
+    navBusy.current = true;
+    const nav = navRef.current;
+    nav.flightStart = performance.now();
+    nav.flightDur = 1400;
+    nav.view = "flight";
+    setFading(true);
+    if (navigator.vibrate) navigator.vibrate(12);
+    setTimeout(() => {
+      setView(key);
+      nav.view = key;
+      nav.snap = true;
+      cosmosProgress.current = 0;
+      const el = scrollRef.current;
+      if (el) { el.style.scrollBehavior = "auto"; el.scrollTop = 0; el.style.scrollBehavior = "smooth"; }
+    }, 560);
+    setTimeout(() => { nav.selected = null; setFading(false); navBusy.current = false; }, 980);
   };
   const [currentId, setCurrentId] = useState("ch-balloons");
   const [visited, setVisited] = useState(() => new Set(["ch-balloons"]));
@@ -2706,6 +2925,8 @@ export default function App() {
   // track which chapter she's on (drives the map's "you are here")
   const handleScroll = useCallback((e) => {
     const el = e.currentTarget;
+    const maxScroll = el.scrollHeight - el.clientHeight;
+    cosmosProgress.current = maxScroll > 0 ? el.scrollTop / maxScroll : 0;
     // find which visible scene is nearest the top of the viewport
     const secs = el.querySelectorAll("section[id^='ch-']");
     let best = null, bestDist = Infinity;
@@ -2831,7 +3052,7 @@ export default function App() {
   return (
     <div className="body-font" style={{ color: "#EAE6F0", background: "transparent", minHeight: "100dvh" }}>
       <StyleTag />
-      <Cosmos progressRef={cosmosProgress} isMobile={isMobile} rideRef={rideRef} />
+      <Cosmos progressRef={cosmosProgress} isMobile={isMobile} rideRef={rideRef} navRef={navRef} />
 
       {/* site-wide grain + vignette — ties the whole world into one mood */}
       <div className="site-grain" aria-hidden="true" />
@@ -2987,7 +3208,6 @@ export default function App() {
           zIndex: 95,
           background: "rgba(255,255,255,0.06)",
           backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
           border: "1px solid rgba(232,195,158,0.18)",
         }}
       >
@@ -3005,7 +3225,6 @@ export default function App() {
             zIndex: 95,
             background: "rgba(255,255,255,0.06)",
             backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
             border: "1px solid rgba(232,195,158,0.18)",
           }}
         >
@@ -3083,14 +3302,14 @@ export default function App() {
       {entered && view === "home" && (
         <motion.div
           key="home"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2 }}
-          className="no-scrollbar"
-          style={{ height: "100dvh", overflowY: "auto", position: "relative", zIndex: 1 }}
+          initial={{ opacity: 0 }} animate={{ opacity: fading ? 0 : 1 }} transition={{ duration: fading ? 0.4 : 0.9 }}
+          style={{ height: "100dvh", overflow: "hidden", position: "relative", zIndex: 1 }}
         >
           <HomeHub
             greeting={greeting}
             onOpenSection={(k) => navTo(k)}
             onJourney={() => navTo("journey")}
+            navRef={navRef}
           />
         </motion.div>
       )}
@@ -3106,8 +3325,8 @@ export default function App() {
           ref={(el) => { scrollRef.current = el; scrollRootRef.current = el; }}
           onScroll={handleScroll}
           initial={{ opacity: 0 }}
-          animate={{ opacity: riding ? 0.06 : 1 }}
-          transition={{ duration: riding ? 0.8 : 1.5 }}
+          animate={{ opacity: riding ? 0.06 : fading ? 0 : 1 }}
+          transition={{ duration: riding ? 0.8 : fading ? 0.4 : 0.9 }}
           className="snap-container no-scrollbar"
           style={{ height: "100dvh", overflowY: riding ? "hidden" : "scroll", scrollSnapType: "y proximity", scrollBehavior: "smooth", position: "relative", zIndex: 1 }}
         >
