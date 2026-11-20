@@ -377,8 +377,9 @@ function Cosmos({ progressRef, isMobile, rideRef, navRef }) {
     const mount = mountRef.current;
     if (!mount) return;
 
-    const W = () => mount.clientWidth;
-    const H = () => mount.clientHeight;
+    // never trust a 0 size (happens if styles load late) — fall back to the window
+    const W = () => mount.clientWidth || window.innerWidth || 1;
+    const H = () => mount.clientHeight || window.innerHeight || 1;
 
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x0a0e27, 0.0009);
@@ -567,8 +568,9 @@ function Cosmos({ progressRef, isMobile, rideRef, navRef }) {
     const layoutHub = () => {
       const visH = 2 * HUB_DIST * Math.tan((62 * Math.PI) / 360);
       const visW = visH * (W() / H());
-      hubR = Math.max(52, Math.min(150, visW * 0.31));
-      orbR = hubR * 0.36;
+      const portrait = W() / H() < 1;
+      hubR = portrait ? Math.max(52, visW * 0.32) : Math.max(52, Math.min(150, visW * 0.31, visH * 0.36));
+      orbR = hubR * (portrait ? 0.42 : 0.28);
       hubY = -visH * 0.03;
       hubGroup.position.set(0, hubY, -HUB_DIST);
     };
@@ -715,6 +717,9 @@ function Cosmos({ progressRef, isMobile, rideRef, navRef }) {
       layoutHub();
     };
     window.addEventListener("resize", onResize);
+    const sizeObs = new ResizeObserver(() => onResize());
+    sizeObs.observe(mount);
+    const sizeVec = new THREE.Vector2();
 
     // ── animation loop ──
     const clock = new THREE.Clock();
@@ -728,7 +733,12 @@ function Cosmos({ progressRef, isMobile, rideRef, navRef }) {
 
     const animate = () => {
       const t = clock.getElapsedTime();
-      const p = progressRef.current || 0; // 0..1 scroll progress
+      // self-heal: if the canvas size or camera aspect is ever stale or invalid, fix it now
+      renderer.getSize(sizeVec);
+      if (!Number.isFinite(camera.aspect) || sizeVec.x !== W() || sizeVec.y !== H()) onResize();
+      const pr = progressRef.current;
+      const p = Number.isFinite(pr) ? Math.min(1, Math.max(0, pr)) : 0; // 0..1 scroll progress
+      if (!Number.isFinite(curZ)) curZ = 600;
       const ride = rideRef && rideRef.current;
 
       // pointer parallax eased (always)
@@ -833,7 +843,10 @@ function Cosmos({ progressRef, isMobile, rideRef, navRef }) {
       nebula.forEach((s) => { if (s.userData.base) s.material.color.copy(s.userData.base).lerp(moodCol, 0.5); });
 
       const hubOn = nav.view === "home";
-      hubAlpha += ((hubOn ? 1 : 0) - hubAlpha) * 0.07;
+      const nowMs = performance.now();
+      const dtS = Math.min(0.1, (nowMs - (nav.lastFrame || nowMs)) / 1000);
+      nav.lastFrame = nowMs;
+      hubAlpha += ((hubOn ? 1 : 0) - hubAlpha) * (1 - Math.exp(-dtS * 4.2));
       hubGroup.visible = hubAlpha > 0.02;
       if (hubGroup.visible) {
         if (!nav.dragging) { nav.hubRot = (nav.hubRot || 0) + (nav.hubVel || 0) + 0.0022; nav.hubVel = (nav.hubVel || 0) * 0.94; }
@@ -842,7 +855,7 @@ function Cosmos({ progressRef, isMobile, rideRef, navRef }) {
           const sel = nav.selected === i;
           o.depth = Math.cos(a);
           o.scale += ((sel ? 5 : 1) - o.scale) * 0.07;
-          o.group.position.set(Math.sin(a) * hubR, -o.depth * hubR * 0.16 + Math.sin(t * 0.8 + i * 1.7) * 2.2, o.depth * hubR * 0.9);
+          o.group.position.set(Math.sin(a) * hubR, -o.depth * hubR * 0.16 + Math.sin(t * 0.8 + i * 1.7) * 2.2, o.depth * hubR * 0.6);
           o.group.scale.setScalar(orbR * o.scale);
           o.mesh.rotation.y = t * 0.25 + i;
           o.ring.rotation.z = t * 0.15 + i;
@@ -869,11 +882,12 @@ function Cosmos({ progressRef, isMobile, rideRef, navRef }) {
           const dist = projV.distanceTo(camera.position);
           projV.project(camera);
           const sx = (projV.x * 0.5 + 0.5) * Wp, sy = (-projV.y * 0.5 + 0.5) * Hp;
+          if (!Number.isFinite(sx) || !Number.isFinite(sy) || !Number.isFinite(dist)) { el.style.opacity = "0"; el.style.pointerEvents = "none"; return; }
           const size = Math.max(68, ((orbR * o.scale) / dist) * k * 2.1);
           const front = (o.depth + 1) / 2;
           el.style.width = size + "px"; el.style.height = size + "px";
           el.style.transform = `translate3d(${sx - size / 2}px, ${sy - size / 2}px, 0)`;
-          el.style.opacity = String(hubAlpha * (0.5 + 0.5 * front));
+          el.style.opacity = String(hubAlpha * (0.72 + 0.28 * front));
           el.style.zIndex = String(1 + Math.round(front * 10));
           el.style.pointerEvents = "auto";
         });
@@ -888,6 +902,7 @@ function Cosmos({ progressRef, isMobile, rideRef, navRef }) {
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("touchmove", onPointer);
       window.removeEventListener("resize", onResize);
+      sizeObs.disconnect();
       renderer.dispose();
       disc.dispose();
       groups.forEach((g) => { g.obj.geometry.dispose(); g.obj.material.dispose(); });
@@ -901,7 +916,7 @@ function Cosmos({ progressRef, isMobile, rideRef, navRef }) {
     };
   }, [isMobile, progressRef, rideRef, navRef]);
 
-  return <div ref={mountRef} className="fixed inset-0" style={{ zIndex: 0, pointerEvents: "none" }} />;
+  return <div ref={mountRef} style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100dvh", zIndex: 0, pointerEvents: "none" }} />;
 }
 
 function Ambient({ scrollProgress }) {
@@ -2742,8 +2757,8 @@ function HomeHub({ onOpenSection, onJourney, greeting, navRef }) {
             }}
           >
             <span style={{ position: "absolute", top: "100%", left: "50%", transform: "translateX(-50%)", marginTop: 6, whiteSpace: "nowrap", textAlign: "center", pointerEvents: "none" }}>
-              <span className="display" style={{ display: "block", fontSize: "1.2rem", lineHeight: 1, color: "#EAE6F0", textShadow: "0 2px 14px rgba(5,6,14,0.9)" }}>{SECTIONS[k].label}</span>
-              <span style={{ display: "block", fontSize: "9.5px", marginTop: 4, color: "rgba(234,230,240,0.55)", textShadow: "0 2px 10px rgba(5,6,14,0.9)" }}>{SECTIONS[k].tag}</span>
+              <span className="display" style={{ display: "block", fontSize: "1.25rem", lineHeight: 1, color: "#FBF6EE", textShadow: "0 1px 4px rgba(5,6,14,1), 0 2px 16px rgba(5,6,14,0.9)" }}>{SECTIONS[k].label}</span>
+              <span style={{ display: "block", fontSize: "10px", marginTop: 4, color: "rgba(234,230,240,0.78)", textShadow: "0 1px 3px rgba(5,6,14,1), 0 2px 12px rgba(5,6,14,0.9)" }}>{SECTIONS[k].tag}</span>
             </span>
           </button>
         ))}
