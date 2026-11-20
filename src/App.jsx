@@ -167,6 +167,16 @@ const timeline = [
       { src: "/photo-hug.jpeg", caption: "and when I hold you, the whole world goes quiet.", secret: true },
     ],
   },
+  {
+    date: "october 2026",
+    place: "round two",
+    title: "the sequel, and somehow even better",
+    moments: [
+      { src: "/photo-croffle.jpeg", caption: "four boxes of croffles. eyes closed. zero regrets." },
+      { src: "/photo-family.jpeg", caption: "everyone smiled on the first try. a family miracle." },
+      { src: "/photo-terrace.jpeg", caption: "caution: do not lean. we leaned anyway." },
+    ],
+  },
 ];
 
 /* ============================ HELPERS ============================ */
@@ -2039,7 +2049,7 @@ function Firefly({ x, y, f }) {
 
 /* ============================ COUNTDOWN — until we meet ============================ */
 // Live ticking countdown to the next time they're together.
-const MEET_DATE = new Date("2026-12-03T00:00:00+05:30"); // 3 December 2026, IST
+const MEET_DATE = new Date("2026-12-02T11:15:00+05:30"); // 2 December 2026, 11:15 AM IST
 
 function useCountdown(target) {
   const [now, setNow] = useState(() => Date.now());
@@ -2080,7 +2090,7 @@ function CountdownScene() {
           <h2 className="display text-center font-light leading-tight mb-2" style={{ fontSize: "clamp(1.8rem,6vw,3rem)" }}>
             Until I get to hold you again
           </h2>
-          <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>3rd december · counting every second.</p>
+          <p className="text-center text-sm mb-10 italic" style={{ color: "rgba(234,230,240,0.5)" }}>2nd december · 11:15 am · counting every second.</p>
 
           <div className="flex items-start justify-center gap-3 sm:gap-6">
             {units.map((u, i) => (
@@ -2887,7 +2897,7 @@ function HoroscopeScene() {
     advice: pick(HORO.advice),
     drink: pick(HORO.drinks),
     mood: pick(HORO.moods),
-    number: r() < 0.25 ? "3 (as in 3 December)" : String(1 + Math.floor(r() * 99)),
+    number: r() < 0.25 ? "2 (as in 2 December)" : String(1 + Math.floor(r() * 99)),
     drama: 2 + Math.floor(r() * 4),
     coffee: 3 + Math.floor(r() * 3),
   };
@@ -3689,7 +3699,7 @@ export default function App() {
                 <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>the flower at the door remembers being touched three times.</p>
                 <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>the sky does something for those who find every star.</p>
                 <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>open every promise. all eight.</p>
-                <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>the last photo holds on if you do.</p>
+                <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>one photo holds on if you do. the one where I'm holding you.</p>
                 <p className="text-xs italic" style={{ color: "rgba(234,230,240,0.4)" }}>and sometimes, if you stay long enough, it rains petals.</p>
               </motion.div>
             </div>
