@@ -172,8 +172,9 @@ const timeline = [
     place: "round two",
     title: "the sequel, and somehow even better",
     moments: [
-      { src: "/photo-croffle.jpeg", caption: "four boxes of croffles. eyes closed. zero regrets." },
+      { src: "/photo-croffle.jpeg", caption: "I have never once been looked at the way she's looking at this croffle." },
       { src: "/photo-family.jpeg", caption: "everyone smiled on the first try. a family miracle." },
+      { src: "/photo-mirror.jpeg", caption: "love, travel, sarcasm. the wall wrote our bio before we did." },
       { src: "/photo-terrace.jpeg", caption: "caution: do not lean. we leaned anyway." },
     ],
   },
